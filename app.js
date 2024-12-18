@@ -1,11 +1,61 @@
-const express=require("express")
-const app=express();
-const env=require("dotenv").config();
-const db=require("./config/db")
-db()
-app.get("/",(req,res)=>{res.send("hello")})
-app.listen(process.env.PORT,()=>{console.log("============");
-    console.log("started");
+const express = require("express");
+const app = express();
+const path = require("path");
+const dotenv = require("dotenv");
+dotenv.config();
+const session=require("express-session")
+const passport=require("./config/passport")
+
+const db = require("./config/db");
+const userRouter = require("./routes/userRouter");
+const adminRouter=require("./routes/adminRouter")
+// Initialize the database connection
+db();
+
+// Middleware for parsing JSON and URL-encoded data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(session({secret:process.env.SESSION_SECRET,
+    resave:false,
+    saveUninitialized:true,
+    cookie:{
+        secure:false,
+        httpOnly:true,
+        maxAge:72*60*60*1000,
+
+    }
+}))
+
+app.use((req,res,next)=>{
+    res.set("cache-control","no-store")
+    next()
+}
+)
+//google authentication//
+app.use(passport.initialize());
+app.use(passport.session());
+// Setting up the view engine
+
+app.set("views", path.join(__dirname, "views"))
+app.set("view engine", "ejs");
+// Serving static files
+app.use(express.static(path.join(__dirname, "public")));
+
+// Routing
+app.use("/", userRouter);
+app.use("/admin",adminRouter)
+
+app.use((req, res, next) => {
+    res.locals.user = req.session.user || null; // Attach user data to res.locals
+    next();
+});
+
+// Start the server
+const PORT = process.env.PORT || 3022;
+app.listen(PORT, () => {
     console.log("============");
-})
-module.exports=app;
+    console.log(`Server started on port ${PORT}`);
+    console.log("============");
+});
+
+module.exports = app;

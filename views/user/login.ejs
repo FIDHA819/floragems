@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://fonts.googleapis.com/css?family=Rouge+Script' rel='stylesheet'>
+    <title>Login - Flora Gems</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            background-color:#e6e8fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            min-height: 100%;
+        }
+
+        .login-container {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #fff;
+            height: 80vh; /* Makes the container responsive to viewport height */
+        }
+
+        .form-section {
+            flex: 1;
+            padding: 40px;
+            background-color: #e6e8fc;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .form-section h1 {
+            font-family: 'Rouge Script';
+            font-size: 40px;
+            color: #333;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .form-section p {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        .form-section form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-section label {
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .form-section input {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-section input:focus {
+            outline: none;
+            border-color: #6c63ff;
+        }
+
+        .form-section button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #6c63ff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .form-section button:hover {
+            background-color: #554cb7;
+        }
+
+        .form-section .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            background-color: #f4f4f4;
+            color: #333;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .form-section .google-btn img {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+
+        .form-section .link {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .form-section .link a {
+            color: #6c63ff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .form-section .link a:hover {
+            text-decoration: underline;
+        }
+
+        .image-section {
+            flex: 1.5;
+            height: 100%;
+            background-image: url("/img/tumblr-23-eb-63241-eefbb-051483-cc-8-ee-79-faa-0-d-1-f-32-d-16-f-12800.png");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            pointer-events: none;
+            border-radius: 0 20px 20px 0; /* Adjusted to round only the right corners */
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .form-section, .image-section {
+                width: 100%;
+                height: auto;
+                border-radius: 12px;
+            }
+
+            .image-section {
+                height: 250px; /* Fixed height for mobile */
+            }
+
+            .form-section h1 {
+                font-size: 24px;
+            }
+
+            .form-section input, .form-section button, .form-section .google-btn {
+                font-size: 16px;
+                padding: 12px;
+            }
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.75rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Form Section -->
+        <div class="form-section">
+            <h1>Flora Gems</h1>
+            <p>Login to continue</p>
+            <form id="loginform" action="/login" method="POST">
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" >
+                <div id="error1" class="error-message"></div>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password">
+                <div id="error2" class="error-message">
+                    
+                <% if (locals.message && message.length > 0) { %>
+                    <div class="alert alert-danger text-center">
+                        <%= message %>
+                    </div>
+                <% } %>
+                </div>
+
+
+                <button type="submit">Login</button>
+
+                <div class="google-btn">
+                    <a href="/auth/google">
+                        <img src="/img/icons-8-google-10.svg" alt="Google Icon">
+                        Sign in with Google
+                    </a>
+                </div>
+            </form>
+            <div class="link">
+                Don't have an account? <a href="/signup">Sign up</a>
+            </div>
+        </div>
+
+        <!-- Image Section -->
+        <div class="image-section"></div>
+    </div>
+
+    <script>
+        const emailid = document.getElementById("email");
+        const passid = document.getElementById("password");
+        const error1 = document.getElementById("error1");
+        const error2 = document.getElementById("error2");
+        const loginform = document.getElementById("loginform");
+
+        function emailValidateChecking() {
+            const emailval = emailid.value;
+            const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+            if (!emailpattern.test(emailval)) {
+                error1.style.display = "block";
+                error1.innerHTML = "Invalid email format";
+            } else {
+                error1.style.display = "none";
+                error1.innerHTML = "";
+            }
+        }
+
+        function passValidateChecking() {
+            const passval = passid.value;
+            if (passval.length < 8) {
+                error2.style.display = "block";
+                error2.innerHTML = "Password should be at least 8 characters";
+            } else {
+                error2.style.display = "none";
+                error2.innerHTML = "";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loginform.addEventListener("submit", function (e) {
+                emailValidateChecking();
+                passValidateChecking();
+
+                if (error1.style.display === "block" || error2.style.display === "block") {
+                    e.preventDefault(); 
+                }
+            });
+        });
+    </script>
+</body>
+</html>

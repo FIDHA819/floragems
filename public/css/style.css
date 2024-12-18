@@ -5,7 +5,7 @@
  * Copyright 2011-2020 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
-:root {
+ :root {
   --blue: #007bff;
   --indigo: #6610f2;
   --purple: #6f42c1;
@@ -74,15 +74,49 @@ hr {
   overflow: visible;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1{
+  font-family: 'Rouge Script';
+}
+h2, h3, h4,h6 {
   margin-top: 0;
   margin-bottom: 0.5rem;
+}
+
+h5{
+  font-family: "Poltawski Nowy", serif;
 }
 
 p {
   margin-top: 0;
   margin-bottom: 1rem;
 }
+
+/* Force the carousel height */
+#mycarousel {
+  height: 30vh; /* Set the carousel height to 30% of the viewport height */
+}
+
+#mycarousel .carousel-inner,
+#mycarousel .carousel-item {
+  height: 100%; /* Ensure child elements take full height */
+}
+
+#mycarousel .carousel__img {
+  width: 100%; /* Full width */
+  height: 100%; /* Full height of the carousel */
+  object-fit: cover; /* Make the image fit without distortion */
+}
+
+#mycarousel .carousel-caption {
+  position: absolute; /* Position the text over the image */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white; /* Ensure text visibility */
+  z-index: 10;
+}
+
 
 abbr[title],
 abbr[data-original-title] {
@@ -151,6 +185,25 @@ sup {
   top: -.5em;
 }
 
+.carousel__img {
+  width: 100vw; 
+  height: 100vh;
+  object-fit: cover;
+}
+
+.carousel__caption {
+  display: flex;
+  align-items: center; 
+  justify-content: center; 
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0; 
+}
+
+
+
 a {
   color: #D19C97;
   text-decoration: none;
@@ -204,6 +257,7 @@ svg {
 table {
   border-collapse: collapse;
 }
+
 
 caption {
   padding-top: 0.75rem;
