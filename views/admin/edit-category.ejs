@@ -1,0 +1,28 @@
+<%- include("../../views/partials/admin/header") %>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 mt-60">
+            <!-- Ensure the form action points to the correct route with the category ID -->
+            <form method="POST" action="/admin/editCategory/<%= category._id %>">
+
+                
+                <div class="mb-4 mt-30">
+                    <label for="category_name" class="form-label">Name</label>
+                    <input type="text" id="category_name" name="categoryName" value="<%= category.name %>" class="form-control border" required />
+                </div>
+
+                <div class="mb-4">
+                    <label for="category_description" class="form-label">Description</label>
+                    <textarea id="category_description" name="description" class="form-control border" required><%= category.description %></textarea>
+                </div>
+
+                <div class="d-grid text-end mt-30 col-md-5">
+                    <button class="btn btn-primary" type="submit">Update category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include("../../views/partials/admin/footer") %>

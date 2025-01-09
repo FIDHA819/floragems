@@ -1,0 +1,609 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Flora Gems</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Free HTML Templates" name="keywords">
+    <meta content="Free HTML Templates" name="description">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Rouge Script' rel='stylesheet'> 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poltawski+Nowy:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+    <style> .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        right: 0;
+    }
+
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        width: 100%;
+    }
+
+    .dropdown-content a:hover {
+        background-color: #f1f1f1;
+    }
+
+    .dropdown:hover > .dropdown-content {
+        display: block;
+    }
+
+    .header {
+        position: relative;
+        z-index: 500;
+    }
+    .dropdown-item {
+    color: #000; /* Ensure text is black */
+    background-color: transparent; /* Ensure no background covers the text */
+}
+
+.dropdown-item:hover {
+    background-color: #f1f1f1; /* Add a hover effect */
+}
+nav[aria-label="Page navigation"] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+nav[aria-label="Page navigation"] .btn {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 16px;
+    color: #b46e59cc;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+nav[aria-label="Page navigation"] .btn:hover {
+    background-color: #b46e59cc;
+    color: #fff;
+}
+
+nav[aria-label="Page navigation"] .btn.active {
+    background-color: #b46e59cc;
+    color: #fff;
+    border-color: #b46e59cc;
+    pointer-events: none;
+    cursor: default;
+}
+
+nav[aria-label="Page navigation"] .btn:disabled {
+    background-color: #f1f1f1;
+    color: #ccc;
+    cursor: not-allowed;
+}
+/* Sort dropdown styling */
+.sort-dropdown {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.sort-dropdown select {
+    font-size: 0.95rem;
+    color: #333;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.sort-dropdown select:focus {
+    border-color: #ffc107;
+    outline: none;
+}
+
+.sort-dropdown label {
+    margin-right: 10px;
+    font-size: 1rem;
+    color: #555;
+}
+
+
+</style>
+</head>         
+
+<body>
+    <!-- Topbar Start -->
+    <div class="container-fluid">
+        <div class="row bg-secondary py-2 px-xl-5">
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="d-inline-flex align-items-center">
+                    <a class="text-dark" href="">FAQs</a>
+                    <span class="text-muted px-2">|</span>
+                    <a class="text-dark" href="">Help</a>
+                    <span class="text-muted px-2">|</span>
+                    <a class="text-dark" href="">Support</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center text-lg-right">
+                <div class="d-inline-flex align-items-center">
+                    <a class="text-dark px-2" href="">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a class="text-dark px-2" href="">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a class="text-dark px-2" href="">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a class="text-dark px-2" href="">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a class="text-dark pl-2" href="">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="row align-items-center py-3 px-xl-5">
+            <div class="col-lg-3 d-none d-lg-block">
+                <a href="" class="text-decoration-none">
+                    <h1 class="m-0 display-5 font-weight-semi-bold">Flora</span>Gems</h1>
+                </a>
+            </div>
+            <div class="col-lg-6 col-6 text-left">
+                <form id="searchForm" method="POST" action="/search">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            name="query" 
+                            class="form-control" 
+                            placeholder="Search products" 
+                            required 
+                        />
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            <span class="input-group-text bg-transparent text-primary">
+                                <i class="fa fa-search"></i>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-lg-3 col-6 text-right">
+                <a href="" class="btn border">
+                    <i class="fas fa-heart text-primary"></i>
+                    <span class="badge">0</span>
+                </a>
+                <a href="/cart" class="btn border">
+                    <i class="fas fa-shopping-cart text-primary"></i>
+                    <span class="badge" id="cart-count">0</span> <!-- Cart count displayed here -->
+                    <!-- Cart count displayed here -->
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Topbar End -->
+
+<!-- Navbar Start -->
+<div class="container-fluid mb-5">
+    <div class="row border-top px-xl-5">
+        <!-- Vertical Navbar for Categories -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <a class="btn shadow-none d-flex align-items-center justify-content-between bg-primary text-white w-100" 
+               data-toggle="collapse" href="#navbar-vertical" 
+               style="height: 65px; margin-top: -1px; padding: 0 30px;">
+                <h6 class="m-0">Categories</h6>
+                <i class="fa fa-angle-down text-dark"></i>
+            </a>
+            <nav class="collapse show navbar navbar-vertical navbar-light align-items-start p-0 border border-top-0 border-bottom-0" 
+                 id="navbar-vertical">
+                <div class="navbar-nav w-100 overflow-hidden" style="height: 210px;">
+                    <!-- Jewelleries Dropdown -->
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link" data-toggle="dropdown">
+                            Jewelleries <i class="fa fa-angle-down float-right mt-1"></i>
+                        </a>
+                        <div class="dropdown-menu position-absolute bg-secondary border-0 rounded-0 w-100 m-0">
+                            <ul>
+                                <% for (let i = 0; i < categories.length; i++) { %>
+                                    <li class="filter-item">
+                                        <a href="/filter?categories=<%= categories[i]._id %>" class="dropdown-item"><%= categories[i].name %></a>
+                                    </li>
+                                <% } %>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Brands Dropdown -->
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link" data-toggle="dropdown">
+                            Brands <i class="fa fa-angle-down float-right mt-1"></i>
+                        </a>
+                        <div class="dropdown-menu position-absolute bg-secondary border-0 rounded-0 w-100 m-0">
+                            <ul>
+                                <% brands.forEach(brand => { %>
+                                    <li class="filter-item">
+                                        <a href="/filter?brand=<%= brand._id %>" class="dropdown-item"><%= brand.brandName %></a>
+                                    </li>
+                                  <% }) %>
+                                  
+                            </ul>
+                          </div>
+                          
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Horizontal Navbar -->
+        <div class="col-lg-9">
+            <nav class="navbar navbar-expand-lg bg-light navbar-light py-3 py-lg-0 px-0">
+                <a href="/" class="text-decoration-none d-block d-lg-none">
+                    <h1 class="m-0 display-5 font-weight-semi-bold">
+                        <span class="text-primary font-weight-bold border px-3 mr-1">Flora</span>Gems
+                    </h1>
+                </a>
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                    <div class="navbar-nav mr-auto py-0">
+                        <a href="/" class="nav-item nav-link active">Home</a>
+                        <a href="/shop" class="nav-item nav-link">Shop</a>
+                        <a href="/detail" class="nav-item nav-link">Shop Detail</a>
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pages</a>
+                            <div class="dropdown-menu rounded-0 m-0">
+                                <a href="/cart" class="dropdown-item">Shopping Cart</a>
+                                <a href="/checkout" class="dropdown-item">Checkout</a>
+                            </div>
+                        </div>
+                        <a href="/contact" class="nav-item nav-link">Contact</a>
+                    </div>
+                    <div class="navbar-nav ml-auto py-0">
+                        <% if (user) { %>
+                            <div class="dropdown">
+                                <a href="#" class="signup-container">
+                                    <%= user.name || "User" %>
+                                </a>
+                                <div class="dropdown-content">
+                                    <a href="/userProfile">Profile</a>
+                                    <a href="/logout">Logout</a>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <a href="/login" class="nav-item nav-link">Login</a>
+                            <a href="/signup" class="nav-item nav-link">Register</a>
+                        <% } %>
+                    </div>
+                </div>
+            </nav>
+                    <div class="dropdown">
+            <button class="btn border dropdown-toggle" type="button" id="sortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Sort by
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="sortDropdown">
+                <a class="dropdown-item" href="/shopSort?sort=latest">Latest</a>
+                <a class="dropdown-item" href="/shopSort?sort=priceAsc">Price: Low to High</a>
+                <a class="dropdown-item" href="/shopSort?sort=priceDesc">Price: High to Low</a>
+                <a class="dropdown-item" href="/shopSort?sort=popularity">Popularity</a>
+            </div>
+        </div>
+    </div>
+</div>
+        </div>
+    </div>
+</div>
+</nav>
+<!-- Navbar End -->
+
+<div class="container-fluid pt-5">
+    <div class="row px-xl-5">
+        <!-- Shop Sidebar Start -->
+        <div class="col-lg-3 col-md-12">
+            <!-- Price Start -->
+            <div class="border-bottom mb-4 pb-4">
+                <h5 class="font-weight-semi-bold mb-4">Filter by price</h5>
+                <form action="/filter" method="get">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <a href="/filterPrice?gt=0&lt=500" class="btn btn-link p-0">under $500</a>
+                        <!-- <span class="badge border font-weight-normal">150</span> -->
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <a href="/filterPrice?gt=500&lt=1000" class="btn btn-link p-0">$500 - $1000</a>
+                        
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <a href="/filterPrice?gt=1000&lt=1500" class="btn btn-link p-0">$1000 - $1500</a>
+                       
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <a href="/filterPrice?gt=1500&lt=10000000" class="btn btn-link p-0">Above$1500</a>
+                        
+                    </div>
+                </form>
+                
+            </div>
+            <!-- Price End -->
+            
+            <!-- Color Start -->
+      <!-- Metal Type Start -->
+<div class="border-bottom mb-4 pb-4">
+    <h5 class="font-weight-semi-bold mb-4">Filter by Metal Type</h5>
+    <form>
+        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+            <a href="/filterMetal?metal=" class="custom-control-label">All Metals</a>
+            <!-- <span class="badge border font-weight-normal">1000</span> -->
+        </div>
+        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+            <a href="/filterMetal?metal=Gold" class="custom-control-label">Gold</a>
+        
+        </div>
+        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+            <a href="/filterMetal?metal=Diamond" class="custom-control-label">Diamond</a>
+           
+        </div>
+        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+            <a href="/filterMetal?metal=Silver" class="custom-control-label">Silver</a>
+           
+        </div>
+        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+            <a href="/filterMetal?metal=Platinum" class="custom-control-label">Platinum</a>
+            
+        </div>
+        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
+            <a href="/filterMetal?metal=Other" class="custom-control-label">Other</a>
+           
+        </div>
+    </form>
+    
+</div>
+<!-- Metal Type End -->
+
+        </div>
+        <!-- Shop Sidebar End -->
+
+<!-- Shop Product Start -->
+<div class="col-lg-9 col-md-12">
+    <div class="row pb-3">
+        <div class="row pb-3">
+       <!-- Sort Dropdown (Positioned to the Right) -->
+
+
+        </div>
+        
+        
+        <!-- Product Cards -->
+        <% for(let i = 0; i < products.length; i++) { %>
+        <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
+            <div class="card product-item border-0 mb-4">
+                <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
+                    <img class="img-fluid w-100" src="/uploads/re-image/<%= products[i].productImages[0] %>" alt="<%= products[i].productName %>">
+                </div>
+                <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
+                    <h6 class="text-truncate mb-3"><%= products[i].productName %></h6>
+                    <div class="d-flex justify-content-center">
+                        <h6>$<%= products[i].salePrice %></h6>
+                        <h6 class="text-muted ml-2"><del>$<%= products[i].regularPrice %></del></h6>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between bg-light border">
+                    <a href="/productDetails?id=<%= products[i]._id %>" class="btn btn-sm text-dark p-0">
+                        <i class="fas fa-eye text-primary mr-1"></i>View Detail
+                    </a>
+                    <a href="#" class="btn btn-sm text-dark p-0" onclick="addToCart('<%=products[i]._id%>')">
+                        <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+              
+<div class="col-12 pb-1">
+    <nav aria-label="Page navigation">
+        <% if (currentPage > 1) { %>
+            <a class="btn" href="/shop?page=<%= currentPage - 1 %>">Prev</a>
+        <% } %>
+
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <a class="btn <%= currentPage === i ? 'active' : '' %>" href="/shop?page=<%= i %>"><%= i %></a>
+        <% } %>
+
+        <% if (currentPage < totalPages) { %>
+            <a class="btn" href="/shop?page=<%= currentPage + 1 %>">Next</a>
+        <% } %>
+    </nav>
+</div>
+
+            </div>
+        </div>
+        <!-- Shop Product End -->
+    </div>
+</div>
+<!-- Shop End -->
+
+    <!-- Footer Start -->
+    <div class="container-fluid bg-secondary text-dark mt-5 pt-5">
+        <div class="row px-xl-5 pt-5">
+            <div class="col-lg-4 col-md-12 mb-5 pr-3 pr-xl-5">
+                <a href="" class="text-decoration-none">
+                    <h1 class="mb-4 display-5 font-weight-semi-bold">Flora Gems</h1>
+                </a>
+                <p>Let our pieces be your new love language........</p>
+                <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>123 Street, New York, USA</p>
+                <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>info@example.com</p>
+                <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890</p>
+            </div>
+            <div class="col-lg-8 col-md-12">
+                <div class="row">
+                    <div class="col-md-4 mb-5">
+                        <h5 class="font-weight-bold text-dark mb-4">Quick Links</h5>
+                        <div class="d-flex flex-column justify-content-start">
+                            <a class="text-dark mb-2" href="index.html"><i class="fa fa-angle-right mr-2"></i>Home</a>
+                            <a class="text-dark mb-2" href="shop.html"><i class="fa fa-angle-right mr-2"></i>Our Shop</a>
+                            <a class="text-dark mb-2" href="detail.html"><i class="fa fa-angle-right mr-2"></i>Shop Detail</a>
+                            <a class="text-dark mb-2" href="cart.html"><i class="fa fa-angle-right mr-2"></i>Shopping Cart</a>
+                            <a class="text-dark mb-2" href="checkout.html"><i class="fa fa-angle-right mr-2"></i>Checkout</a>
+                            <a class="text-dark" href="contact.html"><i class="fa fa-angle-right mr-2"></i>Contact Us</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-5">
+                        <h5 class="font-weight-bold text-dark mb-4">Quick Links</h5>
+                        <div class="d-flex flex-column justify-content-start">
+                            <a class="text-dark mb-2" href="index.html"><i class="fa fa-angle-right mr-2"></i>Home</a>
+                            <a class="text-dark mb-2" href="shop.html"><i class="fa fa-angle-right mr-2"></i>Our Shop</a>
+                            <a class="text-dark mb-2" href="detail.html"><i class="fa fa-angle-right mr-2"></i>Shop Detail</a>
+                            <a class="text-dark mb-2" href="cart.html"><i class="fa fa-angle-right mr-2"></i>Shopping Cart</a>
+                            <a class="text-dark mb-2" href="checkout.html"><i class="fa fa-angle-right mr-2"></i>Checkout</a>
+                            <a class="text-dark" href="contact.html"><i class="fa fa-angle-right mr-2"></i>Contact Us</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-5">
+                        <h5 class="font-weight-bold text-dark mb-4">Newsletter</h5>
+                        <form action="">
+                            <div class="form-group">
+                                <input type="text" class="form-control border-0 py-4" placeholder="Your Name" required="required" />
+                            </div>
+                            <div class="form-group">
+                                <input type="email" class="form-control border-0 py-4" placeholder="Your Email"
+                                    required="required" />
+                            </div>
+                            <div>
+                                <button class="btn btn-primary btn-block border-0 py-3" type="submit">Subscribe Now</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row border-top border-light mx-xl-5 py-4">
+            <div class="col-md-6 px-xl-0">
+                <p class="mb-md-0 text-center text-md-left text-dark">
+                    &copy; <a class="text-dark font-weight-semi-bold" href="#">Flora Gems</a>. All Rights Reserved.
+                   
+                </p>
+            </div>
+            <div class="col-md-6 px-xl-0 text-center text-md-right">
+                <img class="img-fluid" src="img/payments.png" alt="">
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery -->
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script> <!-- Owl Carousel -->
+    
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/easing/easing.min.js"></script>
+   
+
+<!-- Include SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <!-- Contact Javascript File -->
+    <script src="mail/jqBootstrapValidation.min.js"></script>
+    <script src="mail/contact.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+    <script>
+ 
+ function addToCart(productId, quantity = 1) {
+    $.ajax({
+        url: '/addToCart', // Backend route for adding to cart
+        method: 'POST',
+        data: { 
+            productId: productId, 
+            quantity: quantity 
+        },
+        success: function(response) {
+            // Update cart count badge
+            const cartCountElement = document.getElementById('cart-count');
+            cartCountElement.innerHTML = response.cartLength;
+
+            // Show success notification
+            Swal.fire({
+                title: 'Added to Cart!',
+                text: 'The product has been successfully added to your cart.',
+                icon: 'success',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        },
+        error: function() {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Unable to add the product to the cart. Please try again later.',
+                icon: 'error',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        }
+    });
+}
+
+
+
+    function updateCartCount() {
+    $.ajax({
+        url: '/getCartCount',  // The backend route you created
+        method: 'GET',
+        success: function(response) {
+            const cartCountElement = document.getElementById('cart-count');
+            cartCountElement.innerHTML = response.cartLength; // Update the cart count badge with the fetched value
+        },
+        error: function() {
+            console.error('Failed to fetch cart count');
+        }
+    });
+}
+
+// Call the updateCartCount function when the page loads
+$(document).ready(function() {
+    updateCartCount(); // This will automatically update the cart count
+});
+
+</script>
+</body>
+
+</html>

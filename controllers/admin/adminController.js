@@ -1,6 +1,7 @@
 const User = require("../../models/userschema");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const Category = require("../../models/categorySchema");
 
 const pageerror=async(req,res)=>{
     res.render("admin/page-404")
@@ -74,10 +75,12 @@ const logout=async(req,res)=>{
     }
 }
 
+
 module.exports = {
     loadLogin,
     login,
     loadDashboard,
     pageerror,
-    logout
+    logout,
+
 };

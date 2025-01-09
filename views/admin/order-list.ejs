@@ -1,0 +1,104 @@
+<%- include("../../views/partials/admin/header") %>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+</head>
+<div class="content-header">
+    <h2 class="content-title card-title">Order List</h2>
+</div>
+<header class="card-header text-center mb-20">
+    <form action="" method="get" class="d-inline">
+        <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
+            <input type="text" class="form-control border-0 rounded-pill" placeholder="Search orders or customers" name="search">
+            <button class="btn border-0" type="submit">Search</button>
+        </div>
+    </form>
+</header>
+<div class="right mt-5">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col"><b>Order ID</b></th>
+                <th scope="col"><b>Customer Name</b></th>
+                <th scope="col"><b>Total Price</b></th>
+                <th scope="col"><b>Status</b></th>
+                <th scope="col"><b>Payment Method</b></th>
+                <th scope="col"><b>Action</b></th>
+                <th scope="col"><b>Edit</b></th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for (let i = 0; i < orders.length; i++) { %>
+            <tr>
+                <td><%= orders[i].orderId %></td>
+                <td><%= orders[i].customerName %></td>
+                <td>$<%= orders[i].totalPrice.toFixed(2) %></td>
+                <td><%= orders[i].status %></td>
+                <td><%= orders[i].paymentMethod %></td>
+                <td>
+                    <% if (orders[i].status === "pending") { %>
+                    <button class="btn btn-success" onclick="changeOrderStatus('<%= orders[i].orderId %>', 'processing')" style="width: 100px;">Start Processing</button>
+                    <% } else if (orders[i].status === "processing") { %>
+                    <button class="btn btn-warning" onclick="changeOrderStatus('<%= orders[i].orderId %>', 'shipped')" style="width: 100px;">Mark as Shipped</button>
+                    <% } else if (orders[i].status === "shipped") { %>
+                    <button class="btn btn-primary" onclick="changeOrderStatus('<%= orders[i].orderId %>', 'delivered')" style="width: 100px;">Mark as Delivered</button>
+                    <% } %>
+                </td>
+                <td>
+                    <button class="btn btn-info" style="width: 80px;">
+                        <a href="/admin/orderDetails?id=<%= orders[i].orderId %>" class="text-white" style="text-decoration: none;">View</a>
+                    </button>
+                </td>
+            </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
+<div class="container mt-3">
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+            <% for (let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+            </li>
+            <% } %>
+        </ul>
+    </nav>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script>
+  function changeOrderStatus(orderId, newStatus) {
+      Swal.fire({
+          title: `Change Status to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}?`,
+          text: `Are you sure you want to change the status of this order to ${newStatus}?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3885d6",
+          cancelButtonColor: "d33",
+          confirmButtonText: "Yes, change it!"
+      }).then((result) => {
+          if (result.isConfirmed) {
+              $.ajax({
+                  url: "/admin/changeOrderStatus",
+                  method: "GET",
+                  data: { orderId: orderId, status: newStatus },
+                  success: (response) => {
+                      if (response.status) {
+                          Swal.fire("Status Updated", `Order status has been changed to ${newStatus}.`, "success");
+                          location.reload();
+                      } else {
+                          Swal.fire("Error", "Failed to update order status", "error");
+                      }
+                  },
+                  error: (error) => {
+                      Swal.fire("Error", "An error occurred", "error");
+                  }
+              });
+          }
+      });
+  }
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

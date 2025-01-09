@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Dashboard</title>
+    <style>
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Header */
+header {
+    background-color: #d19c97;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Main Content */
+.main {
+    padding: 20px 0;
+}
+
+.page-header {
+    background-color: #f1f1f1;
+    padding: 10px 0;
+    margin-bottom: 20px;
+}
+
+.breadcrumb {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    align-items: center;
+    font-size: 14px;
+}
+
+.breadcrumb a {
+    text-decoration: none;
+    color: #d19c97;
+}
+
+.breadcrumb span {
+    margin: 0 5px;
+    color: #999;
+}
+
+/* Sidebar */
+.dashboard-menu {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.nav-item {
+    margin-bottom: 10px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: #cf876ba8;
+    color: white;
+}
+
+.nav-link.active {
+    background-color: #ac766188;
+    color: white;
+}
+
+/* Content Area */
+.dashboard-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.card {
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #d19c97;
+    color: white;
+    padding: 10px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.card-body {
+    padding: 20px;
+    text-align: center;
+}
+
+.card-body p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.card-body a {
+    margin-top: 10px;
+    display: inline-block;
+    padding: 8px 15px;
+    border-radius: 5px;
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.card-body a:hover {
+    background-color: #218838;
+}
+
+/* Address Section */
+.card-body address {
+    font-style: normal;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 15px 0;
+    text-align: left;
+    line-height: 1.8;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-left: 5px solid #d19c97;
+    border-radius: 5px;
+    color: #333;
+}
+
+.card-body address p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Buttons within Address Section */
+.card-body .d-flex .btn-small {
+    font-size: 14px;
+    padding: 7px 12px;
+    border: 1px solid #d19c97;
+    background-color: #d19c97;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.card-body .d-flex .btn-small:hover {
+    background-color: #ac7661;
+    border-color: #ac7661;
+}
+
+/* Add Address Button */
+.btn-primary {
+    display: inline-block;
+    margin: 20px auto;
+    padding: 12px 25px;
+    background-color: #28a745; /* Green color */
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #218838; /* Darker green */
+    transform: scale(1.05); /* Slight zoom on hover */
+}
+
+.btn-primary:active {
+    background-color: #1e7e34; /* Even darker green on click */
+    transform: scale(1); /* Reset zoom on click */
+}
+
+
+/* Footer */
+footer {
+    background-color: #f1f1f1;
+    padding: 20px 0;
+    text-align: center;
+    color: #333;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+footer a {
+    text-decoration: none;
+    color: #a78654;
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    text-decoration: underline;
+    color: #d19c97;
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <!-- Include your header content here -->
+    </header>
+
+    <main class="main">
+        <div class="page-header breadcrumb-wrap mb-3">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="#" rel="nofollow">Home</a>
+                    <span></span> Profile <span></span> Account
+                </div>
+            </div>
+        </div>
+
+        <section class="pt-10 pb-10">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 m-auto">
+                        <div class="row">
+                            <!-- Sidebar -->
+                            <div class="col-md-4">
+                                <div class="dashboard-menu">
+                                    <ul class="nav flex-column" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" href="#dashboard" role="tab">Dashboard</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#address" role="tab">My Address</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#orders" role="tab">Orders</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#wallet-status" role="tab">Wallet Status</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#wallet-history" role="tab">Wallet History</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#referal" role="tab">Referals</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/logout">Logout</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Content Area -->
+                            <div class="col-md-8">
+                                <div class="tab-content dashboard-content">
+                                    <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                                        <div class="card card-green">
+                                            <div class="card-header">
+                                                <h5 class="mb-0 text-center">User Profile</h5>
+                                            </div>
+                                            <div class="card-body text-center">
+                                                <% if (user) { %>
+                                                    <h5 class="card-title"><%= user.name %></h5>
+                                                    <p><strong>Phone:</strong> <%= user.phone %></p>
+                                                    <p><strong>Email:</strong> <%= user.email %></p>
+                                                    <a href="/change-email" class="btn btn-sm btn-success">Change Email</a>
+                                                    <a href="/change-password" class="btn btn-sm btn-success">Change Password</a>
+                                                <% } else { %>
+                                                    <p>User data not available. Please try again later.</p>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Address Tab -->
+                                    <div class="tab-pane fade" id="address" role="tabpanel">
+                                        <div class="row">
+                                            <% if (userAddress && userAddress.address.length > 0) { %>
+                                                <% userAddress.address.forEach((address) => { %>
+                                                    <div class="col-lg-6">
+                                                        <div class="card mb-3">
+                                                            <div class="card-header">
+                                                                <h5 class="mb-0"><%= address.addressType %></h5>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <address>
+                                                                    <%= address.name %><br/>
+                                                                    <%= address.city %><br/>
+                                                                    <%= address.landMark %><br/>
+                                                                    <%= address.state %><br/>
+                                                                </address>
+                                                                <p>Pincode: <%= address.pincode %></p>
+                                                                <p>Phone: <%= address.phone %></p>
+                                                                <p>Alt Phone:<%= address.altPhone %>
+                                                                </p>
+                                                                <div class="d-flex justify-content-between">
+                                                                    <a href="/editAddress?id=<%=address._id%>" class="btn-small">Edit</a>
+                                                                    <a href="/deleteAddress?id=<%=address._id%>" class="btn-small" onclick="return confirm('Are you sure you want to delete this address?')">Delete</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                <% }) %>
+                                            <% } else { %>
+                                                <div class="col-lg-6">
+                                                    <div class="card mb-3">
+                                                        <div class="card-header">
+                                                            <h5 class="mb-0">No Address</h5>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <address>No address available</address>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <% } %>
+                                            <div>
+                                                <a href="/addaddress">
+                                                    <button class="btn btn-primary">Add Address</button>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Content Area -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <!-- Include your footer content here -->
+    </footer>
+</body>
+</html>

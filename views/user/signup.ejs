@@ -32,7 +32,7 @@
             border-radius: 12px;
             overflow: hidden;
             background-color: #fff;
-            height: 80vh; /* Makes the container responsive to viewport height */
+            height: 90vh; /* Makes the container responsive to viewport height */
         }
 
         .form-section {
@@ -60,14 +60,15 @@
 
         .form-section label {
             margin-bottom: 5px;
-            font-size: 14px;
+            font-size: 15px;
+            font-family:'Times New Roman', Times, serif;
             font-weight: bold;
             color: #444;
         }
 
         .form-section input {
-            margin-bottom: 15px;
-            padding: 10px;
+            margin-bottom: 10px;
+            padding: 5px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 14px;
@@ -141,7 +142,7 @@
         .checkbox-container {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         .checkbox-container input {
             margin-right: 10px;
@@ -152,6 +153,44 @@
             color: #666;
             display: inline;
         }
+        .error-message{
+            color:red;
+            font-size: 0.75rem;
+            display:none
+        }
+        /* Loader styling */
+#loader {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 1000;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #fff;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Spinner animation */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
         
         /* Responsive Design */
         @media (max-width: 768px) {
@@ -192,7 +231,18 @@
         <div class="form-section">
             <h1>Flora Gems</h1>
             <p style="text-align: center; margin-bottom: 30px; color: #666;">Sign up to continue</p>
+
+            <div id="loader" style="display: none;">
+                <p>Sending OTP...</p>
+                <div class="spinner"></div>
+            </div>
             <form id="signupform" action="/signup" method="POST">
+              
+                <h4 style="color: red;"><%= message %></h4>
+
+
+
+                  
                 <label for="name">Name</label>
                 <input type="text" id="name" name="name" placeholder="Enter your name" >
                 <div id="error1" class="error-message"></div>
@@ -201,9 +251,20 @@
                 <input type="email" id="email" name="email" placeholder="Enter your email" >
                 <div id="error2" class="error-message"></div>
 
+                <label for="email">Phone Number</label>
+                <input type="text" id="phone" name="phone" placeholder="Enter your Phone Number" >
+                <div id="error3" class="error-message"></div>
+
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" placeholder="Enter your password" >
-                <div id="error3" class="error-message"></div>
+                <div id="error4" class="error-message"></div>
+
+
+                <label for="cPassword">Confirm Password</label>
+<input type="password" id="cPassword" name="cPassword" placeholder="Re-enter your password">
+<div id="error5" class="error-message"></div>
+
+           
 
                 <div class="checkbox-container">
                     <input type="checkbox" id="terms" name="terms">
@@ -227,76 +288,126 @@
         <div class="image-section"></div>
     </div>
     <script>
-        const nameid = document.getElementById("name");
-        const emailid = document.getElementById("email");
-        const passid = document.getElementById("password");
-        const error1 = document.getElementById("error1");
-        const error2 = document.getElementById("error2");
-        const error3 = document.getElementById("error3");
-        const signupform = document.getElementById("signupform");
-    
-        function nameValidateChecking() {
-            const nameval = nameid.value;
-            const namepattern = /^[a-zA-Z\s]+$/;
-            console.log("Validating name...");
-            if (nameval.trim() === "") {
-                error1.style.display = "block";
-                error1.innerHTML = "Please enter a valid name";
-            } else if (!namepattern.test(nameval)) {
-                error1.style.display = "block";
-                error1.innerHTML = "Name can only contain alphabet and spaces";
-            } else {
-                error1.style.display = "none";
-                error1.innerHTML = "";
-            }
-        }
-    
-        function emailValidateChecking() {
-            const emailval = emailid.value;
-            const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            console.log("Validating email...");
-            if (!emailpattern.test(emailval)) {
-                error2.style.display = "block";
-                error2.innerHTML = "Invalid email format";
-            } else {
-                error2.style.display = "none";
-                error2.innerHTML = "";
-            }
-        }
-    
-        function passValidateChecking() {
-            const passval = passid.value;
-            const alpha = /^[a-zA-Z]/;
-            const digit = /\d/;
-            console.log("Validating password...");
-            if (passval.length < 8) {
-                error3.style.display = "block";
-                error3.innerHTML = "Password should contain at least 8 characters";
-            } else if (!alpha.test(passval) || !digit.test(passval)) {
-                error3.style.display = "block";
-                error3.innerHTML = "Password should contain both letters and digits";
-            } else {
-                error3.style.display = "none";
-                error3.innerHTML = "";
-            }
-        }
-    
-        document.addEventListener("DOMContentLoaded", function () {
-            nameid.addEventListener("input", nameValidateChecking);
-            emailid.addEventListener("input", emailValidateChecking);
-            passid.addEventListener("input", passValidateChecking);
+     document.addEventListener("DOMContentLoaded", function () {
+    const nameid = document.getElementById("name");
+    const emailid = document.getElementById("email");
+    const phoneid = document.getElementById("phone");
+    const passid = document.getElementById("password");
+    const cpassid = document.getElementById("cPassword");
+    const error1 = document.getElementById("error1");
+    const error2 = document.getElementById("error2");
+    const error3 = document.getElementById("error3");
+    const error4 = document.getElementById("error4");
+    const error5 = document.getElementById("error5");
+    const signform = document.getElementById("signupform");
 
-            signupform.addEventListener("submit", function (e) {
-                nameValidateChecking();
-                emailValidateChecking();
-                passValidateChecking();
-    
-                if (error1.style.display === "block" || error2.style.display === "block" || error3.style.display === "block") {
-                    console.log("Form validation failed.");
-                    e.preventDefault(); // Prevent form submission if validation fails
-                }
-            });
-        });
+    // Function to clear error messages
+    function clearErrorMessages() {
+        error1.style.display = "none";
+        error2.style.display = "none";
+        error3.style.display = "none";
+        error4.style.display = "none";
+        error5.style.display = "none";
+        
+    }
+
+    // Function for validation
+    function validateForm() {
+        clearErrorMessages(); // Clear previous errors
+
+        let isValid = true;
+
+        // Validate Name
+        const nameval = nameid.value.trim();
+        const namepattern = /^[a-zA-Z\s]+$/;
+        if (nameval === "") {
+            error1.style.display = "block";
+            error1.innerHTML = "Please enter a valid name";
+            isValid = false;
+        } else if (!namepattern.test(nameval)) {
+            error1.style.display = "block";
+            error1.innerHTML = "Name can only contain alphabets and spaces";
+            isValid = false;
+        }
+
+        // Validate Email
+        const emailval = emailid.value.trim();
+        const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailpattern.test(emailval)) {
+            error2.style.display = "block";
+            error2.innerHTML = "Invalid email format";
+            isValid = false;
+        }
+
+        // Validate Phone
+        const phoneval = phoneid.value.trim();
+        if (phoneval === "") {
+            error3.style.display = "block";
+            error3.innerHTML = "Enter a valid phone number";
+            isValid = false;
+        } else if (phoneval.length !== 10 || !/^\d+$/.test(phoneval)) {
+            error3.style.display = "block";
+            error3.innerHTML = "Phone number must be 10 digits";
+            isValid = false;
+        }
+
+        // Validate Password
+        const passval = passid.value.trim();
+        const cPassval = cpassid.value.trim();
+        const alpha = /[a-zA-Z]/;
+        const digit = /\d/;
+
+        if (passval.length < 8) {
+            error4.style.display = "block";
+            error4.innerHTML = "Password must be at least 8 characters long";
+            isValid = false;
+        } else if (!alpha.test(passval) || !digit.test(passval)) {
+            error4.style.display = "block";
+            error4.innerHTML = "Password must contain both letters and numbers";
+            isValid = false;
+        }
+
+        if (passval !== cPassval) {
+            error5.style.display = "block";
+            error5.innerHTML = "Passwords do not match";
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    // Form Submit Event Listener
+    signform.addEventListener("submit", function (e) {
+        e.preventDefault(); // Prevent form from submitting by default
+
+        clearErrorMessages(); // Ensure errors are cleared before validating again
+
+        if (validateForm()) {
+            // Show loader and disable the submit button
+            document.getElementById("loader").style.display = "block";
+            const submitButton = signform.querySelector("button[type='submit']");
+            submitButton.disabled = true;
+            submitButton.textContent = "Processing...";
+
+            // Simulate form submission (you can replace with AJAX if needed)
+            setTimeout(function () {
+                // Normally, here you would send the form data via AJAX or submit
+                signform.submit(); // Form submission (or perform AJAX logic)
+            }, 1000);
+        }
+    });
+});
+document.addEventListener('DOMContentLoaded', function () {
+    const message = document.querySelector('h4');
+    if (message) {
+        // Remove the message after a short timeout, for example 3 seconds
+        setTimeout(function () {
+            message.style.display = 'none';  // Hide the error message
+        }, 3000); // Hide after 3 seconds
+    }
+});
+
+
     </script>
     
 </body>
