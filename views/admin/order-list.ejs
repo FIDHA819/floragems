@@ -30,24 +30,38 @@
             <% for (let i = 0; i < orders.length; i++) { %>
             <tr>
                 <td><%= orders[i].orderId %></td>
-                <td><%= orders[i].customerName %></td>
+                <td>
+                    <% if (orders[i].user) { %>
+                      <%= orders[i].user.name %>
+                    <% } else { %>
+                      N/A <!-- Fallback text if user is not found -->
+                    <% } %>
+                  </td>
+                  
                 <td>$<%= orders[i].totalPrice.toFixed(2) %></td>
                 <td><%= orders[i].status %></td>
-                <td><%= orders[i].paymentMethod %></td>
-                <td>
-                    <% if (orders[i].status === "pending") { %>
-                    <button class="btn btn-success" onclick="changeOrderStatus('<%= orders[i].orderId %>', 'processing')" style="width: 100px;">Start Processing</button>
-                    <% } else if (orders[i].status === "processing") { %>
-                    <button class="btn btn-warning" onclick="changeOrderStatus('<%= orders[i].orderId %>', 'shipped')" style="width: 100px;">Mark as Shipped</button>
-                    <% } else if (orders[i].status === "shipped") { %>
-                    <button class="btn btn-primary" onclick="changeOrderStatus('<%= orders[i].orderId %>', 'delivered')" style="width: 100px;">Mark as Delivered</button>
-                    <% } %>
-                </td>
+                <td><%= orders[i].payment %></td>
+                <% if (orders[i]) { %>
+                    <td>
+                        
+
+                        <% if (orders[i].status === "Pending") { %>
+                            <button class="btn btn-success" onclick="changeOrderStatus('<%= orders[i].orderId %>', 'Processing')" style="width: 100px;">Start Processing</button>
+                        <% } else if (orders[i].status === "Processing") { %>
+                            <button class="btn btn-warning" onclick="changeOrderStatus('<%= orders[i].orderId %>', 'Shipped')" style="width: 100px;">Mark as Shipped</button>
+                        <% } else if (orders[i].status === "Shipped") { %>
+                            <button class="btn btn-primary" onclick="changeOrderStatus('<%= orders[i].orderId %>', 'Delivered')" style="width: 100px;">Mark as Delivered</button>
+                        <% } %>
+                    </td>
+                <% } %>
+                
                 <td>
                     <button class="btn btn-info" style="width: 80px;">
-                        <a href="/admin/orderDetails?id=<%= orders[i].orderId %>" class="text-white" style="text-decoration: none;">View</a>
+                      <a href="/admin/orderDetailsAdmin?orderId=<%= orders[i].orderId %>" 
+                         class="text-white" style="text-decoration: none;">View</a>
                     </button>
-                </td>
+                  </td>
+                  
             </tr>
             <% } %>
         </tbody>
@@ -69,36 +83,39 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
 <script>
-  function changeOrderStatus(orderId, newStatus) {
-      Swal.fire({
-          title: `Change Status to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}?`,
-          text: `Are you sure you want to change the status of this order to ${newStatus}?`,
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3885d6",
-          cancelButtonColor: "d33",
-          confirmButtonText: "Yes, change it!"
-      }).then((result) => {
-          if (result.isConfirmed) {
-              $.ajax({
-                  url: "/admin/changeOrderStatus",
-                  method: "GET",
-                  data: { orderId: orderId, status: newStatus },
-                  success: (response) => {
-                      if (response.status) {
-                          Swal.fire("Status Updated", `Order status has been changed to ${newStatus}.`, "success");
-                          location.reload();
-                      } else {
-                          Swal.fire("Error", "Failed to update order status", "error");
-                      }
-                  },
-                  error: (error) => {
-                      Swal.fire("Error", "An error occurred", "error");
-                  }
-              });
+ function changeOrderStatus(orderId, newStatus) {
+  Swal.fire({
+    title: `Change Status to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}?`,
+    text: `Are you sure you want to change the status of this order to ${newStatus}?`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3885d6",
+    cancelButtonColor: "d33",
+    confirmButtonText: "Yes, change it!"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      $.ajax({
+        url: `/admin/changeStatus`,
+        method: "GET",
+        data: {
+          orderId: orderId,
+          status: newStatus
+        },
+        success: (response) => {
+          if (response.status) {
+            Swal.fire("Status Updated", `Order status has been changed to ${newStatus}.`, "success");
+            location.reload(); // Reload the page to see the updated status
+          } else {
+            Swal.fire("Error", "Failed to update order status", "error");
           }
+        },
+        error: (error) => {
+          Swal.fire("Error", "An error occurred", "error");
+        }
       });
-  }
-</script>
+    }
+  });
+}
 
+</script>
 <%- include("../../views/partials/admin/footer") %>

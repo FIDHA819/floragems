@@ -27,41 +27,450 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
-    <style> .dropdown {
-        position: relative;
-        display: inline-block;
+    <style> /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .container-fluid {
+            max-width: 100%;
+            padding: 0 15px;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+        }
+        
+        .text-primary {
+            color: #007bff;
+        }
+        
+        .text-dark {
+            color: #343a40;
+        }
+        
+        .btn-outline-primary {
+            border-color: #007bff;
+            color: #007bff;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+        
+        .text-muted {
+            color: #6c757d;
+        }
+        
+        /* Featured Section */
+        .featured .fa {
+            font-size: 24px;
+        }
+        
+        .featured h5 {
+            font-size: 18px;
+        }
+        
+        .featured .col-lg-3 {
+            margin-bottom: 30px;
+        }
+        
+        /* Categories Section */
+        .cat-item {
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cat-img img {
+            width: 100%;
+            height: auto;
+        }
+        
+        .cat-item h5 {
+            font-size: 18px;
+        }
+        
+        /* Carousel Section */
+        .carousel-inner img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+        }
+        
+        .carousel-caption {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }
+        
+        /* Product Section */
+        .product-item .card {
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-item .card-header img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .product-item h6 {
+            font-size: 16px;
+        }
+        
+        .product-item .card-footer a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        
+        /* Vendor Section */
+        .vendor-item img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Footer Section */
+        footer {
+            background-color: #343a40;
+            color: #fff;
+            padding: 30px 0;
+        }
+        
+        footer .font-weight-semi-bold {
+            font-weight: 600;
+        }
+        
+        footer a {
+            color: #fff;
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            color: #007bff;
+        }
+        
+        /* Responsive Styles */
+        
+        /* Small screens (mobile) */
+        @media (max-width: 767px) {
+            .carousel-caption h1 {
+                font-size: 24px;
+            }
+        
+            .carousel-caption a {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+        
+            .product-item h6 {
+                font-size: 14px;
+            }
+        
+            .vendor-item {
+                display: block;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+        
+            .footer .col-md-4 {
+                margin-bottom: 30px;
+            }
+        
+            .footer .form-control {
+                font-size: 14px;
+            }
+        
+            .footer .btn-block {
+                font-size: 14px;
+            }
+        }
+        
+        /* Medium screens (tablet) */
+        @media (min-width: 768px) and (max-width: 991px) {
+            .carousel-caption h1 {
+                font-size: 32px;
+            }
+        
+            .carousel-caption a {
+                font-size: 16px;
+                padding: 12px 20px;
+            }
+        
+            .product-item h6 {
+                font-size: 16px;
+            }
+        
+            .vendor-item {
+                display: inline-block;
+                width: 48%;
+                margin-bottom: 20px;
+            }
+        
+            .footer .col-md-4 {
+                width: 48%;
+            }
+        
+            .footer .form-control {
+                font-size: 16px;
+            }
+        
+            .footer .btn-block {
+                font-size: 16px;
+            }
+        }
+        
+        /* Large screens (desktop) */
+        @media (min-width: 992px) {
+            .carousel-caption h1 {
+                font-size: 40px;
+            }
+        
+            .carousel-caption a {
+                font-size: 18px;
+                padding: 15px 25px;
+            }
+        
+            .product-item h6 {
+                font-size: 18px;
+            }
+        
+            .vendor-item {
+                display: inline-block;
+                width: 12%;
+                margin-right: 20px;
+            }
+        
+            .footer .col-md-4 {
+                width: 30%;
+            }
+        
+            .footer .form-control {
+                font-size: 18px;
+            }
+        
+            .footer .btn-block {
+                font-size: 18px;
+            }
+        }
+        
+        /* Larger screens (extra large) */
+        @media (min-width: 1200px) {
+            .carousel-caption h1 {
+                font-size: 50px;
+            }
+        
+            .carousel-caption a {
+                font-size: 20px;
+                padding: 18px 30px;
+            }
+        
+            .product-item h6 {
+                font-size: 20px;
+            }
+        
+            .vendor-item {
+                display: inline-block;
+                width: 12%;
+                margin-right: 20px;
+            }
+        
+            .footer .col-md-4 {
+                width: 30%;
+            }
+        
+            .footer .form-control {
+                font-size: 18px;
+            }
+        
+            .footer .btn-block {
+                font-size: 18px;
+            }
+        }
+        /* Navbar styling */
+.navbar-nav {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+.dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            right: 0;
+        }
+        
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .dropdown:hover > .dropdown-content {
+            display: block;
+        }
+        
+        /* Header Styling */
+        .header {
+            position: relative;
+            z-index: 500;
+        }
+        
+        /* Dropdown Item Styling */
+        .dropdown-item {
+            color: #000; /* Ensure text is black */
+            background-color: transparent; /* Ensure no background covers the text */
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f1f1f1; /* Add a hover effect */
+        }
+        
+.signup-container {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    color: #333;
+    text-decoration: none;
+    padding: 10px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    position: relative;
+}
+
+.signup-container i {
+    margin-right: 5px;
+}
+
+/* Dropdown container */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+/* Login/Register buttons */
+.nav-item.nav-link {
+    padding: 10px 15px;
+    font-size: 16px;
+    color: #333;
+    text-decoration: none;
+}
+
+.nav-item.nav-link:hover {
+    background-color: #f0f0f0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .navbar-nav {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: white;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-        right: 0;
-    }
-
-    .dropdown-content a {
-        color: black;
-        padding: 12px 16px;
-        text-decoration: none;
-        display: block;
-        width: 100%;
-    }
-
-    .dropdown-content a:hover {
-        background-color: #f1f1f1;
-    }
-
-    .dropdown:hover > .dropdown-content {
-        display: block;
-    }
-
-    .header {
+        min-width: 100%;
+        box-shadow: none;
         position: relative;
-        z-index: 500;
-    }</style>
+    }
+
+    .signup-container {
+        display: block;
+    }
+
+    .nav-item.nav-link {
+        padding: 10px;
+        width: 100%;
+        text-align: left;
+    }
+}
+/* Banner Container */
+.banner-container {
+    position: relative;
+    overflow: hidden;
+    background-color: #f8d0d0; /* Pinkish color for the banner background */
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin: 10px 0;
+}
+
+/* Moving Banner Text */
+.moving-banner {
+    white-space: nowrap;
+    animation: scroll-banner 10s linear infinite; /* Animation for scrolling */
+    font-size: 16px;
+    color: #242121; 
+    font-weight: bold;
+}
+
+/* Animation for the banner to move */
+@keyframes scroll-banner {
+    0% {
+        transform: translateX(100%); /* Start from right */
+    }
+    100% {
+        transform: translateX(-100%); /* Move to the left */
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .banner-container {
+        padding: 8px 15px;
+    }
+
+    .moving-banner {
+        font-size: 14px;
+    }
+}
+
+
+        
+    </style>
 </head>         
 
 <body>
@@ -104,16 +513,11 @@
                 </a>
             </div>
             <div class="col-lg-6 col-6 text-left">
-                <form action="">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for products">
-                        <div class="input-group-append">
-                            <span class="input-group-text bg-transparent text-primary">
-                                <i class="fa fa-search"></i>
-                            </span>
-                        </div>
+                <div class="banner-container">
+                    <div class="moving-banner">
+                        <span>Free Shipping on Products Above ₹50000</span>
                     </div>
-                </form>
+                </div>
             </div>
             <div class="col-lg-3 col-6 text-right">
                 <a href="" class="btn border">
@@ -135,41 +539,18 @@
     <!-- Navbar Start -->
     <div class="container-fluid mb-5">
         <div class="row border-top px-xl-5">
-            <div class="col-lg-3 d-none d-lg-block">
-                <a class="btn shadow-none d-flex align-items-center justify-content-between bg-primary text-white w-100" data-toggle="collapse" href="#navbar-vertical" style="height: 65px; margin-top: -1px; padding: 0 30px;">
-                    <h6 class="m-0">Categories</h6>
-                    <i class="fa fa-angle-down text-dark"></i>
-                </a>
-                <nav class="collapse show navbar navbar-vertical navbar-light align-items-start p-0 border border-top-0 border-bottom-0" id="navbar-vertical">
-                    <div class="navbar-nav w-100 overflow-hidden" style="height: 210px">
-                        <div class="nav-item dropdown">
-                            <a href="#" class="nav-link" data-toggle="dropdown">All Jewelleries <i class="fa fa-angle-down float-right mt-1"></i></a>
-                            <div class="dropdown-menu position-absolute bg-secondary border-0 rounded-0 w-100 m-0">
-                                <a href="" class="dropdown-item">Rings</a>
-                                <a href="" class="dropdown-item">Necklace</a>
-                                <a href="" class="dropdown-item">Earings</a>
-                            </div>
-                        </div>
-                        <a href="" class="nav-item nav-link">Gold</a>
-                        <a href="" class="nav-item nav-link">Diamond</a>
-                        <a href="" class="nav-item nav-link">Platinum</a>
-   
-                    </div>
-                </nav>
-            </div>
-            <div class="col-lg-9">
+            <div class="col-lg-12">
                 <nav class="navbar navbar-expand-lg bg-light navbar-light py-3 py-lg-0 px-0">
                     <a href="" class="text-decoration-none d-block d-lg-none">
-                        <h1 class="m-0 display-5 font-weight-semi-bold"><span class="text-primary font-weight-bold border px-3 mr-1">E</span>Shopper</h1>
+                        <h1 class="m-0 display-5 font-weight-semi-bold">FloraGems</h1>
                     </a>
                     <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
                         <span class="navbar-toggler-icon"></span>
                     </button>
-                    <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-                        <div class="navbar-nav mr-auto py-0">
+                    <div class="collapse navbar-collapse justify-content-center" id="navbarCollapse">
+                        <div class="navbar-nav py-0">
                             <a href="index" class="nav-item nav-link active">Home</a>
                             <a href="/shop" class="nav-item nav-link">Shop</a>
-                            <a href="detail.html" class="nav-item nav-link">Shop Detail</a>
                             <div class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pages</a>
                                 <div class="dropdown-menu rounded-0 m-0">
@@ -177,12 +558,15 @@
                                     <a href="checkout.html" class="dropdown-item">Checkout</a>
                                 </div>
                             </div>
-                            <a href="contact.html" class="nav-item nav-link">Contact</a>
+        <a href="contact.html" class="nav-item nav-link">Contact</a>
                         </div>
                         <div class="navbar-nav ml-auto py-0">
                             <% if (user) { %>
                                 <div class="dropdown">
-                                    <a href="#" class="signup-container"><%= user.name || "User" %></a> <!-- Fallback for name -->
+                                    <a href="#" class="signup-container">
+                                        <i class="fa fa-user" style="font-size: 16px; margin-right: 5px;"></i> <!-- User Icon -->
+                                        <%= user.name || "User" %> <!-- Fallback for name -->
+                                    </a>
                                     <div class="dropdown-content">
                                         <a href="/userProfile">Profile</a>
                                         <a href="/logout">Logout</a>
@@ -193,6 +577,7 @@
                                 <a href="/signup" class="nav-item nav-link">Register</a>
                             <% } %>
                         </div>
+                        
                         
                         </div>
                         
@@ -310,31 +695,6 @@
     <!-- Categories End -->
 
 
-    <!-- Offer Start -->
-    <!-- <div class="container-fluid offer pt-5">
-        <div class="row px-xl-5">
-            <div class="col-md-6 pb-4">
-                <div class="position-relative bg-secondary text-center text-md-right text-white mb-2 py-5 px-5">
-                    <img src="img/offer-1.png" alt="">
-                    <div class="position-relative" style="z-index: 1;">
-                        <h5 class="text-uppercase text-primary mb-3">20% off the all order</h5>
-                        <h1 class="mb-4 font-weight-semi-bold">Spring Collection</h1>
-                        <a href="" class="btn btn-outline-primary py-md-2 px-md-3">Shop Now</a>
-                    </div>
-                </div>
-            </div> -->
-            <!-- <div class="col-md-6 pb-4">
-                <div class="position-relative bg-secondary text-center text-md-left text-white mb-2 py-5 px-5">
-                    <img src="img/offer-2.png" alt="">
-                    <div class="position-relative" style="z-index: 1;">
-                        <h5 class="text-uppercase text-primary mb-3">20% off the all order</h5>
-                        <h1 class="mb-4 font-weight-semi-bold">Winter Collection</h1>
-                        <a href="" class="btn btn-outline-primary py-md-2 px-md-3">Shop Now</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> -->
     <div id="mycarousel" class="carousel slide" data-ride="carousel">
         <div class="carousel-inner">
           <div class="carousel-item active">

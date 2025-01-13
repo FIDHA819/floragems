@@ -113,7 +113,12 @@
         <p>The One-Time Password (OTP) has been sent to the email address (expires in 5 minutes)</p>
         <input type="text" id="otp" class="input-field" placeholder="Enter OTP" maxlength="6">
         <div id="timer" class="timer">
-          Resend OTP <span id="timerValue">50s</span>
+         <% if (resendAllowed) { %>
+            <button id="resend-otp">Resend OTP</button>
+          <% } else { %>
+            <p>Resending OTP is not allowed at this time.</p>
+          <% } %>
+           <span id="timerValue">50s</span>
         </div>
         <button type="submit" id="verifyBtn" class="btn">Verify</button>
       </div>
@@ -125,107 +130,111 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <script>
-   let timer = 50;
+  
    const timerElement = document.getElementById("timerValue");
-   const timerLink = document.getElementById("timer");
-   
-   function startTimer() {
-      const interval = setInterval(() => {
-         if (timer > 0) {
+const timerLink = document.getElementById("timer");
+let timer = localStorage.getItem('timer') ? parseInt(localStorage.getItem('timer')) : 50; // Get saved timer value or set default to 50
+
+function startTimer() {
+    const interval = setInterval(() => {
+        if (timer > 0) {
             timer--;
             timerElement.textContent = `${timer}s`;
-         } else {
+            localStorage.setItem('timer', timer); // Save timer value to local storage
+        } else {
             clearInterval(interval);
             timerElement.innerHTML = `<span style="color: blue; cursor: pointer;" onclick="resendOTP()">Resend</span>`;
             timerLink.classList.add("expired");
             timerLink.classList.remove("disabled");
-         }
-      }, 1000);
-   }
+            localStorage.removeItem('timer'); // Clear timer value when it reaches 0
+        }
+    }, 1000);
+}
 
-   startTimer();
+startTimer();
 
-   function validateOTP() {
-      const otpInput = document.getElementById("otp").value;
+function validateOTP() {
+    const otpInput = document.getElementById("otp").value;
 
-      if (!otpInput) {
-         Swal.fire({
+    if (!otpInput) {
+        Swal.fire({
             icon: 'error',
             title: 'Invalid OTP',
             text: 'Please enter a valid OTP.',
-         });
-         return false;
-      }
+        });
+        return false;
+    }
 
-      $.ajax({
-         type: "POST",
-         url: "/verify-otp",
-         data: { otp: otpInput },
-         success: function(response) {
+    $.ajax({
+        type: "POST",
+        url: "/verify-otp",
+        data: { otp: otpInput },
+        success: function(response) {
             if (response.success) {
-               Swal.fire({
-                  icon: "success",
-                  title: "OTP Verified Successfully",
-                  showConfirmButton: false,
-                  timer: 1500,
-               }).then(() => {
-                  window.location.href = response.redirectUrl;
-               });
+                Swal.fire({
+                    icon: "success",
+                    title: "OTP Verified Successfully",
+                    showConfirmButton: false,
+                    timer: 1500,
+                }).then(() => {
+                    window.location.href = response.redirectUrl;
+                });
             } else {
-               Swal.fire({
-                  icon: "error",
-                  title: "Error",
-                  text: response.message,
-               });
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: response.message,
+                });
             }
-         },
-         error: function() {
+        },
+        error: function() {
             Swal.fire({
-               icon: "error",
-               title: "Invalid OTP",
-               text: "Please try again",
+                icon: "error",
+                title: "Invalid OTP",
+                text: "Please try again",
             });
-         }
-      });
-      return false;
-   }
+        }
+    });
+    return false;
+}
 
-   function resendOTP() {
-      timer = 50;
-      timerElement.textContent = `${timer}s`;
-      timerLink.classList.add("disabled");
-      timerLink.classList.remove("expired");
-      startTimer();
+function resendOTP() {
+    timer = 50;
+    timerElement.textContent = `${timer}s`;
+    timerLink.classList.add("disabled");
+    timerLink.classList.remove("expired");
+    startTimer();
 
-      $.ajax({
-         type: "POST",
-         url: "/resend-otp",
-         success: function(response) {
+    $.ajax({
+        type: "POST",
+        url: "/resend-otp",
+        success: function(response) {
             if (response.success) {
-               Swal.fire({
-                  icon: "success",
-                  title: "OTP Resent Successfully",
-                  showConfirmButton: false,
-                  timer: 1500,
-               });
+                Swal.fire({
+                    icon: "success",
+                    title: "OTP Resent Successfully",
+                    showConfirmButton: false,
+                    timer: 1500,
+                });
             } else {
-               Swal.fire({
-                  icon: "error",
-                  title: "Error",
-                  text: "An error occurred while resending the OTP. Please try again later.",
-               });
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "An error occurred while resending the OTP. Please try again later.",
+                });
             }
-         },
-         error: function() {
+        },
+        error: function() {
             Swal.fire({
-               icon: "error",
-               title: "Error",
-               text: "An error occurred while resending the OTP. Please try again later.",
+                icon: "error",
+                title: "Error",
+                text: "An error occurred while resending the OTP. Please try again later.",
             });
-         }
-      });
-      return false;
-   }
+        }
+    });
+    return false;
+}
+
   </script>
 </body>
 </html>

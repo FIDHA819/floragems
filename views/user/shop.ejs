@@ -25,118 +25,197 @@
 
     <!-- Libraries Stylesheet -->
     <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    
+
+ 
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
-    <style> .dropdown {
-        position: relative;
-        display: inline-block;
-    }
-
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: white;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-        right: 0;
-    }
-
-    .dropdown-content a {
-        color: black;
-        padding: 12px 16px;
-        text-decoration: none;
-        display: block;
-        width: 100%;
-    }
-
-    .dropdown-content a:hover {
-        background-color: #f1f1f1;
-    }
-
-    .dropdown:hover > .dropdown-content {
-        display: block;
-    }
-
-    .header {
-        position: relative;
-        z-index: 500;
-    }
-    .dropdown-item {
-    color: #000; /* Ensure text is black */
-    background-color: transparent; /* Ensure no background covers the text */
-}
-
-.dropdown-item:hover {
-    background-color: #f1f1f1; /* Add a hover effect */
-}
-nav[aria-label="Page navigation"] {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-nav[aria-label="Page navigation"] .btn {
-    display: inline-block;
-    padding: 10px 15px;
-    font-size: 16px;
-    color: #b46e59cc;
-    text-decoration: none;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    transition: all 0.3s ease;
-}
-
-nav[aria-label="Page navigation"] .btn:hover {
-    background-color: #b46e59cc;
-    color: #fff;
-}
-
-nav[aria-label="Page navigation"] .btn.active {
-    background-color: #b46e59cc;
-    color: #fff;
-    border-color: #b46e59cc;
-    pointer-events: none;
-    cursor: default;
-}
-
-nav[aria-label="Page navigation"] .btn:disabled {
-    background-color: #f1f1f1;
-    color: #ccc;
-    cursor: not-allowed;
-}
-/* Sort dropdown styling */
-.sort-dropdown {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.sort-dropdown select {
-    font-size: 0.95rem;
-    color: #333;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #fff;
-    transition: border-color 0.3s ease-in-out;
-}
-
-.sort-dropdown select:focus {
-    border-color: #ffc107;
-    outline: none;
-}
-
-.sort-dropdown label {
-    margin-right: 10px;
-    font-size: 1rem;
-    color: #555;
-}
-
+      <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>/* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        
+        a {
+            text-decoration: none;
+        }
+        
+        /* Dropdown Menu */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            right: 0;
+        }
+        
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .dropdown:hover > .dropdown-content {
+            display: block;
+        }
+        
+        /* Header Styling */
+        .header {
+            position: relative;
+            z-index: 500;
+        }
+        
+        /* Dropdown Item Styling */
+        .dropdown-item {
+            color: #000; /* Ensure text is black */
+            background-color: transparent; /* Ensure no background covers the text */
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f1f1f1; /* Add a hover effect */
+        }
+        
+        /* Pagination Styles */
+        nav[aria-label="Page navigation"] {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        nav[aria-label="Page navigation"] .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            font-size: 16px;
+            color: #b46e59cc;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        nav[aria-label="Page navigation"] .btn:hover {
+            background-color: #b46e59cc;
+            color: #fff;
+        }
+        
+        nav[aria-label="Page navigation"] .btn.active {
+            background-color: #b46e59cc;
+            color: #fff;
+            border-color: #b46e59cc;
+            pointer-events: none;
+            cursor: default;
+        }
+        
+        nav[aria-label="Page navigation"] .btn:disabled {
+            background-color: #f1f1f1;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        /* Sort Dropdown Styles */
+        .sort-dropdown {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .sort-dropdown select {
+            font-size: 0.95rem;
+            color: #333;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            transition: border-color 0.3s ease-in-out;
+        }
+        
+        .sort-dropdown select:focus {
+            border-color: #ffc107;
+            outline: none;
+        }
+        
+        .sort-dropdown label {
+            margin-right: 10px;
+            font-size: 1rem;
+            color: #555;
+        }
+        
+        /* Price Filter Styles */
+        .filter-price {
+            margin-bottom: 15px;
+        }
+        
+        .filter-price a {
+            color: #b46e59cc;
+            font-size: 16px;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .filter-price a:hover {
+            color: #d68a5d;
+        }
+        
+        /* Price Range Radio Button */
+        .price-range input[type="radio"] {
+            margin-right: 10px;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .dropdown-content {
+                position: static;
+                width: 100%;
+            }
+        
+            .sort-dropdown {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        
+            .sort-dropdown select {
+                width: 100%;
+                margin-top: 10px;
+            }
+        
+            nav[aria-label="Page navigation"] {
+                flex-direction: column;
+            }
+        
+            nav[aria-label="Page navigation"] .btn {
+                margin: 5px 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                text-align: center;
+            }
+        
+            .dropdown-content {
+                min-width: 100%;
+            }
+        }
+        
 
 </style>
 </head>         
@@ -180,25 +259,26 @@ nav[aria-label="Page navigation"] .btn:disabled {
                     <h1 class="m-0 display-5 font-weight-semi-bold">Flora</span>Gems</h1>
                 </a>
             </div>
-            <div class="col-lg-6 col-6 text-left">
-                <form id="searchForm" method="POST" action="/search">
-                    <div class="input-group">
-                        <input 
-                            type="text" 
-                            name="query" 
-                            class="form-control" 
-                            placeholder="Search products" 
-                            required 
-                        />
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-primary">Search</button>
-                            <span class="input-group-text bg-transparent text-primary">
-                                <i class="fa fa-search"></i>
-                            </span>
-                        </div>
-                    </div>
-                </form>
-            </div>
+            <form id="searchForm" method="GET" action="/filtered">
+                <div class="input-group">
+                  <input 
+                    type="text" 
+                    name="query" 
+                    class="form-control" 
+                    placeholder="Search products" 
+                    value="<%= searchQuery %>" 
+                    required 
+                  />
+                  <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    <span class="input-group-text bg-transparent text-primary">
+                      <i class="fa fa-search"></i>
+                    </span>
+                  </div>
+                </div>
+              </form>
+              
+            
             <div class="col-lg-3 col-6 text-right">
                 <a href="" class="btn border">
                     <i class="fas fa-heart text-primary"></i>
@@ -229,38 +309,41 @@ nav[aria-label="Page navigation"] .btn:disabled {
                  id="navbar-vertical">
                 <div class="navbar-nav w-100 overflow-hidden" style="height: 210px;">
                     <!-- Jewelleries Dropdown -->
-                    <div class="nav-item dropdown">
-                        <a href="#" class="nav-link" data-toggle="dropdown">
-                            Jewelleries <i class="fa fa-angle-down float-right mt-1"></i>
-                        </a>
-                        <div class="dropdown-menu position-absolute bg-secondary border-0 rounded-0 w-100 m-0">
-                            <ul>
-                                <% for (let i = 0; i < categories.length; i++) { %>
-                                    <li class="filter-item">
-                                        <a href="/filter?categories=<%= categories[i]._id %>" class="dropdown-item"><%= categories[i].name %></a>
-                                    </li>
-                                <% } %>
-                            </ul>
-                        </div>
+                <!-- Category Filter -->
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link" data-toggle="dropdown">
+                      Jewelleries <i class="fa fa-angle-down float-right mt-1"></i>
+                    </a>
+                    <div class="dropdown-menu position-absolute bg-secondary border-0 rounded-0 w-100 m-0">
+                      <ul>
+                        <% categories.forEach(category => { %>
+                          <li class="filter-item">
+                            <a href="/filtered?category=<%= category._id %>&query=<%= searchQuery %>&sort=<%= sortOption %>" class="dropdown-item">
+                              <%= category.name %>
+                            </a>
+                          </li>
+                        <% }) %>
+                      </ul>
                     </div>
-                    
-                    <!-- Brands Dropdown -->
-                    <div class="nav-item dropdown">
-                        <a href="#" class="nav-link" data-toggle="dropdown">
-                            Brands <i class="fa fa-angle-down float-right mt-1"></i>
-                        </a>
-                        <div class="dropdown-menu position-absolute bg-secondary border-0 rounded-0 w-100 m-0">
-                            <ul>
-                                <% brands.forEach(brand => { %>
-                                    <li class="filter-item">
-                                        <a href="/filter?brand=<%= brand._id %>" class="dropdown-item"><%= brand.brandName %></a>
-                                    </li>
-                                  <% }) %>
-                                  
-                            </ul>
-                          </div>
-                          
-                    </div>
+                  </div>
+                  
+
+<!-- Brand Filter -->
+<div class="nav-item dropdown">
+    <a href="#" class="nav-link" data-toggle="dropdown">
+        Brands <i class="fa fa-angle-down float-right mt-1"></i>
+    </a>
+    <div class="dropdown-menu position-absolute bg-secondary border-0 rounded-0 w-100 m-0">
+        <ul>
+            <% brands.forEach(brand => { %>
+                <li class="filter-item">
+                    <a href="/filtered?brand=<%= brand.brandName%>&query=<%= searchQuery %>&sort=<%= sortOption  %>" class="dropdown-item"><%= brand.brandName %></a>
+                </li>
+            <% }) %>
+        </ul>
+    </div>
+</div>
+
                 </div>
             </nav>
         </div>
@@ -308,17 +391,21 @@ nav[aria-label="Page navigation"] .btn:disabled {
                     </div>
                 </div>
             </nav>
-                    <div class="dropdown">
-            <button class="btn border dropdown-toggle" type="button" id="sortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Sort by
-            </button>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="sortDropdown">
-                <a class="dropdown-item" href="/shopSort?sort=latest">Latest</a>
-                <a class="dropdown-item" href="/shopSort?sort=priceAsc">Price: Low to High</a>
-                <a class="dropdown-item" href="/shopSort?sort=priceDesc">Price: High to Low</a>
-                <a class="dropdown-item" href="/shopSort?sort=popularity">Popularity</a>
-            </div>
-        </div>
+      <!-- Sorting Dropdown -->
+<div class="dropdown">
+    <button class="btn border dropdown-toggle" type="button" id="sortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Sort by
+    </button>
+    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="sortDropdown">
+        <a class="dropdown-item" href="/filtered?sort=latest">Latest</a>
+        <a class="dropdown-item" href="/filtered?sort=priceAsc">Price: Low to High</a>
+        <a class="dropdown-item" href="/filtered?sort=priceDesc">Price: High to Low</a>
+        <a class="dropdown-item" href="/filtered?sort=popularity">Popularity</a>
+        <a class="dropdown-item" href="/filtered?sort=az">A-Z</a>
+        <a class="dropdown-item" href="/filtered?sort=za">Z-A</a>
+    </div>
+</div>
+
     </div>
 </div>
         </div>
@@ -332,102 +419,190 @@ nav[aria-label="Page navigation"] .btn:disabled {
         <!-- Shop Sidebar Start -->
         <div class="col-lg-3 col-md-12">
             <!-- Price Start -->
-            <div class="border-bottom mb-4 pb-4">
-                <h5 class="font-weight-semi-bold mb-4">Filter by price</h5>
-                <form action="/filter" method="get">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <a href="/filterPrice?gt=0&lt=500" class="btn btn-link p-0">under $500</a>
-                        <!-- <span class="badge border font-weight-normal">150</span> -->
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <a href="/filterPrice?gt=500&lt=1000" class="btn btn-link p-0">$500 - $1000</a>
-                        
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <a href="/filterPrice?gt=1000&lt=1500" class="btn btn-link p-0">$1000 - $1500</a>
-                       
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <a href="/filterPrice?gt=1500&lt=10000000" class="btn btn-link p-0">Above$1500</a>
-                        
-                    </div>
-                </form>
-                
-            </div>
+          <!-- Price Filter -->
+<div class="border-bottom mb-4 pb-4">
+    <h5 class="font-weight-semi-bold mb-4">Filter by price</h5>
+    <form action="/filtered" method="get">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <a href="/filtered?price=0-50000" class="btn btn-link p-0">under ₹50000</a>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <a href="/filtered?price=50000-100000" class="btn btn-link p-0">₹50000 - ₹100000</a>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <a href="/filtered?price=100000-150000" class="btn btn-link p-0">₹100000 - ₹150000</a>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <a href="/filtered?price=150000-100000000000" class="btn btn-link p-0">Above ₹150000</a>
+        </div>
+    </form>
+</div>
+
             <!-- Price End -->
             
             <!-- Color Start -->
       <!-- Metal Type Start -->
+<!-- Metal Type Filter -->
 <div class="border-bottom mb-4 pb-4">
     <h5 class="font-weight-semi-bold mb-4">Filter by Metal Type</h5>
     <form>
         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-            <a href="/filterMetal?metal=" class="custom-control-label">All Metals</a>
-            <!-- <span class="badge border font-weight-normal">1000</span> -->
+            <a href="/filtered?metal=" class="custom-control-label">All Metals</a>
         </div>
         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-            <a href="/filterMetal?metal=Gold" class="custom-control-label">Gold</a>
-        
+            <a href="/filtered?metal=Gold" class="custom-control-label">Gold</a>
         </div>
         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-            <a href="/filterMetal?metal=Diamond" class="custom-control-label">Diamond</a>
-           
+            <a href="/filtered?metal=Diamond" class="custom-control-label">Diamond</a>
         </div>
         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-            <a href="/filterMetal?metal=Silver" class="custom-control-label">Silver</a>
-           
+            <a href="/filtered?metal=Silver" class="custom-control-label">Silver</a>
         </div>
         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-            <a href="/filterMetal?metal=Platinum" class="custom-control-label">Platinum</a>
-            
+            <a href="/filtered?metal=Platinum" class="custom-control-label">Platinum</a>
         </div>
         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
-            <a href="/filterMetal?metal=Other" class="custom-control-label">Other</a>
-           
+            <a href="/filtered?metal=Other" class="custom-control-label">Other</a>
         </div>
     </form>
-    
 </div>
-<!-- Metal Type End -->
 
-        </div>
-        <!-- Shop Sidebar End -->
+<!-- Combined Search Form (Initially Hidden) -->
+<!-- Button to Trigger the Form -->
+<div class="d-flex justify-content-center mb-4">
+    <button id="combineSearchBtn" class="btn btn-primary">Combine Your Search</button>
+</div>
 
-<!-- Shop Product Start -->
-<div class="col-lg-9 col-md-12">
-    <div class="row pb-3">
-        <div class="row pb-3">
-       <!-- Sort Dropdown (Positioned to the Right) -->
-
-
-        </div>
-        
-        
-        <!-- Product Cards -->
-        <% for(let i = 0; i < products.length; i++) { %>
-        <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
-            <div class="card product-item border-0 mb-4">
-                <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
-                    <img class="img-fluid w-100" src="/uploads/re-image/<%= products[i].productImages[0] %>" alt="<%= products[i].productName %>">
-                </div>
-                <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
-                    <h6 class="text-truncate mb-3"><%= products[i].productName %></h6>
-                    <div class="d-flex justify-content-center">
-                        <h6>$<%= products[i].salePrice %></h6>
-                        <h6 class="text-muted ml-2"><del>$<%= products[i].regularPrice %></del></h6>
-                    </div>
-                </div>
-                <div class="card-footer d-flex justify-content-between bg-light border">
-                    <a href="/productDetails?id=<%= products[i]._id %>" class="btn btn-sm text-dark p-0">
-                        <i class="fas fa-eye text-primary mr-1"></i>View Detail
-                    </a>
-                    <a href="#" class="btn btn-sm text-dark p-0" onclick="addToCart('<%=products[i]._id%>')">
-                        <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
-                    </a>
-                </div>
+<!-- Combined Search Form (Initially Hidden) -->
+<div id="combineSearchForm" class="d-none">
+    <form action="/filtered" method="get">
+        <div class="border-bottom mb-4 pb-4">
+            <h5 class="font-weight-semi-bold mb-4">Search</h5>
+            <div class="form-group">
+                <input type="text" name="query" class="form-control" placeholder="Search for products..." value="<%= searchQuery %>">
             </div>
         </div>
-        <% } %>
+
+        <!-- Category Filter -->
+        <div class="border-bottom mb-4 pb-4">
+            <h5 class="font-weight-semi-bold mb-4">Filter by Category</h5>
+            <div class="form-group">
+                <select name="category" class="form-control">
+                    <option value="">Select Category</option>
+                    <% categories.forEach(category => { %>
+                        <option value="<%= category._id %>"><%= category.name %></option>
+                    <% }) %>
+                </select>
+            </div>
+        </div>
+
+        <!-- Brand Filter -->
+        <div class="border-bottom mb-4 pb-4">
+            <h5 class="font-weight-semi-bold mb-4">Filter by Brand</h5>
+            <div class="form-group">
+                <select name="brand" class="form-control">
+                    <option value="">Select Brand</option>
+                    <% brands.forEach(brand => { %>
+                        <option value="<%= brand.brandName %>"><%= brand.brandName %></option>
+                    <% }) %>
+                </select>
+            </div>
+        </div>
+
+        <!-- Price Filter -->
+        <div class="border-bottom mb-4 pb-4">
+            <h5 class="font-weight-semi-bold mb-4">Filter by Price</h5>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <input type="radio" name="price" value="0-50000"> under ₹50000
+            </div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <input type="radio" name="price" value="50000-100000"> ₹50000 - ₹100000
+            </div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <input type="radio" name="price" value="100000-150000"> ₹100000 - ₹150000
+            </div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <input type="radio" name="price" value="150000-100000000000"> Above ₹150000
+            </div>
+        </div>
+
+        <!-- Metal Type Filter -->
+        <div class="border-bottom mb-4 pb-4">
+            <h5 class="font-weight-semi-bold mb-4">Filter by Metal Type</h5>
+            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                <input type="checkbox" name="metal" value="Gold"> Gold
+            </div>
+            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                <input type="checkbox" name="metal" value="Diamond"> Diamond
+            </div>
+            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                <input type="checkbox" name="metal" value="Silver"> Silver
+            </div>
+            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                <input type="checkbox" name="metal" value="Platinum"> Platinum
+            </div>
+            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
+                <input type="checkbox" name="metal" value="Other"> Other
+            </div>
+        </div>
+
+        <!-- Sorting Dropdown -->
+        <div class="border-bottom mb-4 pb-4">
+            <h5 class="font-weight-semi-bold mb-4">Sort By</h5>
+            <div class="form-group">
+                <select name="sort" class="form-control">
+                    <option value="">Select Sort Option</option>
+                    <option value="latest">Latest</option>
+                    <option value="priceAsc">Price: Low to High</option>
+                    <option value="priceDesc">Price: High to Low</option>
+                    <option value="popularity">Popularity</option>
+                    <option value="az">A-Z</option>
+                    <option value="za">Z-A</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </div>
+    </form>
+</div>
+<!-- Metal Type End -->
+</div>
+       
+
+
+        <!-- Shop Sidebar End -->
+
+
+  
+<div class="col-lg-9 col-md-12">
+    <div class="row pb-3">
+        <% for(let i = 0; i < products.length; i++) { %>
+            <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
+                <div class="card product-item border-0 mb-4">
+                    <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
+                        <img class="img-fluid w-100" src="/uploads/re-image/<%= products[i].productImages[0] %>" alt="<%= products[i].productName %>">
+                    </div>
+                    <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
+                        <h6 class="text-truncate mb-3"><%= products[i].productName %></h6>
+                        <div class="d-flex justify-content-center">
+                            <h6>₹<%= products[i].salePrice %></h6>
+                            <h6 class="text-muted ml-2"><del>₹<%= products[i].regularPrice %></del></h6>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between bg-light border">
+                        <a href="/productDetails?id=<%= products[i]._id %>" class="btn btn-sm text-dark p-0">
+                            <i class="fas fa-eye text-primary mr-1"></i>View Detail
+                        </a>
+                        <a href="#" class="btn btn-sm text-dark p-0" onclick="addToCart('<%=products[i]._id%>')">
+                            <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <% } %>
     </div>
 </div>
 
@@ -536,6 +711,7 @@ nav[aria-label="Page navigation"] .btn:disabled {
     <script src="lib/easing/easing.min.js"></script>
    
 
+    <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
 <!-- Include SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -546,31 +722,96 @@ nav[aria-label="Page navigation"] .btn:disabled {
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+
     <script>
- 
- function addToCart(productId, quantity = 1) {
+      function addToCart(productId, quantity = 1) {
     $.ajax({
-        url: '/addToCart', // Backend route for adding to cart
+        url: '/addToCart',
         method: 'POST',
         data: { 
             productId: productId, 
             quantity: quantity 
         },
         success: function(response) {
-            // Update cart count badge
-            const cartCountElement = document.getElementById('cart-count');
-            cartCountElement.innerHTML = response.cartLength;
+            console.log(response);  // Log the full response for debugging
 
-            // Show success notification
-            Swal.fire({
-                title: 'Added to Cart!',
-                text: 'The product has been successfully added to your cart.',
-                icon: 'success',
-                timer: 3000,
-                showConfirmButton: false
-            });
+            // Check if the response contains the necessary data
+            if (response.status === true) {
+                // Check if the cartItems array exists
+                if (Array.isArray(response.cartItems)) {
+                    let cart = response.cartItems;
+                    let productInCart = cart.find(item => item.productId === productId);  // Check if the product is already in the cart
+
+                    // If the product is already in the cart, check the quantity
+                    if (productInCart && productInCart.quantity + quantity > 3) {
+                        Swal.fire({
+                            title: 'Maximum Quantity Reached!',
+                            text: 'You can only add a maximum of 3 of this product to your cart.',
+                            icon: 'warning',
+                            confirmButtonText: 'Okay'
+                        });
+                        return;  // Prevent adding the product to the cart
+                    }
+
+                    // Check the total cart length, and prevent adding if the cart already has 3 or more items
+                    let totalItemsInCart = cart.reduce((total, item) => total + item.quantity, 0);  // Calculate total number of items in the cart
+                    if (totalItemsInCart + quantity > 3) {
+                        Swal.fire({
+                            title: 'Cart Limit Reached!',
+                            text: 'You can only add up to 3 items to your cart.',
+                            icon: 'warning',
+                            confirmButtonText: 'Okay'
+                        });
+                        return;  // Prevent adding more products if the cart is full
+                    }
+                }
+
+                // If the user needs to login, show the login prompt
+                if (response.redirectToLogin) {
+                    Swal.fire({
+                        title: 'Please Login!',
+                        text: 'You need to log in to add products to your cart.',
+                        icon: 'warning',
+                        showConfirmButton: true,
+                        confirmButtonText: 'Go to Login'
+                    }).then(() => {
+                        window.location.href = '/login';
+                    });
+                } else {
+                    // Update cart count badge
+                    const cartCountElement = document.getElementById('cart-count');
+                    if (cartCountElement) {
+                        cartCountElement.innerHTML = response.cartLength;  // Update cart count
+                    }
+
+                    // Update subtotal
+                    const subtotalElement = document.getElementById('cart-subtotal');
+                    if (subtotalElement) {
+                        subtotalElement.innerHTML = `₹${response.subtotal}`;  // Update subtotal
+                    }
+
+                    // Show success notification
+                    Swal.fire({
+                        title: 'Added to Cart!',
+                        text: 'The product has been successfully added to your cart.',
+                        icon: 'success',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
+            } else {
+                // Handle error response from the server
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Unable to add the product to the cart. Please try again later.',
+                    icon: 'error',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
         },
         error: function() {
+            // Handle any AJAX errors
             Swal.fire({
                 title: 'Error!',
                 text: 'Unable to add the product to the cart. Please try again later.',
@@ -581,8 +822,6 @@ nav[aria-label="Page navigation"] .btn:disabled {
         }
     });
 }
-
-
 
     function updateCartCount() {
     $.ajax({
@@ -602,6 +841,11 @@ nav[aria-label="Page navigation"] .btn:disabled {
 $(document).ready(function() {
     updateCartCount(); // This will automatically update the cart count
 });
+
+    document.getElementById('combineSearchBtn').addEventListener('click', function() {
+        var form = document.getElementById('combineSearchForm');
+        form.classList.toggle('d-none'); // Toggle visibility of the form
+    });
 
 </script>
 </body>

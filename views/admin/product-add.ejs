@@ -230,7 +230,7 @@
                            <div class="col-lg-4">
                                <div class="mb-4">
                                    <label class="form-label">Regular price</label>
-                                   <input placeholder="$" name="regularPrice" type="text"
+                                   <input placeholder="₹" name="regularPrice" type="text"
                                        class="form-control border">
                                        <div id="regularPrice-error" class="error-message"></div>
                                </div>
@@ -238,7 +238,7 @@
                            <div class="col-lg-4">
                                <div class="mb-4">
                                    <label class="form-label">Sale price</label>
-                                   <input placeholder="$ " name="salePrice" type="text" class="form-control border">
+                                   <input placeholder="₹ " name="salePrice" type="text" class="form-control border">
                                   
                                </div>
                                <div id="salePrice-error" class="error-message"></div>
@@ -287,70 +287,55 @@
                         <div class="row">
                             <div class="card-body align-items-center" style="margin-bottom: 20px;">
                                 <img src="" alt="" id="imgView1">
-                                                            <input class="form-control" type="file" name="images" id="input1"
-                                                                accept="image/png, image/jpeg, image/ image/webp"
-                                                                onchange="viewImage1(event), viewImage(event, 1)">
-                                                                <div id="images-error" class="error-message"></div>
-                                                        </div>
-                                                        <div class="image-cropper d-flex align-items-center"
-                                                            style="display:none;  width: 100%;   margin-bottom: 20px;">
-                                                            <img src="" width="250px" height="250px"  id="croppedImg1" alt="">
-                                                            <button type="button" id="saveButton1" class="btn-sm btn-primary">Save</button>
-                                                        </div>
-                                                    </div>
-                                                   
-                                                    <div class="row">
-                                                        <div class="card-body align-items-center" style="margin-bottom: 20px;">
-                                                            <img src="" alt="" id="imgView2">
-
-
-                                                            <input class="form-control" type="file" name="images" id="input2"
-                                                            accept="image/png, image/jpeg, image/jpg image/webp"
-                                                            onchange="viewImage2(event),viewImage(event, 2)">
-                                                    </div>
-                                                    <div class="image-cropper d-flex align-items-center"
-                                                        style="display:none; width: 100%;  margin-bottom: 20px;">
-                                                        <img src=""  width="250px" height="250px" id="croppedImg2" alt="">
-                                                        <button type="button" id="saveButton2" class="btn-sm btn-primary">Save</button>
-                                                    </div>
-                                                </div>
-                                               
-                                                <div class="row">
-                                                    <div class="card-body align-items-center" style="margin-bottom: 20px;">
-                                                        <img src="" alt="" id="imgView3">
-
-
-                                                        <input class="form-control" type="file" name="images" id="input3"
-                                                            accept="image/png, image/jpeg, image/jpg image/webp"
-                                                            onchange="viewImage3(event),viewImage(event, 3)">
-                                                    </div>
-                                                    <div class="image-cropper d-flex align-items-center"
-                                                        style="display:none; width: 100%; margin-bottom: 20px;">
-                                                        <img src="" width="250px" height="250px" id="croppedImg3" alt="">
-                                                         
-                                                        <button type="button" id="saveButton3" class="btn-sm btn-primary">Save</button>
-                                                    </div>
-                                                </div>
-                                               
-                                                <div class="row">
-                                                    <div class="card-body align-items-center" style="margin-bottom: 20px;">
-                                                        <img src=""  alt="" id="imgView4">
-
-
-                                               
-                                                        <input class="form-control" type="file" name="images" id="input4"
-                                                        accept="image/png, image/jpeg, image/ image/webp"
-                                                        onchange="viewImage4(event),viewImage(event, 4)">
-                                                </div>
-                                                <div class="image-cropper d-flex align-items-center"
-                                                    style="display:none; width:100%; margin-bottom: 20px;">
-                                                    <img src=""  width="250px" height="250px" id="croppedImg4" alt="">
-                                                    <button type="button" id="saveButton4" class="btn-sm btn-primary">Save</button>
-                                                </div>
-                                            </div>
-           
-                                        </div>
-            </div>
+                                <input class="form-control" type="file" name="images" id="input1"
+                                    accept="image/png, image/jpeg, image/webp"
+                                    onchange="viewImage1(event), viewImage(event, 1)">
+                                <div id="image-error1" class="error-message"></div> <!-- Updated error message ID -->
+                            </div>
+                            <div class="image-cropper d-flex align-items-center" style="display:none; width: 100%; margin-bottom: 20px;">
+                                <img src="" width="250px" height="250px" id="croppedImg1" alt="">
+                                <button type="button" id="saveButton1" class="btn-sm btn-primary">Save</button>
+                            </div>
+                            
+                            <!-- Repeat the same for the other image inputs -->
+                            
+                            <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                <img src="" alt="" id="imgView2">
+                                <input class="form-control" type="file" name="images" id="input2"
+                                    accept="image/png, image/jpeg, image/jpg, image/webp"
+                                    onchange="viewImage2(event), viewImage(event, 2)">
+                                <div id="image-error2" class="error-message"></div> <!-- Updated error message ID -->
+                            </div>
+                            <div class="image-cropper d-flex align-items-center" style="display:none; width: 100%; margin-bottom: 20px;">
+                                <img src="" width="250px" height="250px" id="croppedImg2" alt="">
+                                <button type="button" id="saveButton2" class="btn-sm btn-primary">Save</button>
+                            </div>
+                            
+                            <!-- Add the same for input3 and input4 -->
+                            <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                <img src="" alt="" id="imgView3">
+                                <input class="form-control" type="file" name="images" id="input3"
+                                    accept="image/png, image/jpeg, image/jpg, image/webp"
+                                    onchange="viewImage3(event), viewImage(event, 3)">
+                                <div id="image-error3" class="error-message"></div> <!-- Error message for input3 -->
+                            </div>
+                            <div class="image-cropper d-flex align-items-center" style="display:none; width: 100%; margin-bottom: 20px;">
+                                <img src="" width="250px" height="250px" id="croppedImg3" alt="">
+                                <button type="button" id="saveButton3" class="btn-sm btn-primary">Save</button>
+                            </div>
+                            
+                            <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                <img src="" alt="" id="imgView4">
+                                <input class="form-control" type="file" name="images" id="input4"
+                                    accept="image/png, image/jpeg, image/webp"
+                                    onchange="viewImage4(event), viewImage(event, 4)">
+                                <div id="image-error4" class="error-message"></div> <!-- Error message for input4 -->
+                            </div>
+                            <div class="image-cropper d-flex align-items-center" style="display:none; width: 100%; margin-bottom: 20px;">
+                                <img src="" width="250px" height="250px" id="croppedImg4" alt="">
+                                <button type="button" id="saveButton4" class="btn-sm btn-primary">Save</button>
+                            </div>
+                                                        
             <div>
                 <button class="btn btn-md rounded font-sm hover-up"  type="button" onclick="validateAndSubmit()">Publish</button>
             </div>
@@ -392,6 +377,9 @@ document.getElementById("imgView4").src = URL.createObjectURL(event.target.files
 //for processing image - crop ,changing file name
 function viewImage(event,index){
 let input = event.target;
+
+
+    
 let reader = new FileReader();
 reader.onload = function (){
 
@@ -495,10 +483,10 @@ function validateForm() {
     const price = document.getElementsByName('regularPrice')[0].value;
     const saleprice = document.getElementsByName('salePrice')[0].value;
     const category = document.getElementsByName('category')[0].value;
-    const images = document.getElementById('input1');
     const quantity = document.getElementsByName('quantity')[0].value;
     let isValid = true;
 
+    // Validation for other fields
     if (name.trim() === "") {
         displayErrorMessage('productName-error', 'Please enter a product name.');
         isValid = false;
@@ -529,40 +517,47 @@ function validateForm() {
         isValid = false;
     }
 
+    // Image validation for input1 to input4
     let imageCount = 0;
     for (let i = 1; i <= 4; i++) {
         const imageInput = document.getElementById('input' + i);
         if (imageInput.files.length > 0) {
-            imageCount++;
+            const file = imageInput.files[0];
+            const fileType = file.type;
+            if (!['image/png', 'image/jpeg', 'image/webp'].includes(fileType)) {
+                displayErrorMessage(`image-error${i}`, 'Please select a valid image format (PNG, JPEG, WEBP).');
+                isValid = false;
+            } else {
+                imageCount++;
+            }
+        } else {
+            displayErrorMessage(`image-error${i}`, 'Please select an image.');
+            isValid = false;
         }
     }
 
     if (imageCount === 0) {
-        displayErrorMessage("images-error", 'Please select at least one image.');
+        displayErrorMessage('images-error', 'Please select at least one image.');
         isValid = false;
     }
 
     return isValid;
 }
 
+function displayErrorMessage(elementId, message) {
+    var errorElement = document.getElementById(elementId);
+    errorElement.innerText = message;
+    errorElement.style.display = "block";
+}
 
+function clearErrorMessages() {
+    const errorElements = document.getElementsByClassName('error-message');
+    Array.from(errorElements).forEach(element => {
+        element.innerText = '';
+        element.style.display = "none";
+    });
+}
 
-          function displayErrorMessage(elementId, message) {
-              var errorElement = document.getElementById(elementId);
-              errorElement.innerText = message;
-              errorElement.style.display = "block";
-          }
-  
-  
-          function clearErrorMessages() {
-              const errorElements = document.getElementsByClassName('error-message');
-              Array.from(errorElements).forEach(element => {
-                  element.innerText = '';
-              });
-              const errorMessage = document.getElementById('errorMessage');
-  
-  
-          }
 
           
 

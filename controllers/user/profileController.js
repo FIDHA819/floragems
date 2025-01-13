@@ -257,10 +257,32 @@ const verifyEmailOtp = async (req, res) => {
 const updateEmail = async (req, res) => {
     try {
         const newEmail = req.body.newEmail;
-        const userId = req.session.user;
-        await User.findByIdAndUpdate(userId, { email: newEmail });
-        res.redirect("/userProfile");
+        const userId = req.session.user._id; // Ensure you access the user ID properly
+
+        // Update the email in the database
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { email: newEmail },
+            { new: true } // This ensures the updated user document is returned
+        );
+
+        if (!updatedUser) {
+            return res.redirect("/pageNotFound"); // Handle case where user is not found
+        }
+
+        // Update the email in the session
+        req.session.user.email = updatedUser.email;
+
+        // Save the session to persist the changes
+        req.session.save((err) => {
+            if (err) {
+                console.error("Error saving session:", err);
+                return res.redirect("/pageNotFound");
+            }
+            res.redirect("/userProfile");
+        });
     } catch (error) {
+        console.error("Error updating email:", error);
         res.redirect("/pageNotFound");
     }
 };
@@ -272,7 +294,7 @@ const changePassword = async (req, res) => {
             return res.redirect("/forgot-password"); // Redirect to forgot password if session is missing
         }
 
-        res.render("user/change-password");
+        res.redirect("/forgot-password");
     } catch (error) {
         res.redirect("/pageNotFound");
     }
@@ -351,13 +373,13 @@ const addaddress = async (req, res) => {
 
 const postAddAddress = async (req, res) => {
     try {
-        const userId = req.session.user;
+        const userId = req.session.user; // Make sure this is an ObjectId or convert to ObjectId if needed
         if (!userId) {
             console.log("User ID not found in session");
             return res.redirect("/pageNotFound");
         }
 
-        const userData = await User.findOne({ _id: userId });
+        const userData = await User.findById(userId); // Directly using findById
         if (!userData) {
             console.log("User not found in database with ID:", userId);
             return res.redirect("/pageNotFound");
@@ -389,28 +411,33 @@ const postAddAddress = async (req, res) => {
     }
 };
 
-const editAddress=async(req,res)=>{
+const editAddress = async (req, res) => {
     try {
-        const addressId=req.query.id;
-        const user=req.session.user;
-        const currAddress=await Address.findOne({
-            "address._id":addressId,
-        })
-        if(!currAddress){
-            return res.redirect("/pageNotFound")
+        const addressId = req.query.id;
+        const user = req.session.user;
+        const currAddress = await Address.findOne({
+            "address._id": addressId,
+        });
+
+        if (!currAddress) {
+            return res.redirect("/pageNotFound");
         }
-        const addressData=currAddress.address.find((item)=>{
-            return item._id.toString()===addressId.toString();
-        })
-        if(!addressData){
-            return res.redirect("/pageNotFound")
+
+        const addressData = currAddress.address.find((item) => {
+            return item._id.toString() === addressId.toString();
+        });
+
+        if (!addressData) {
+            return res.redirect("/pageNotFound");
         }
-        res.render("user/edit-address",{address:addressData,user:user})
+
+        res.render("user/edit-address", { address: addressData, user: user });
     } catch (error) {
-        console.error("Error in edit address",error);
-        res.redirect("/pageNotFound")
+        console.error("Error in edit address", error);
+        res.redirect("/pageNotFound");
     }
-}
+};
+
 const postEditAddress = async (req, res) => {
     try {
         const data = req.body;
@@ -454,27 +481,43 @@ const postEditAddress = async (req, res) => {
         res.redirect("/pageNotFound"); // Handle errors and redirect
     }
 };
-const deleteAddress=async(req,res)=>{
+const deleteAddress = async (req, res) => {
     try {
-        const addressId=req.query.id;
-        const findAddress=await Address.findOne({"address._id":addressId})
-        if(!findAddress){
-            return res.status(404).send("Address Not Find")
-        }
-        await Address.updateOne({
-            "address._id":addressId
-        },{
-            $pull:{address:{
-                _id:addressId
-            }}
-        })
-        res.redirect("/userProfile")
-    } catch (error) {
-        console.error("Error in delete address ",error)
-        res.redirect("/pageNotFound")
-    }
-}
+      const { addressId } = req.query;
   
+      // Log the addressId received in the query parameters
+      console.log("Address ID being passed:", addressId);
+  
+      // Ensure the addressId is valid (check if it's an ObjectId)
+      if (!addressId) {
+        return res.status(400).json({ error: "Address ID is required" });
+      }
+  
+      // Find and delete the address using the provided addressId
+      const address = await Address.findOneAndUpdate(
+        { "address._id": addressId }, // Match the addressId inside the array
+        { $pull: { address: { _id: addressId } } }, // Remove the address from the array
+        { new: true } // Return the updated document
+      );
+  
+      // Log the address document after deletion
+      console.log("Updated Address Document:", address);
+  
+      // If no address is found, return a 404 error
+      if (!address) {
+        return res.status(404).json({ error: "Address not found" });
+      }
+  
+      // Redirect to the user profile page after successful deletion
+      res.redirect("/userProfile");
+    } catch (error) {
+      console.error("Error in delete address", error);
+      res.redirect("/pageNotFound"); // Redirect to a custom error page in case of failure
+    }
+  };
+  
+
+
 module.exports = {
     getForgotPassPage,
     forgotEmailValid,

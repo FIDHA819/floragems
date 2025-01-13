@@ -13,33 +13,27 @@ const { ObjectId } = mongoose.Types;
 const easyinvoice = require("easyinvoice");
 const Coupon = require("../../models/couponSchema");
 const { productDetails } = require("./productController");
-
-
+const { v4: uuidv4 } = require('uuid');
 const getCheckoutPage = async (req, res) => {
   try {
+    const orderId = uuidv4();
     const userId = req.query.userId;
 
-    // Validate userId
-    if (!userId || !mongodb.ObjectId.isValid(userId)) {
+    if (!userId || !ObjectId.isValid(userId)) {
       return res.redirect("/pageNotFound");
     }
 
-    // Fetch user
     const findUser = await User.findById(userId);
     if (!findUser) {
       return res.redirect("/pageNotFound");
     }
 
-    // Fetch user's address
     const addressData = await Address.findOne({ userId: userId });
-
-    // Fetch cart and populate product details
     const cart = await Cart.findOne({ userId: userId }).populate("items.productId");
     if (!cart || cart.items.length === 0) {
       return res.redirect("/cart");
     }
 
-    // Map cart items to a usable format
     const cartItems = cart.items.map((item) => {
       const product = item.productId;
       return {
@@ -51,15 +45,32 @@ const getCheckoutPage = async (req, res) => {
         productImages: product.productImages || [],
         brand: product.brand || "N/A",
         productDetails: product.productDetails,
+        availableStock: product.quantity, // Add available stock to check during checkout
       };
     });
 
+    // Check if there is enough stock for each product
+    const outOfStockItems = cartItems.filter(item => item.quantity > item.availableStock);
+    if (outOfStockItems.length > 0) {
+      const outOfStockProductNames = outOfStockItems.map(item => item.productName).join(", ");
+      return res.render("user/checkout-cart", {
+        user: findUser,
+        isCart: true,
+        errorMessage: `The following products are out of stock or have insufficient quantity: ${outOfStockProductNames}. Please adjust your cart.`,
+        cartItems,
+        userAddress: addressData,
+        orderId,
+        grandTotal: 0,
+        shippingCost: 0,
+        Total: 0,
+      });
+    }
+
     // Calculate totals
     const grandTotal = cartItems.reduce((sum, item) => sum + item.total, 0);
-    const shippingCost = grandTotal > 500 ? 0 : 100;
+    const shippingCost = grandTotal > 50000 ? 0 : 100;
     const Total = grandTotal + shippingCost;
 
-    // Fetch available coupons
     const today = new Date();
     const findCoupons = await Coupon.find({
       isList: true,
@@ -68,22 +79,161 @@ const getCheckoutPage = async (req, res) => {
       minimumPrice: { $lt: grandTotal },
     });
 
-    // Render the checkout page
     res.render("user/checkout-cart", {
-      cartItems, // Pass cart items directly
+      cartItems,
       user: findUser,
+      orderId: orderId,
       isCart: true,
       userAddress: addressData,
       grandTotal,
       Coupon: findCoupons,
       shippingCost,
-      Total
+      Total,
     });
   } catch (error) {
     console.error("Error in getCheckoutPage:", error);
     res.redirect("/pageNotFound");
   }
 };
+
+const orderPlaced = async (req, res) => {
+  try {
+    const { userId, addressId, totalPrice, discount, payment, orderedItems } = req.body;
+
+    // Fetch the address details from the Address model
+    const userAddress = await Address.findOne({ userId });
+    if (!userAddress) {
+      return res.status(404).json({ error: "Address not found" });
+    }
+
+    const specificAddress = userAddress.address.find((addr) => addr._id.toString() === addressId);
+    if (!specificAddress) {
+      return res.status(404).json({ error: "Address not found" });
+    }
+
+    // Check if products are available in stock
+    for (const item of orderedItems) {
+      const product = await Product.findById(item.product);
+      if (!product) {
+        return res.status(404).json({ error: `Product not found for ID: ${item.product}` });
+      }
+
+      if (product.quantity < item.quantity) {  // Check against 'quantity' field
+        return res.status(400).json({ error: `Insufficient stock for product: ${product.productName}` });
+      }
+    }
+
+    // Create a new order
+    const order = new Order({
+      userId,
+      totalPrice,
+      discount,
+      finalAmount: totalPrice - discount,
+      payment,
+      orderedItems: orderedItems.map((item) => ({
+        product: item.product,
+        quantity: item.quantity,
+        price: item.price,
+        total: item.total,
+      })),
+      address: specificAddress, // Save the address details here
+      status: "Pending",
+    });
+    
+    console.log("New Order ID:", order.orderId);
+    
+    await order.save();
+
+    // Reduce product quantities after order is placed
+    for (const item of orderedItems) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.quantity -= item.quantity; // Reduce the 'quantity' field
+        await product.save(); // Save the updated product
+      }
+    }
+
+    res.status(201).json({ message: "Order placed successfully", orderId: order.orderId, order });
+  } catch (error) {
+    console.error("Error placing order:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+const getOrderDetailsPage = async (req, res) => {
+  try {
+    const userId = req.session.user._id;
+    const orderId = req.query.id;
+
+    console.log("User ID:", userId);
+    console.log("Order ID being queried:", orderId);
+    console.log("Order ID being queried:", req.query.id);
+
+
+    if (!userId || !orderId) {
+      return res.status(400).json({ error: "Missing userId or orderId" });
+    }
+
+    // Fetch the order by orderId
+    const findOrder = await Order.findOne({ orderId })
+      .populate("orderedItems.product") // Populate product details
+      .exec();
+
+    console.log("Fetched Order Data:", findOrder);
+
+    if (!findOrder) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Address is directly embedded in the order document
+    const specificAddress = findOrder.address;
+
+    console.log("Specific Address:", specificAddress);
+    console.log("Specific Address passed to frontend:", specificAddress);
+
+    const findUser = await User.findOne({ _id: userId });
+
+    if (!findUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!findOrder.orderedItems || !Array.isArray(findOrder.orderedItems)) {
+      return res.status(400).json({ error: "Invalid order products data" });
+    }
+
+    let totalGrant = 0;
+    findOrder.orderedItems.forEach((item) => {
+      totalGrant += item.price * item.quantity;
+    });
+
+    const totalPrice = findOrder.totalPrice;
+    const discount = totalGrant - totalPrice;
+    const finalAmount = totalPrice;
+
+    console.log("Total Grant: ", totalGrant);
+    console.log("Total Price: ", totalPrice);
+    console.log("Discount: ", discount);
+    console.log("Final Amount: ", finalAmount);
+    console.log("Address passed to template:", findOrder.address);
+
+    res.render("user/orderDetails", {
+      orders: findOrder,
+      user: findUser,
+      address: findOrder.address,  // Pass the embedded address to the template
+      totalGrant: totalGrant,
+      totalPrice: totalPrice,
+      discount: discount,
+      finalAmount: finalAmount,
+      response:res
+    });
+  } catch (error) {
+    console.error("Error fetching order details:", error);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+};
+
+
 
 
 const deleteProduct = async (req, res) => {
@@ -130,275 +280,55 @@ const deleteProduct = async (req, res) => {
 };
 
 
-const applyCoupon = async (req, res) => {
-  try {
-    const userId = req.session.user;
-    const selectedCoupon = await Coupon.findOne({ name: req.body.coupon });
-
-    if (!selectedCoupon) {
-      return res.json({ success: false, message: 'Coupon not found' });
-    }
-
-    if (selectedCoupon.userId.includes(userId)) {
-      return res.json({ success: false, message: 'Coupon already used' });
-    }
-
-    await Coupon.updateOne(
-      { name: req.body.coupon },
-      { $addToSet: { userId: userId } }
-    );
-
-    const gt = parseInt(req.body.total) - parseInt(selectedCoupon.offerPrice);
-    return res.json({ success: true, gt: gt, offerPrice: parseInt(selectedCoupon.offerPrice) });
-  } catch (error) {
-    console.error('Error applying coupon:', error);
-    return res.json({ success: false, message: 'Error applying coupon' });
-  }
-};
-
-const orderPlaced = async (req, res) => {
-  try {
-    const { totalPrice, addressId, payment, discount } = req.body;
-    const userId = req.session.user;
-    const findUser = await User.findOne({ _id: userId });
-    if (!findUser) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    const productIds = findUser.cart.map((item) => item.productId);
-    const findAddress = await Address.findOne({ userId: userId, "address._id": addressId });
-    if (!findAddress) {
-      return res.status(404).json({ error: "Address not found" });
-    }
-
-    const desiredAddress = findAddress.address.find((item) => item._id.toString() === addressId.toString());
-    if (!desiredAddress) {
-      return res.status(404).json({ error: "Specific address not found" });
-    }
-    const findProducts = await Product.find({ _id: { $in: productIds } });
-    if (findProducts.length !== productIds.length) {
-      return res.status(404).json({ error: "Some products not found" });
-    }
-    const cartItemQuantities = findUser.cart.map((item) => ({
-      productId: item.productId,
-      quantity: item.quantity,
-    }));
-
-    const orderedProducts = findProducts.map((item) => ({
-      _id: item._id,
-      price: item.salePrice,
-      name: item.productName,
-      image: item.productImage[0],
-      productStatus: "Confirmed",
-      quantity: cartItemQuantities.find((cartItem) => cartItem.productId.toString() === item._id.toString()).quantity,
-    }));
-
-    if (payment === "cod" && totalPrice > 1000) {
-      return res.status(400).json({ error: "Orders above ₹1000 are not allowed for Cash on Delivery (COD)" });
-    }
-
-    const finalAmount = totalPrice - discount;
-
-    let newOrder = new Order({
-      product: orderedProducts,
-      totalPrice: totalPrice,
-      discount: discount,
-      finalAmount: finalAmount,
-      address: desiredAddress,
-      payment: payment,
-      userId: userId,
-      status: "Confirmed",
-      createdOn: Date.now(),
-    });
-    let orderDone = await newOrder.save();
-
-    await User.updateOne({ _id: userId }, { $set: { cart: [] } });
-    for (let orderedProduct of orderedProducts) {
-      const product = await Product.findOne({ _id: orderedProduct._id });
-      if (product) {
-        product.quantity = Math.max(product.quantity - orderedProduct.quantity, 0);
-        await product.save();
-      }
-    }
-
-    res.json({
-      payment: true,
-      method: "cod",
-      order: orderDone,
-      quantity: cartItemQuantities,
-      orderId: orderDone._id,
-    });
-
-  } catch (error) {
-    console.error("Error processing order:", error);
-    res.redirect("/pageNotFound");
-  }
-};
-
-const getOrderDetailsPage = async (req, res) => {
-  try {
-    const userId = req.session.user;
-    const orderId = req.query.id;
-    const findOrder = await Order.findOne({ _id: orderId });
-    const findUser = await User.findOne({ _id: userId });
-    
-    let totalGrant = 0;
-    findOrder.product.forEach((val) => {
-      totalGrant += val.price * val.quantity;
-    });
-
-    const totalPrice = findOrder.totalPrice;
-    const discount = totalGrant - totalPrice;
-    const finalAmount = totalPrice; 
-
-    res.render("orderDetails", {
-      orders: findOrder,
-      user: findUser,
-      totalGrant: totalGrant,
-      totalPrice: totalPrice,
-      discount: discount,
-      finalAmount: finalAmount,
-    });
-  } catch (error) {
-    res.redirect("/pageNotFound");
-  }
-};
-
-const paymentConfirm = async (req, res) => {
-  try {
-    await Order.updateOne(
-      { _id: req.body.orderId },
-      { $set: { status: "Confirmed" } }
-    ).then((data) => {
-      res.json({ status: true });
-    });
-  } catch (error) {
-    res.redirect("/pageNotFound");
-  }
-};
 
 const cancelOrder = async (req, res) => {
   try {
-    const userId = req.session.user;
-    const findUser = await User.findOne({ _id: userId });
-    if (!findUser) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    const { orderId } = req.body;
-    const findOrder = await Order.findOne({ _id: orderId });
-    if (!findOrder) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-    if (findOrder.status === "Cancelled") {
-      return res.status(400).json({ message: "Order is already cancelled" });
-    }
+      const { orderId ,reason} = req.body;
 
-    await Order.updateOne({ _id: orderId }, { status: "Cancelled" });
+      
 
-    for (const productData of findOrder.product) {
-      const productId = productData._id;
-      const quantity = productData.quantity;
-      const product = await Product.findById(productId);
-      if (product) {
-        product.quantity += quantity;
-        await product.save();
+      // Find the order by orderId (not _id)
+      const findOrder = await Order.findOne({ orderId })
+          .populate("orderedItems.product") // Populate product details
+          .exec();
+
+      if (!findOrder) {
+          return res.status(404).json({ message: "Order not found" });
       }
-    }
 
-    res.status(200).json({ message: "Order cancelled successfully" });
+      // Check if the order is already cancelled
+      if (findOrder.status === "Cancelled") {
+          return res.status(400).json({ message: "Order is already cancelled" });
+      }
+
+      // Update order status to "Cancelled"
+      await Order.updateOne({ orderId }, { status: "Cancelled" });
+      findOrder.cancellationReason = reason;  // Save the reason in the order document
+        findOrder.status = 'Cancelled';  // Update the status to 'Cancelled'
+        await findOrder.save();
+
+
+      // Loop through the products and update their quantities
+      for (const productData of findOrder.orderedItems) {
+          const productId = productData.product._id;
+          const quantity = productData.quantity;
+
+          const product = await Product.findById(productId);
+          if (product) {
+              product.quantity += quantity;
+              await product.save();
+          }
+      }
+
+      // Send success response
+      res.status(200).json({ message: "Order cancelled successfully" });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const returnorder = async (req, res) => {
-  try {
-    const userId = req.session.user;
-    const findUser = await User.findOne({ _id: userId });
-    if (!findUser) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    const { orderId } = req.body;
-    const findOrder = await Order.findOne({ _id: orderId });
-    if (!findOrder) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-    if (findOrder.status === "returned") {
-      return res.status(400).json({ message: "Order is already returned" });
-    }
-    await Order.updateOne({ _id: orderId }, { status: "Return Request" });
-    res.status(200).json({ message: "Return request initiated successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-const downloadInvoice = async (req, res) => {
-  try {
-      const orderId = req.params.orderId;
-      const order = await Order.findById(orderId).populate('userId');
-
-      if (!order) {
-          return res.status(404).send('Order not found');
-      }
-
-      const data = {
-          "documentTitle": "INVOICE",
-          "currency": "INR",
-          "taxNotation": "gst",
-          "marginTop": 25,
-          "marginRight": 25,
-          "marginLeft": 25,
-          "marginBottom": 25,
-          apiKey: process.env.EASYINVOICE_API,
-          mode: "development",
-          images: {
-              logo: "https://firebasestorage.googleapis.com/v0/b/ecommerce-397a7.appspot.com/o/logo.jpg?alt=media&token=07b6be19-1ce8-4797-a3a0-f0eaeaafedad",
-          },
-          "sender": {
-            "company": "Trend Setter",
-            "address": "Thrissur, Kerala",
-            "zip": "680007",
-            "city": "Thrissur",
-            "state": "Kerala",
-            "country": "India",
-            "email": "trendsetter@trendy.com",
-            "phone": "+91 9073470980",
-        },
-        "client": {
-            "company": order.userId.name,
-            "address": order.address.street,
-            "zip": order.address.zip,
-            "city": order.address.city,
-            "state": order.address.state,
-            "country": order.address.country,
-            "email": order.userId.email,
-            "phone": order.userId.phone,
-        },
-        "invoiceNumber": orderId,
-        "date": order.createdOn,
-        "products": order.product.map(item => ({
-            "quantity": item.quantity,
-            "description": item.name,
-            "price": item.price,
-            "tax": 0,
-            "total": item.quantity * item.price
-        })),
-        "bottomNotice": "Thank you for your purchase",
-    };
-
-    easyinvoice.createInvoice(data).then(invoice => {
-        const pdf = invoice.pdf;
-        const filePath = path.join(__dirname, '..', 'downloads', `${orderId}.pdf`);
-        fs.writeFileSync(filePath, pdf, 'binary');
-        res.download(filePath, `${orderId}.pdf`);
-    });
-} catch (error) {
-    console.error(error);
-    res.status(500).send('Error generating invoice');
-}
-};
 
 
 const postAddNewAddress = async (req, res) => {
@@ -455,16 +385,83 @@ const addNewaddress = async (req, res) => {
   }
 };
 
+
+const listMyorders=async(req,res)=>{
+  
+    const userId = req.session.user;
+    const orders = await Order.find({ userId: req.session.user}) // Fetch orders for the logged-in user
+        .populate('orderedItems.product') // Populate product data
+        .sort({ createdAt: -1 }); // Sort by creation date (latest first)
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = 2;  // Orders per page
+        const skip = (page - 1) * limit;
+
+    try {
+      const orders = await Order.find({ userId })
+          .skip(skip)
+          .limit(limit)
+          .sort({ createdAt: -1 });  // Sort orders by date, latest first
+      const totalOrders = await Order.countDocuments({ userId });
+    res.render('user/myOrder', { orders  ,  totalPages: Math.ceil(totalOrders / limit),
+      currentPage: page,}); // Render myOrders.ejs and pass the orders data
+} catch (error) {
+    console.error(error);
+    res.status(500).send('Error fetching orders');
+}
+}
+const getOrderDetailsPages = async (req, res) => {
+  try {
+    const orderId = req.params.orderId; // Retrieve the orderId from the URL
+    console.log("Order ID being queried:", orderId); // Log the orderId to verify it's correct
+
+    // Fetch the order with populated ordered items
+    const findOrder = await Order.findOne({ orderId })
+      .populate("orderedItems.product") // Populate product details
+      .exec();
+
+    console.log("Fetched Order Data:", findOrder);
+
+    if (!findOrder) {
+      return res.status(404).render('error', { message: 'Order not found' });
+    }
+
+    // Calculate the total grant
+    let totalGrant = 0;
+    findOrder.orderedItems.forEach((item) => {
+      totalGrant += item.price * item.quantity;
+    });
+
+    const totalPrice = findOrder.totalPrice;
+    const discount = totalGrant - totalPrice;
+    const finalAmount = totalPrice;
+
+    // Pass 'findOrder.address' directly to the view
+    res.render('user/orderDetails', {
+      orders: findOrder,
+      address: findOrder.address, // Directly use the embedded address
+      totalGrant: totalGrant,
+      totalPrice: totalPrice,
+      discount: discount,
+      finalAmount: finalAmount,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('error', { message: 'An error occurred while fetching the order details' });
+  }
+};
+
+
+
 module.exports = {
 getCheckoutPage,
 deleteProduct,
-applyCoupon,
+listMyorders,
 orderPlaced,
 getOrderDetailsPage,
 cancelOrder,
-returnorder,
-paymentConfirm,
-downloadInvoice,
+getOrderDetailsPages,
 postAddNewAddress,
-addNewaddress
+addNewaddress,
+
 };

@@ -8,8 +8,24 @@
 <div class="card">
     <div class="card-body">
         <h5 class="card-title">Order ID: <%= orders.orderId %></h5>
-        <p><strong>Customer Name:</strong> <%= orders.customerName %></p>
-        <p><strong>Address:</strong> <%= orders.address.street %>, <%= orders.address.city %>, <%= orders.address.state %>, <%= orders.address.zip %></p>
+        <p><strong>Customer Name:</strong>
+            <% if (orders.userId) { %>
+                <%= orders.userId.name %> <!-- Replace 'name' with the actual field in your User schema -->
+            <% } else { %>
+                N/A <!-- Fallback text if user is not found -->
+            <% } %>
+        </p>
+        
+        <% if (address) { %>
+            <p>
+                Address: <%= address.landMark %>, <%= address.city %> <br>
+                <%= address.state %>, <%= address.addressType %> <br>
+                Pincode: <%= address.pincode %> <br>
+                Phone: <%= address.phone %>, Alt Phone: <%= address.altPhone %>
+            </p>
+        <% } else { %>
+            <p>No address available.</p>
+        <% } %>
         <p><strong>Payment Method:</strong> <%= orders.paymentMethod %></p>
         <p><strong>Status:</strong> <%= orders.status %></p>
         <p><strong>Total Price:</strong> $<%= orders.totalPrice.toFixed(2) %></p>
@@ -27,27 +43,34 @@
                 </tr>
             </thead>
             <tbody>
-                <% orders.product.forEach(product => { %>
-                <tr>
-                    <td><%= product.productName %></td>
-                    <td><%= product.quantity %></td>
-                    <td>$<%= product.price.toFixed(2) %></td>
-                    <td>$<%= (product.price * product.quantity).toFixed(2) %></td>
-                </tr>
-                <% }) %>
-            </tbody>
+                <% if (orders.orderedItems && orders.orderedItems.length > 0) { %>
+                  <% orders.orderedItems.forEach(item => { %>
+                    <tr>
+                      <td><%= item.product.productName %></td> <!-- Assuming `productName` is a field in Product -->
+                      <td><%= item.quantity %></td>
+                      <td>$<%= item.price.toFixed(2) %></td>
+                      <td>$<%= item.total.toFixed(2) %></td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4">No products found for this order.</td>
+                  </tr>
+                <% } %>
+              </tbody>
+              
         </table>
         <hr>
         <div class="d-flex justify-content-between">
             <div>
                 <h5>Order Status</h5>
                 <p><strong>Status:</strong> <%= orders.status %></p>
-                <button class="btn btn-primary" onclick="changeOrderStatus('<%= orders.orderId %>', 'processing')" style="width: 150px;">Start Processing</button>
-                <% if (orders.status === "processing") { %>
-                <button class="btn btn-warning" onclick="changeOrderStatus('<%= orders.orderId %>', 'shipped')" style="width: 150px;">Mark as Shipped</button>
+                <button class="btn btn-primary" onclick="changeOrderStatus('<%= orders.orderId %>', 'Processing')" style="width: 150px;">Start Processing</button>
+                <% if (orders.status === "Processing") { %>
+                <button class="btn btn-warning" onclick="changeOrderStatus('<%= orders.orderId %>', 'Shipped')" style="width: 150px;">Mark as Shipped</button>
                 <% } %>
-                <% if (orders.status === "shipped") { %>
-                <button class="btn btn-success" onclick="changeOrderStatus('<%= orders.orderId %>', 'delivered')" style="width: 150px;">Mark as Delivered</button>
+                <% if (orders.status === "Shipped") { %>
+                <button class="btn btn-success" onclick="changeOrderStatus('<%= orders.orderId %>', 'Delivered')" style="width: 150px;">Mark as Delivered</button>
                 <% } %>
             </div>
             <div>
@@ -63,35 +86,39 @@
 
 <script>
   function changeOrderStatus(orderId, newStatus) {
-      Swal.fire({
-          title: `Change Status to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}?`,
-          text: `Are you sure you want to change the status of this order to ${newStatus}?`,
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3885d6",
-          cancelButtonColor: "d33",
-          confirmButtonText: "Yes, change it!"
-      }).then((result) => {
-          if (result.isConfirmed) {
-              $.ajax({
-                  url: "/admin/changeOrderStatus",
-                  method: "GET",
-                  data: { orderId: orderId, status: newStatus },
-                  success: (response) => {
-                      if (response.status) {
-                          Swal.fire("Status Updated", `Order status has been changed to ${newStatus}.`, "success");
-                          location.reload();
-                      } else {
-                          Swal.fire("Error", "Failed to update order status", "error");
-                      }
-                  },
-                  error: (error) => {
-                      Swal.fire("Error", "An error occurred", "error");
-                  }
-              });
+  Swal.fire({
+    title: `Change Status to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}?`,
+    text: `Are you sure you want to change the status of this order to ${newStatus}?`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3885d6",
+    cancelButtonColor: "d33",
+    confirmButtonText: "Yes, change it!"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      $.ajax({
+        url: `/admin/changeStatus`,
+        method: "GET",
+        data: {
+          orderId: orderId,
+          status: newStatus
+        },
+        success: (response) => {
+          if (response.status) {
+            Swal.fire("Status Updated", `Order status has been changed to ${newStatus}.`, "success");
+            location.reload(); // Reload the page to see the updated status
+          } else {
+            Swal.fire("Error", "Failed to update order status", "error");
           }
+        },
+        error: (error) => {
+          Swal.fire("Error", "An error occurred", "error");
+        }
       });
-  }
+    }
+  });
+}
+
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

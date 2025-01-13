@@ -65,6 +65,23 @@
         .h1 {
             font-family: 'Courier New', Courier, monospace;
         }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar-vertical {
+                width: 100%;
+                position: relative;
+            }
+            .carousel-inner img {
+                height: auto;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .input-group {
+                width: 100%;
+            }
+        }
     </style>
 </head>         
 
@@ -135,31 +152,7 @@
     <!-- Topbar End -->
 
     <!-- Navbar Start -->
-    <div class="container-fluid mb-5">
-        <div class="row border-top px-xl-5">
-            <div class="col-lg-3 d-none d-lg-block">
-                <a class="btn shadow-none d-flex align-items-center justify-content-between bg-primary text-white w-100" data-toggle="collapse" href="#navbar-vertical" style="height: 65px; margin-top: -1px; padding: 0 30px;">
-                    <h6 class="m-0">Categories</h6>
-                    <i class="fa fa-angle-down text-dark"></i>
-                </a>
-                <nav class="collapse show navbar navbar-vertical navbar-light align-items-start p-0 border border-top-0 border-bottom-0" id="navbar-vertical">
-                    <div class="navbar-nav w-100 overflow-hidden" style="height: 210px">
-                        <div class="nav-item dropdown">
-                            <a href="#" class="nav-link" data-toggle="dropdown">All Jewelleries <i class="fa fa-angle-down float-right mt-1"></i></a>
-                            <div class="dropdown-menu position-absolute bg-secondary border-0 rounded-0 w-100 m-0">
-                                <a href="#" class="dropdown-item">Rings</a>
-                                <a href="#" class="dropdown-item">Necklace</a>
-                                <a href="#" class="dropdown-item">Earings</a>
-                            </div>
-                        </div>
-                        <a href="#" class="nav-item nav-link">Gold</a>
-                        <a href="#" class="nav-item nav-link">Diamond</a>
-                        <a href="#" class="nav-item nav-link">Platinum</a>
-                    </div>
-                </nav>
-            </div>
-        </div>
-    </div>
+    
     <!-- Navbar End -->
 
     <!-- Page Header Start -->
@@ -280,45 +273,49 @@
            
     </div><!-- Products Start -->
     <div class="container-fluid pt-5">
-        <div class="text-center mb-4">
-            <h2 class="section-title px-5"><span class="px-2">Top Sellers</span></h2>
-        </div> 
-        <div class="row px-xl-5 pb-3">
-            <% if (product && product.length > 0) { %>
-                <% for (let i = 0; i < product.length; i++) { %>
-                    <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
-                        <div class="card product-item border-0 mb-4">
-                            <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
-                                <a href="/productDetails?id=<%= product[i]._id %>">
-                                    <% if (product[i].productImages && product[i].productImages.length > 0) { %>
-                                        <img class="img-fluid w-100" src="/uploads/re-image/<%= product[i].productImages[0] %>" alt="<%= product[i].productName %>">
-                                    <% } else { %>
-                                        <img class="img-fluid w-100" src="/uploads/product-images/default.jpg" alt="Default Product Image">
-                                    <% } %>
-                                </a>
-                            </div>
-                            <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
-                                <h6 class="text-truncate mb-3"><%= product[i].productName %></h6>
-                                <div class="d-flex justify-content-center">
-                                    <h6>$<%= product[i].salePrice %></h6>
-                                    <% if (product[i].regularPrice) { %>
-                                        <h6 class="text-muted ml-2"><del>$<%= product[i].regularPrice %></del></h6>
-                                    <% } %>
-                                </div>
-                            </div>
-                            <div class="card-footer d-flex justify-content-between bg-light border">
-                                <a href="/productDetails?id=<%= product[i]._id %>" class="btn btn-sm text-dark p-0"><i class="fas fa-eye text-primary mr-1"></i>View Detail</a>
-                                <a href="#" onclick="addToCart('<%= product.id %>')" class="btn btn-primary py-2 px-3 mr-2">
-                                    <i class="fas fa-cart-plus"></i> Add to Cart
-                                </a>
-                            </div>
+        
+        <div class="container-fluid pt-5">
+            <div class="text-center mb-4">
+              <h1 class="section-title px-5"><span class="px-2">Top Sellers</span></h1>
+            </div> 
+            <div class="row px-xl-5 pb-3">
+              <% if (topSellers && topSellers.length > 0) { %>
+                <% for (let i = 0; i < topSellers.length; i++) { %>
+                  <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
+                    <div class="card product-item border-0 mb-4">
+                      <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
+                        <a href="/productDetails?id=<%= topSellers[i]._id %>">
+                          <% if (topSellers[i].productImages && topSellers[i].productImages.length > 0) { %>
+                            <img class="img-fluid w-100" src="/uploads/re-image/<%= topSellers[i].productImages[0] %>" alt="<%= topSellers[i].productName %>">
+                          <% } else { %>
+                            <img class="img-fluid w-100" src="/uploads/product-images/default.jpg" alt="Default Product Image">
+                          <% } %>
+                        </a>
+                      </div>
+                      <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
+                        <h6 class="text-truncate mb-3"><%= topSellers[i].productName %></h6>
+                        <div class="d-flex justify-content-center">
+                          <h6>$<%= topSellers[i].salePrice %></h6>
+                          <% if (topSellers[i].regularPrice) { %>
+                            <h6 class="text-muted ml-2"><del>$<%= topSellers[i].regularPrice %></del></h6>
+                          <% } %>
                         </div>
+                      </div>
+                      <div class="card-footer d-flex justify-content-between bg-light border">
+                        <a href="/productDetails?id=<%= topSellers[i]._id %>" class="btn btn-sm text-dark p-0"><i class="fas fa-eye text-primary mr-1"></i>View Detail</a>
+                        <a href="#" onclick="addToCart('<%= topSellers[i]._id %>')" class="btn btn-primary py-2 px-3 mr-2">
+                          <i class="fas fa-cart-plus"></i> Add to Cart
+                        </a>
+                      </div>
                     </div>
+                  </div>
                 <% } %>
-            <% } else { %>
-                <p>No products available at the moment.</p>
-            <% } %>
-        </div>
+              <% } else { %>
+                <p>No top sellers available at the moment.</p>
+              <% } %>
+            </div>
+          </div>
+          
     </div>
     <!-- Products End -->
     
@@ -402,6 +399,7 @@
 <script src="lib/easing/easing.min.js"></script>
 <script src="lib/owlcarousel/owl.carousel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/3.0.8/jquery.elevatezoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- Contact Javascript File -->
 <script src="mail/jqBootstrapValidation.min.js"></script>
@@ -464,21 +462,53 @@ function increaseQuantity() {
     if (quantity < maxQuantity) {
         quantityInput.value = quantity + 1;
     }
-}
+}function addToCart(productId, quantity = 1) {
+    // Check if the cart already has 3 of this product
+    const currentQuantity = parseInt(document.getElementById('quantity').value, 10);
+    const maxQuantity = 3;  // Set maximum quantity per product
 
+    // If current quantity exceeds or equals max quantity, show an alert and prevent adding more
+    if (currentQuantity > maxQuantity) {
+        Swal.fire({
+            title: 'Maximum Quantity Reached!',
+            text: 'You can only add a maximum of 3 of this product to your cart.',
+            icon: 'warning',
+            confirmButtonText: 'Okay'
+        });
+        return;
+    }
 
-function addToCart(productId, quantity) {
-        $.ajax({
-            url: '/addToCart', // Backend route for adding to cart
-            method: 'POST',
-            data: { 
-                productId: productId, 
-                quantity: quantity 
-            },
-            success: function(response) {
+    // Proceed to add the product to the cart if quantity is valid
+    $.ajax({
+        url: '/addToCart',
+        method: 'POST',
+        data: { 
+            productId: productId, 
+            quantity: quantity 
+        },
+        success: function(response) {
+            if (response.redirectToLogin) {
+                Swal.fire({
+                    title: 'Please Login!',
+                    text: 'You need to log in to add products to your cart.',
+                    icon: 'warning',
+                    showConfirmButton: true,
+                    confirmButtonText: 'Go to Login'
+                }).then(() => {
+                    window.location.href = '/login';
+                });
+            } else {
                 // Update cart count badge
                 const cartCountElement = document.getElementById('cart-count');
-                cartCountElement.innerHTML = response.cartLength;
+                if (cartCountElement) {
+                    cartCountElement.innerHTML = response.cartLength;
+                }
+
+                // Update subtotal
+                const subtotalElement = document.getElementById('cart-subtotal');
+                if (subtotalElement) {
+                    subtotalElement.innerHTML = `₹${response.subtotal}`;
+                }
 
                 // Show success notification
                 Swal.fire({
@@ -488,18 +518,19 @@ function addToCart(productId, quantity) {
                     timer: 3000,
                     showConfirmButton: false
                 });
-            },
-            error: function() {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Unable to add the product to the cart. Please try again later.',
-                    icon: 'error',
-                    timer: 3000,
-                    showConfirmButton: false
-                });
             }
-        });
-    }
+        },
+        error: function() {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Unable to add the product to the cart. Please try again later.',
+                icon: 'error',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        }
+    });
+}
 
 
     function updateCartCount() {

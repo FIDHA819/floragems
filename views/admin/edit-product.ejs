@@ -432,25 +432,20 @@ console.log(document.getElementById('input1').files);
 
     
     function validateForm() {
-       let imageDatas = false
+        let isValid = true;
                console.log("validate form");
                clearErrorMessages();
                const name = document.getElementsByName('productName')[0].value;
                const description = document.getElementsByName('descriptionData')[0].value;
                const brand = document.getElementsByName('brand')[0].value;
-               const price = document.getElementsByName('regularPrice')[0].value;
-               const saleprice = document.getElementsByName('salePrice')[0].value;
-               const color = document.getElementsByName('color')[0].value;
-               const category = document.getElementsByName('category')[0].value;
-               const images = document.getElementById('input1')
-               const quantity=document.getElementsByName('quantity')
-    imageDatas = document.getElementById("imageDatas")?.value;
-               let isValid = true;    
-               if (name.trim() === "") {
-       displayErrorMessage('productName-error', 'Please enter a product name.');
-       isValid = false;
-    }
+               const regularPrice = document.getElementsByName('regularPrice')[0].value;
+               const salePrice = document.getElementsByName('salePrice')[0].value;
               
+               const category = document.getElementsByName('category')[0].value;
+               const quantity = document.getElementsByName('quantity')[0].value;
+
+               let imageDatas = document.getElementById("imageDatas") ? document.getElementById("imageDatas").value : false;
+
                if (description=== '') {
                    displayErrorMessage('description-error', 'Please enter a product description.');
                    isValid = false;
@@ -465,19 +460,16 @@ console.log(document.getElementById('input1').files);
     
     
     
-               if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
+               if (!/^\d+(\.\d{1,2})?$/.test(regularPrice) || parseFloat(regularPrice) < 0) {
                    displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
                    isValid = false;
                }
-              if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
+              if (!/^\d+(\.\d{1,2})?$/.test(salePrice) || parseFloat(salePrice) < 0) {
                    displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
                    isValid = false;
                }
               
-               if (color.trim() === "") {
-                   displayErrorMessage('color-error', 'Please enter a color.');
-                   isValid = false;
-               }
+             
                if (!imageDatas && images.files.length === 0) {
                    displayErrorMessage("images-error",'Please select an image.');
                    isValid = false;

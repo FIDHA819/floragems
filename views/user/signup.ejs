@@ -341,15 +341,22 @@
 
         // Validate Phone
         const phoneval = phoneid.value.trim();
-        if (phoneval === "") {
-            error3.style.display = "block";
-            error3.innerHTML = "Enter a valid phone number";
-            isValid = false;
-        } else if (phoneval.length !== 10 || !/^\d+$/.test(phoneval)) {
-            error3.style.display = "block";
-            error3.innerHTML = "Phone number must be 10 digits";
-            isValid = false;
-        }
+if (phoneval === "") {
+    error3.style.display = "block";
+    error3.innerHTML = "Enter a valid phone number";
+    isValid = false;
+} else if (phoneval.length !== 10 || !/^\d+$/.test(phoneval)) {
+    error3.style.display = "block";
+    error3.innerHTML = "Phone number must be 10 digits";
+    isValid = false;
+} else if (/^0{10}$/.test(phoneval)) {
+    error3.style.display = "block";
+    error3.innerHTML = "Phone number cannot be all zeroes";
+    isValid = false;
+} else {
+    error3.style.display = "none"; 
+}
+
 
         // Validate Password
         const passval = passid.value.trim();

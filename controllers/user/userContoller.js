@@ -97,52 +97,48 @@ const loadSignup = async (req, res) => {
     res.status(500).send("Server error: Unable to load signup page");
   }
 
-};
-
-
-
-const signup = async (req, res) => {
+};const signup = async (req, res) => {
   try {
-    const { name, email, password, phone, cPassword } = req.body;  // Make sure to capture cPassword
-    const message = req.session.message || null;
+    const { name, email, password, phone, cPassword } = req.body;
 
     if (password !== cPassword) {
-      req.session.message = "Passwords do not match.";  // Set message to session
+      req.session.message = "Passwords do not match.";
       return res.render("user/signup", { message: req.session.message });
     }
 
-    // Validate input fields
     if (!email || !password || !name) {
       req.session.message = "All fields are required.";
       return res.render("user/signup", { message: req.session.message });
     }
 
-    // Check if user already exists
     const findUser = await User.findOne({ email });
     if (findUser) {
       req.session.message = "User with this email already exists.";
       return res.render("user/signup", { message: req.session.message });
     }
 
+    // Check if OTP already exists and is valid
+    if (req.session.userOtp && Date.now() < req.session.otpExpiration) {
+      return res.render("user/verify-otp", { resendAllowed: true });
+    }
+
     // Generate OTP
     const otp = generateOtp();
     const expirationTime = Date.now() + 5 * 60 * 1000;
 
-    // Send verification email
     const emailSent = await sendVerificationEmail(email, otp);
     if (!emailSent) {
       req.session.message = "Error sending verification email. Please try again.";
       return res.render("user/signup", { message: req.session.message });
     }
 
-    // Store OTP and user data in session
     req.session.userOtp = otp;
     req.session.userData = { name, email, password, phone };
     req.session.otpExpiration = expirationTime;
+    req.session.otpSent = true;
 
     console.log("OTP Sent:", otp);
-    return res.render("user/verify-otp");
-
+    return res.render("user/verify-otp", { resendAllowed: true });
   } catch (error) {
     console.error("Signup error:", error);
     res.redirect("/pageNotFound");
@@ -161,95 +157,110 @@ const securePassword = async (password) => {
   }
 };
 
-// Verify OTP Controller
+// Updated Verify OTP Controller
 const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body;
     console.log("Received OTP:", otp);
+   
+        if (!req.session.userOtp || !req.session.userData) {
+          return res.status(400).json({ success: false, message: "Session expired. Please try again." });
+        }
+    
+        if (Date.now() > req.session.otpExpiration) {
+          return res.send({ success: false, message: "OTP has expired. Please request a new one." });
+        }
+    
+        if (req.body.otp.trim() === req.session.userOtp) {
+          const user = req.session.userData;
+    
+          const passwordHash = await securePassword(user.password);
+          const saveUserData = new User({
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            password: passwordHash,
+          });
+    
+          await saveUserData.save();
+          req.session.user = {
+            _id: saveUserData._id,
+            name: saveUserData.name,
+            email: saveUserData.email,
+          };
+    
+          console.log("User saved and logged in:", req.session.user);
+          return res.json({ success: true, redirectUrl: "/" });
+        } else {
+          res.status(400).json({ success: false, message: "Invalid OTP" });
+        }
+      } catch (error) {
+        console.error("Error verifying OTP:", error);
+        res.status(500).json({ success: false, message: "An error occurred" });
+      }
+    };
+    
 
-    // Ensure session data exists
-    if (!req.session.userOtp || !req.session.userData) {
-      console.error("No OTP or user data in session");
-      return res.status(400).json({ success: false, message: "Session expired. Please try again." });
-    }
+    const resendOtp = async (req, res) => {
+      try {
+        const { userData, lastResendTime } = req.session;
+    
+        if (!userData || !userData.email) {
+          return res.status(400).json({ success: false, message: "Email not found in session." });
+        }
+    
+        const currentTime = Date.now();
+        if (lastResendTime && currentTime - lastResendTime < 30000) {
+          return res.status(429).json({ success: false, message: "Please wait before requesting another OTP." });
+        }
+    
+        const { email } = userData;
+    
+        // Generate new OTP
+        const otp = generateOtp();
+        req.session.userOtp = otp;
+        req.session.lastResendTime = currentTime;
+    
+        // Send verification email
+        const emailSent = await sendVerificationEmail(email, otp);
+        if (emailSent) {
+          console.log("Resend OTP:", otp);
+          return res.status(200).json({ success: true, message: "OTP resent successfully." });
+        } else {
+          return res.status(500).json({ success: false, message: "Failed to resend OTP. Please try again." });
+        }
+      } catch (error) {
+        console.error("Error resending OTP:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error. Please try again later." });
+      }
+    };
+    
 
 
-    if (Date.now() > req.session.otpExpiration) {
-      return res.send({ success: false, message: "OTP has expired. Please request a new one." });
-  }
-    // Check if OTP matches
-    if (otp.toString().trim() === req.session.userOtp.toString().trim()) {
-      const user = req.session.userData;
-
-      // Hash password
-      const passwordHash = await securePassword(user.password);
-
-      // Save user to database
-      const saveUserData = new User({
-        name: user.name,
-        email: user.email,
-        phone:user.phone,
-        password: passwordHash,
-        ...(user.googleId && { googleId: user.googleId }),
-      });
-
-      await saveUserData.save();
-      console.log("User saved to database:", saveUserData);
-
-      // Store user ID in session
-      req.session.user = saveUserData._id;
-
-      // Respond with success
-      res.json({ success: true, redirectUrl: "/" });
-    } else {
-      console.error("Invalid OTP received:", otp);
-      res.status(400).json({ success: false, message: "Invalid OTP, please try again" });
-    }
-  } catch (error) {
-    console.error("Error verifying OTP:", error);
-    res.status(500).json({ success: false, message: "An error occurred" });
-  }
-};
-
-// Resend OTP Controller
-const resendOtp = async (req, res) => {
+    const loadLogin = async (req, res) => {
+      try {
+        if (!req.session.user) {
+          const message = req.session.message || null; // Retrieve message from session
+          req.session.message = null; // Clear session message after fetching
+          return res.render("user/login", { message }); // Pass message to the view
+        } else {
+          return res.redirect("/"); // Redirect to home page if user is already logged in
+        }
+      } catch (error) {
+        console.error("Error loading login page:", error); // Log the error for debugging
+        return res.redirect("/page-404"); // Redirect to a custom 404 page
+      }
+    };
+    
+const loadBlockedPage = async (req, res) => {
   try {
-    if (!req.session.userData || !req.session.userData.email) {
-      return res.status(400).json({ success: false, message: "Email not found in session." });
-    }
-
-    const { email } = req.session.userData;
-
-    // Generate new OTP
-    const otp = generateOtp();
-    req.session.userOtp = otp;
-
-    // Send verification email
-    const emailSent = await sendVerificationEmail(email, otp);
-    if (emailSent) {
-      console.log("Resend OTP:", otp);
-      return res.status(200).json({ success: true, message: "OTP resent successfully." });
-    } else {
-      return res.status(500).json({ success: false, message: "Failed to resend OTP. Please try again." });
-    }
+    // Render a page indicating the user is blocked
+    res.render("user/blocked"); // Create this view in your 'views/user' folder
   } catch (error) {
-    console.error("Error resending OTP:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error. Please try again later." });
+    console.error("Error rendering blocked page:", error);
+    res.status(500).send("Error rendering blocked page");
   }
 };
-
-const loadLogin =async(req,res)=>{
-    try {
-        if(!req.session.user){
-            return res.render("user/login")
-        }else{
-            res.redirect("/")
-        }   
-    } catch (error) {
-        res.redirect("/page-404")
-        
-    }
-}
 
 const login = async (req, res) => {
   try {
@@ -265,10 +276,9 @@ const login = async (req, res) => {
       }
 
       if (findUser.isBlocked) {
-          console.log("User is blocked");
-          return res.render("user/login", { message: "User Is Blocked By Admin" });
+        console.log("User is blocked");
+        return res.redirect("/blocked"); // Redirect to the blocked page
       }
-
       const passwordMatch = await bcrypt.compare(password, findUser.password);
       if (!passwordMatch) {
           console.log("Incorrect password");
@@ -311,28 +321,78 @@ const logout=async(req,res)=>{
     
   }
 }
+const profilename = async (req, res) => {
+  try {
+      if (!req.user) {
+          return res.status(400).json({ error: "User not authenticated" });
+      }
 
+      const { name, phone } = req.body;
+
+      // Update user in the database
+      const updatedUser = await User.findByIdAndUpdate(
+          req.user._id, // Use req.user._id instead of req.user.id
+          { name, phone },
+          { new: true }
+      );
+
+      if (!updatedUser) {
+          return res.status(404).json({ error: "User not found" });
+      }
+
+      res.redirect('/userProfile'); // Redirect to the dashboard after updating
+  } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).send("Internal server error");
+  }
+};
 const loadShoppingPage = async (req, res) => {
   try {
-    const user = req.session.user || null; // Get user data from session
+    const user = req.session.user || null;
     const userData = await User.findOne({ _id: user });
-    const categories = await Category.find({ isListed: true }); // Fetch categories
+    const categories = await Category.find({ isListed: true });
     const brands = await Brand.find({ isBlocked: false }).select("brandName brandImage");
-    console.log("Fetched Brands:", brands); // Debug to check fetched brands
-    
 
-
-    const categoryIds = categories.map((category) => category._id.toString());
+    const query = req.query.query || '';
+    const sort = req.query.sort || 'latest';
     const page = parseInt(req.query.page) || 1;
     const limit = 9;
     const skip = (page - 1) * limit;
+
+    console.log("Query Parameters:", req.query);
+
+    let searchQuery = {};
+    if (query) {
+      searchQuery.$text = { $search: query };
+    }
+
+    let sortOption = {};
+    if (sort === 'latest') {
+      sortOption.createdAt = -1;
+    } else if (sort === 'priceAsc') {
+      sortOption.salePrice = 1;
+    } else if (sort === 'priceDesc') {
+      sortOption.salePrice = -1;
+    } else if (sort === 'popularity') {
+      sortOption.popularity = -1;
+    } else if (sort === 'az') {
+      sortOption.name = 1;
+    } else if (sort === 'za') {
+      sortOption.name = -1;
+    }
+
+    const categoryIds = categories.map((category) => category._id.toString());
+
+    console.log("Search Query:", searchQuery);
+    console.log("Sort Option:", sortOption);
 
     const products = await Product.find({
       isBlocked: false,
       category: { $in: categoryIds },
       quantity: { $gt: 0 },
+      ...searchQuery,
     })
-      .sort({ createdOn: -1 })
+      .sort(sortOption)
       .skip(skip)
       .limit(limit);
 
@@ -340,19 +400,23 @@ const loadShoppingPage = async (req, res) => {
       isBlocked: false,
       category: { $in: categoryIds },
       quantity: { $gt: 0 },
+      ...searchQuery,
     });
+
     const totalPages = Math.ceil(totalProducts / limit);
     const metalTypes = ["Gold", "Diamond", "Silver", "Platinum", "Other"];
 
     res.render("user/shop", {
       user: userData,
-      products: products,
-      categories: categories, // Pass categories to the view
-      brands: brands,
-      metalTypes:metalTypes,
-      totalProducts: totalProducts,
+      products,
+      categories,
+      brands,
+      metalTypes,
+      sortOption: sort,
+      totalProducts,
       currentPage: page,
-      totalPages: totalPages,
+      totalPages,
+      searchQuery: query,
     });
   } catch (error) {
     console.error("Error loading shopping page:", error);
@@ -360,268 +424,94 @@ const loadShoppingPage = async (req, res) => {
   }
 };
 
-const filterProduct = async (req, res) => {
+const getFilteredProducts = async (req, res) => {
   try {
-    const user = req.session.user; // User session
-    const { categories, brand, page } = req.query; // Query parameters
-    const currentPage = parseInt(page) || 1;
-    const itemsPerPage = 6;
+    const { query, category, brand, price, metal, sort } = req.query;
+    const user = req.session.user || null;
+    const userData = await User.findOne({ _id: user });
+    const categories = await Category.find({ isListed: true });
+    const brands = await Brand.find({ isBlocked: false }).select("brandName brandImage");
+console.log(brands)
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9;
+    const skip = (page - 1) * limit;
 
-    // Fetch categories and brands
-    const categoriesList = await Category.find({ isListed: true }).lean();
-    const brandsList = await Brand.find({}).lean();
+    console.log("Query Parameters:", req.query);
 
-    // Build the query object
-    const query = {
-      isBlocked: false,
-      quantity: { $gt: 0 },
-    };
-
-    // Add category filter if available
-    if (categories) {
-      const categoryId = categories; // Assuming the category is passed as ObjectId in the query string
-      const findCategory = await Category.findById(categoryId).lean();
-      if (findCategory) {
-        query.category = findCategory._id; // Match category by ObjectId
-      } else {
-        console.warn(`Invalid category ID: ${categoryId}`);
-      }
+    let searchQuery = {};
+    if (query) {
+      searchQuery.$text = { $search: query };
     }
 
-    // Add brand filter if available
+    let filterQuery = {};
+    if (category) {
+      filterQuery.category = category;
+    }
     if (brand) {
-      // Ensure the brand filter is passed as an ObjectId
-      const findBrand = await Brand.findById(brand).lean(); // Use findById to search by ObjectId
-      if (findBrand) {
-        query.brand = findBrand.brandName; // Match brand by ObjectId, not by name
-      } else {
-        console.warn(`Invalid brand ID: ${brand}`);
-      }
+      filterQuery.brand = brand;
     }
-
-    console.log("Final Query:", query);
-
-    // Fetch filtered products
-    const allProducts = await Product.find(query).lean();
-    console.log("Filtered Products:", allProducts);
-
-    // Sort products by creation date (descending)
-    allProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    // Pagination logic
-    const totalPages = Math.ceil(allProducts.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentProduct = allProducts.slice(startIndex, startIndex + itemsPerPage);
-
-    // Fetch user data for history (if logged in)
-    let userData = null;
-    if (user) {
-      userData = await User.findById(user);
-      if (userData && Array.isArray(userData.searchHistory)) {
-        userData.searchHistory.push({
-          category: categories || null,
-          brand: brand || null,
-          searchedOn: new Date(),
-        });
-        await userData.save();
-      }
-    }
-
-    // Render the shop page
-    res.render("user/shop", {
-      user: userData,
-      products: currentProduct,
-      categories: categoriesList,
-      brands: brandsList,
-      totalPages,
-      currentPage,
-      selectedCategory: categories || null,
-      selectedBrand: brand || null,
-    });
-  } catch (error) {
-    console.error("Error in filterProduct:", error);
-    res.redirect("/pageNotFound");
-  }
-};
-const filterByPrice=async(req,res)=>{
-  try {
-    const user = req.session.user; // User session
-    const userData=await User.findOne({_id:user});
-    const categories = await Category.find({ isListed: true }).lean();
-    const brands = await Brand.find({}).lean();
-let finalProduct=await Product.find({
-  salePrice:{$gt:req.query.gt,$lt:req.query.lt},
-  isBlocked: false,
-  quantity: { $gt: 0 }
-}).lean()
-    
-  } catch (error) {
-    findProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    const currentPage = parseInt(page) || 1;
-    const itemsPerPage = 6;
-    // Pagination logic
-    const totalPages = Math.ceil(findProducts.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentProduct = findProducts.slice(startIndex, startIndex + itemsPerPage);
-req.session.filteredProducts=findProducts;
-res.render("user/shop", {
-  user: userData,
-  products: currentProduct,
-  categories: categories,
-  brands: brands,
-  totalPages,
-  currentPage,
-  selectedCategory: categories || null,
-  selectedBrand: brand || null,
-})
-
-  }
-}
-const filterByMetal = async (req, res) => {
-  try {
-    const user = req.session.user; // User session
-    const userData = await User.findOne({ _id: user });
-    const categories = await Category.find({ isListed: true }).lean();
-    const brands = await Brand.find({}).lean();
-    
-    const { metal, page } = req.query; // Get metal filter from query params
-    const currentPage = parseInt(page) || 1;
-    const itemsPerPage = 6;
-
-    // Build the query object for filtering
-    let query = {
-      isBlocked: false,
-      quantity: { $gt: 0 }
-    };
-
-    // Check if the 'metal' filter is passed in the query
     if (metal) {
-      query.metalType = metal; // Filter by metal type (e.g., 'Gold', 'Diamond', etc.)
+      filterQuery.metalType = metal;
+    }
+    if (price) {
+      const [minPrice, maxPrice] = price.split('-').map(Number);
+      filterQuery.salePrice = { $gte: minPrice, $lte: maxPrice };
     }
 
-    // Fetch filtered products based on the query
-    let filteredProducts = await Product.find(query).lean();
+    const queryCondition = { ...searchQuery, ...filterQuery };
 
-    // If no products found for the selected metal, log a message
-    if (filteredProducts.length === 0) {
-      console.log(`No products found for metal type: ${metal}`);
+    console.log("Search Query:", searchQuery);
+    console.log("Filter Query:", filterQuery);
+    console.log("Query Condition:", queryCondition);
+
+    let sortOption = {};
+    if (sort === 'latest') {
+      sortOption.createdAt = -1;
+    } else if (sort === 'priceAsc') {
+      sortOption.salePrice = 1;
+    } else if (sort === 'priceDesc') {
+      sortOption.salePrice = -1;
+    } else if (sort === 'popularity') {
+      sortOption.popularity = -1;
+    } else if (sort === 'az') {
+      sortOption.name = 1;
+    } else if (sort === 'za') {
+      sortOption.name = -1;
     }
 
-    // Sort the products by creation date (descending)
-    filteredProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    console.log("Sort Option:", sortOption);
 
-    // Pagination logic
-    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentProduct = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+    const products = await Product.find(queryCondition)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit);
 
-    // Render the page with filtered products and pagination
+    const totalProducts = await Product.countDocuments(queryCondition);
+    const totalPages = Math.ceil(totalProducts / limit);
+    const metalTypes = ["Gold", "Diamond", "Silver", "Platinum", "Other"];
+
     res.render("user/shop", {
       user: userData,
-      products: currentProduct,
-      categories: categories,
-      brands: brands,
+      products,
+      categories,
+      brands,
+      metalTypes,
+      searchQuery: query,
+      selectedCategory: category,
+      selectedBrand: brand,
+      selectedPrice: price,
+      selectedMetal: metal,
+      sortOption: sort,
+      totalProducts,
+      currentPage: page,
       totalPages,
-      currentPage,
-      selectedMetal: metal || null, // Pass the selected metal type
     });
   } catch (error) {
-    console.error("Error in filterByMetal:", error);
-    res.redirect("/pageNotFound"); // Redirect to a 404 page if there's an error
+    console.error("Error fetching filtered products:", error);
+    res.status(500).send("Error fetching products");
   }
 };
-const searchProducts = async (req, res) => {
-  try {
-    console.log("Search query received:", req.body.query); // Debug
-    const user = req.session.user;
-    const userData = await User.findOne({ _id: user });
-    const search = req.body.query || ''; // Default to empty string
-    console.log("User session:", userData); // Debug
 
-    const categories = await Category.find({ isListed: true }).lean();
-    const brands = await Brand.find({}).lean();
-    const categoryIds = categories.map(category => category._id.toString());
-    console.log("Category IDs:", categoryIds); // Debug
-
-    const currentPage = parseInt(req.query.page) || 1;
-    const itemsPerPage = 6;
-
-    let searchResults = [];
-    if (req.session.filteredProducts && req.session.filteredProducts.length > 0) {
-      console.log("Using session filtered products"); // Debug
-      searchResults = req.session.filteredProducts.filter(product =>
-        product.productName.toLowerCase().includes(search.toLowerCase())
-      );
-    } else {
-      console.log("Fetching products from database"); // Debug
-      searchResults = await Product.find({
-        productName: { $regex: search, $options: 'i' },
-        isBlocked: false,
-        quantity: { $gt: 0 },
-        category: { $in: categoryIds },
-      }).lean();
-    }
-
-    console.log("Search results found:", searchResults.length); // Debug
-
-    // Pagination
-    const totalPages = Math.ceil(searchResults.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentProduct = searchResults.slice(startIndex, startIndex + itemsPerPage);
-
-    res.render('user/shop', {
-      user: userData,
-      products: currentProduct,
-      categories: categories,
-      brands: brands,
-      totalPages,
-      currentPage,
-      count: searchResults.length,
-    });
-  } catch (error) {
-    console.error("Error in searchProducts:", error);
-    res.redirect('/pageNotFound');
-  }
-};const sortPage = async (req, res) => {
-  try {
-    const categories = await Category.find({ isListed: true }).lean();
-    const brands = await Brand.find({}).lean();
-    
-    const sortOption = req.query.sort || "latest"; // Default to "latest"
-    let sortCriteria = {};
-
-    // Determine sorting criteria based on the selected option
-    if (sortOption === "latest") {
-        sortCriteria = { createdAt: -1 }; // Sort by newest first
-    } 
-
-    // Fetch sorted products
-    const products = await Product.find({ isBlocked: false, quantity: { $gt: 0 } })
-        .sort(sortCriteria)
-        .lean();
-
-    // Pagination logic
-    const currentPage = parseInt(req.query.page) || 1;
-    const itemsPerPage = 6;
-    const totalPages = Math.ceil(products.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentProduct = products.slice(startIndex, startIndex + itemsPerPage);
-
-    // Render the page with sorted products and categories
-    res.render("user/shop", {
-        user: req.session.user,
-        products: currentProduct, // Paginated products
-        categories: categories, // Pass categories to the view
-        sortOption: sortOption,
-        brands: brands,
-        totalPages: totalPages,
-        currentPage: currentPage,
-    });
-  } catch (error) {
-    console.error(error);
-    res.redirect("/pageNotFound");
-  }
-};
 
 // Export Controllers
 module.exports = {
@@ -635,9 +525,7 @@ module.exports = {
   login,
   logout,
   loadShoppingPage,
-  filterProduct,
-  filterByPrice,
-  filterByMetal,
-  searchProducts,
-  sortPage
+  profilename,
+  getFilteredProducts,
+  loadBlockedPage
 };

@@ -27,6 +27,7 @@
 
     <style>
     /* General Body Styles */
+/* General Body Styles */
 body {
     font-family: 'Poppins', sans-serif;
     background-color: #f8f9fa;
@@ -264,6 +265,7 @@ input[type="number"]:focus {
 
 /* Media Queries for Responsiveness */
 @media (max-width: 768px) {
+    /* Adjustments for mobile screens */
     .page-header h1 {
         font-size: 24px;
     }
@@ -285,6 +287,75 @@ input[type="number"]:focus {
         bottom: 10px;
         right: 10px;
         padding: 10px;
+    }
+
+    /* Adjust cart summary layout */
+    .cart-summary-table .row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .cart-summary-table .row .col-6 {
+        width: 100%;
+    }
+
+    /* Adjust Cart Items Layout */
+    .table td {
+        padding: 10px;
+    }
+
+    .product-name img {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* Adjust buttons and inputs for small screens */
+    .btn, input[type="number"], .cart-summary-table .row .col-6 {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    /* For smaller mobile screens */
+    .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .page-header h1 {
+        font-size: 22px;
+    }
+
+    .table td {
+        padding: 8px;
+    }
+
+    .product-name img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .cart-summary-table .row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .cart-summary-table .row .col-6 {
+        width: 100%;
+        font-size: 14px;
+    }
+
+    .back-to-top {
+        font-size: 18px;
+        padding: 12px;
+    }
+
+    .btn {
+        font-size: 12px;
+    }
+
+    .input-group input {
+        font-size: 14px;
     }
 }
 
@@ -361,7 +432,7 @@ input[type="number"]:focus {
     <!-- Page Header End -->
     <div class="bg-primary text-white py-2">
         <marquee behavior="scroll" direction="left" style="font-size: 16px; font-weight: bold;">
-            Free Shipping Order Above ₹500
+            Free Shipping Order Above ₹50000
         </marquee>
     </div>
    <!-- Cart Start -->
@@ -391,7 +462,7 @@ input[type="number"]:focus {
                                 </td>
                                 <td>₹<%= item.productPrice %></td>
                                 <td>
-                                    <button class="btn btn-sm btn-secondary" onclick="changeQuantity('<%= item.productId %>', -1, '<%= item.productPrice %>', '<%= index %>')">-</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="changeQuantity('<%= item.productId %>', -1, '<%= item.productPrice %>', '<%= index %>', <%= item.productQuantity %>)">-</button>
                                     <input 
                                         type="number" 
                                         id="cartProductQuantity<%= index %>" 
@@ -399,12 +470,13 @@ input[type="number"]:focus {
                                         value="<%= item.quantity %>" 
                                         min="1" 
                                         max="<%= item.productQuantity %>" 
-                                        onchange="handleQuantityChange('<%= item.productId %>', this.value, '<%= item.productPrice %>', '<%= index %>', '<%= item.productQuantity %>')">
+                                        onchange="handleQuantityChange('<%= item.productId %>', this.value, '<%= item.productPrice %>', '<%= index %>', <%= item.productQuantity %>)">
                                     <button 
                                         class="btn btn-sm btn-secondary" 
-                                        onclick="changeQuantity('<%= item.productId %>', 1, '<%= item.productPrice %>', '<%= index %>')">
+                                        onclick="changeQuantity('<%= item.productId %>', 1, '<%= item.productPrice %>', '<%= index %>', <%= item.productQuantity %>)">
                                         +
                                     </button>
+                                    
                                 </td>
                                 <td><span id="subTotal<%= index %>">₹<%= item.total %></span></td>
                                 <td>
@@ -465,71 +537,89 @@ input[type="number"]:focus {
                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                     
                     <script>
-              function changeQuantity(productId, count, productPrice, index, maxStock) {
-    const currentQuantityInput = document.getElementById(`cartProductQuantity${index}`);
-    let currentQuantity = parseInt(currentQuantityInput.value, 10);
+          function changeQuantity(productId, count, productPrice, index, maxStock) {
+  const currentQuantityInput = document.getElementById(`cartProductQuantity${index}`);
+  let currentQuantity = parseInt(currentQuantityInput.value, 10);
 
-    if (isNaN(currentQuantity)) {
-        Swal.fire('Invalid Quantity!', 'Please enter a valid number.', 'error');
-        return;
-    }
+  if (isNaN(currentQuantity)) {
+    Swal.fire('Invalid Quantity!', 'Please enter a valid number.', 'error');
+    return;
+  }
 
-    let newQuantity = currentQuantity + count;
+  let newQuantity = currentQuantity + count;
 
-    // Check if the quantity is below 1
-    if (newQuantity < 1) {
-        Swal.fire('Invalid Quantity!', 'Quantity must be at least 1.', 'error');
-        return;
-    }
+  // Limit the quantity to 3
+  if (newQuantity > 3) {
+    Swal.fire('Limit Reached!', 'You can only add a maximum of 3 of this product to your cart.', 'error');
+    return;
+  }
 
-    // Check if the quantity exceeds available stock
-    if (newQuantity > maxStock) {
-        Swal.fire('Stock Limit Reached!', `Only ${maxStock} units are available in stock.`, 'error');
-        return;
-    }
+  // Check if the quantity is below 1
+  if (newQuantity < 1) {
+    Swal.fire('Invalid Quantity!', 'Quantity must be at least 1.', 'error');
+    return;
+  }
 
-    // Update the input field with the new quantity
-    currentQuantityInput.value = newQuantity;
+  // Check if the quantity exceeds available stock
+  if (newQuantity > maxStock) {
+    Swal.fire('Stock Limit Reached!', `Only ${maxStock} units are available in stock.`, 'error');
+    return;
+  }
 
-    // AJAX request to update the server with the new quantity
-    $.ajax({
-        url: '/changeQuantity',
-        method: 'POST',
-        data: {
-            userId: '<%= user._id %>',
-            productId: productId,
-            quantity: newQuantity
-        },
-        success: (response) => {
-            console.log(response); // Log the response from the server
+  // Update the input field with the new quantity
+  currentQuantityInput.value = newQuantity;
 
-            // Update the subtotal dynamically
-            const subTotalElement = document.getElementById(`subTotal${index}`);
-            subTotalElement.textContent = `₹${response.newSubtotal.toFixed(2)}`;
+  // AJAX request to update the server with the new quantity
+  $.ajax({
+    url: '/changeQuantity',
+    method: 'POST',
+    data: {
+      userId: '<%= user._id %>',  // Assuming you have user._id available
+      productId: productId,
+      quantity: newQuantity
+    },
+    success: (response) => {
+      if (response.error === "Stock has been changed") {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Stock Changed',
+          text: response.message,
+          confirmButtonText: 'Okay'
+        });
+      } else {
+        console.log(response); // Log the response from the server
 
-            // Update grand total
-            const totalElement = document.getElementById('total');
-            totalElement.textContent = `₹${response.newGrandTotal.toFixed(2)}`;
+        // Update the subtotal dynamically
+        const subTotalElement = document.getElementById(`subTotal${index}`);
+        subTotalElement.textContent = `₹${response.newSubtotal.toFixed(2)}`;
 
-            // Update shipping cost and grand total after quantity change
-            updateShipping(); // Recalculate and update shipping cost
+        // Update grand total
+        const totalElement = document.getElementById('total');
+        totalElement.textContent = `₹${response.newGrandTotal.toFixed(2)}`;
 
-            // Success message
-            Swal.fire('Success!', 'Quantity updated successfully.', 'success');
-            window.location.reload();
-        },
-        error: () => {
-            Swal.fire('Error!', 'Failed to update quantity.', 'error');
-        },
-    });
+        // Update shipping cost and grand total after quantity change
+        updateShipping(); // Recalculate and update shipping cost
+
+        // Success message
+        Swal.fire('Success!', 'Quantity updated successfully.', 'success');
+        window.location.reload(); // Reload to update the page with new totals
+      }
+    },
+  
+    error: () => {
+  Swal.fire('Error!', 'Failed to update quantity.', 'error').then(() => {
+    window.location.reload();  // This will reload the current page
+  });
 }
 
+  });
+}
 
                     
                     function updateShipping() {
                         // Example: if total price is more than ₹5000, shipping is free, else it's ₹100
                         let total = parseFloat(document.getElementById('subTotalDisplay').textContent.replace('₹', ''));
-                        let shippingCost = total > 5000 ? 0 : 100;
+                        let shippingCost = total > 50000 ? 0 : 100;
                     
                         // Update the shipping cost
                         document.getElementById('shipping').textContent = `₹${shippingCost.toFixed(2)}`;
