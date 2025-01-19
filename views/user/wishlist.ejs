@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- jQuery and SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <title>My Wishlist - Flora Gems</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .breadcrumb-wrap {
+            background: linear-gradient(to right, #f4e4e1, #e8d6d3);
+            padding: 20px 0;
+        }
+
+        .breadcrumb {
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .breadcrumb a {
+            color: #b46e59cc;
+            text-decoration: none;
+        }
+
+        .breadcrumb span {
+            color: #6c757d;
+            margin: 0 5px;
+        }
+
+        .table-responsive {
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+        }
+
+        .table th,
+        .table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #f1f1f1;
+        }
+
+        .table th {
+            background-color: #b46e59cc;
+            color: #fff;
+        }
+
+        .table td img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            color: #fff;
+            background-color: #b46e59cc;
+            text-decoration: none;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #9e5c4b;
+        }
+
+        .ri-delete-bin-line {
+            font-size: 18px;
+            color: #dc3545;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .ri-delete-bin-line:hover {
+            color: #c82333;
+        }
+
+        @media (max-width: 768px) {
+            .breadcrumb {
+                font-size: 0.9rem;
+            }
+
+            .table th,
+            .table td {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+
+            .btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            .table td img {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="main">
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="/" rel="nofollow">Home</a>
+                    <span>&gt;</span> Shop
+                    <span>&gt;</span> My Wishlist
+                </div>
+            </div>
+        </div>
+
+        <section class="mt-50 mb-50">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table shopping-summery text-center clean">
+                                <thead>
+                                    <tr class="main-heading">
+                                        <th>Image</th>
+                                        <th>Name</th>
+                                        <th>Price</th>
+                                        <th>Add to Cart</th>
+                                        <th>Remove</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (wishlist.length > 0) { %>
+                                        <% for (let product of wishlist) { %>
+                                            <tr>
+                                                <td>
+                                                    <img src="/uploads/re-image/<%= product.productImages[0] %>" alt="Product Image" />
+                                                </td>
+                                                <td>
+                                                    <h5><%= product.productName %></h5>
+                                                    <p><%= product.category.name %></p>
+                                                </td>
+                                                <td>₹<%= product.salePrice %></td>
+                                                <td>
+                                                    <a href="#" onclick="addToCart('<%= product._id %>')" class="btn btn-sm">Add to Cart</a>
+                                                </td>
+                                                <td>
+                                                    <i class="ri-delete-bin-line" onclick="removeItem('<%= product._id %>')"></i>
+                                                </td>
+                                            </tr>
+                                        <% } %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="5">
+                                                <p class="lead">No items found in Wishlist</p>
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+   function addToCart(productId, quantity = 1) {
+    $.ajax({
+        url: '/addToCart',
+        method: 'POST',
+        data: { 
+            productId: productId, 
+            quantity: quantity 
+        },
+        success: function(response) {
+            console.log(response);  // Log the full response for debugging
+
+            // Check if the response contains the necessary data
+            if (response.status === true) {
+                // Check if the cartItems array exists
+                if (Array.isArray(response.cartItems)) {
+                    let cart = response.cartItems;
+                    let productInCart = cart.find(item => item.productId === productId);  // Check if the product is already in the cart
+
+                    // If the product is already in the cart, check the quantity
+                    if (productInCart && productInCart.quantity + quantity > 3) {
+                        Swal.fire({
+                            title: 'Maximum Quantity Reached!',
+                            text: 'You can only add a maximum of 3 of this product to your cart.',
+                            icon: 'warning',
+                            confirmButtonText: 'Okay'
+                        });
+                        return;  // Prevent adding the product to the cart
+                    }
+
+                    // Check the total cart length, and prevent adding if the cart already has 3 or more items
+                    let totalItemsInCart = cart.reduce((total, item) => total + item.quantity, 0);  // Calculate total number of items in the cart
+                    if (totalItemsInCart + quantity > 3) {
+                        Swal.fire({
+                            title: 'Cart Limit Reached!',
+                            text: 'You can only add up to 3 items to your cart.',
+                            icon: 'warning',
+                            confirmButtonText: 'Okay'
+                        });
+                        return;  // Prevent adding more products if the cart is full
+                    }
+                }
+
+                // If the user needs to login, show the login prompt
+                if (response.redirectToLogin) {
+                    Swal.fire({
+                        title: 'Please Login!',
+                        text: 'You need to log in to add products to your cart.',
+                        icon: 'warning',
+                        showConfirmButton: true,
+                        confirmButtonText: 'Go to Login'
+                    }).then(() => {
+                        window.location.href = '/login';
+                    });
+                } else {
+                    // Update cart count badge
+                    const cartCountElement = document.getElementById('cart-count');
+                    if (cartCountElement) {
+                        cartCountElement.innerHTML = response.cartLength;  // Update cart count
+                    }
+
+                    // Update subtotal
+                    const subtotalElement = document.getElementById('cart-subtotal');
+                    if (subtotalElement) {
+                        subtotalElement.innerHTML = `₹${response.subtotal}`;  // Update subtotal
+                    }
+
+                    // Show success notification
+                    Swal.fire({
+                        title: 'Added to Cart!',
+                        text: 'The product has been successfully added to your cart.',
+                        icon: 'success',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
+            } else {
+                // Handle error response from the server
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Unable to add the product to the cart. Please try again later.',
+                    icon: 'error',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+        },
+        error: function() {
+            // Handle any AJAX errors
+            Swal.fire({
+                title: 'Error!',
+                text: 'Unable to add the product to the cart. Please try again later.',
+                icon: 'error',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        }
+    });
+}
+
+    function updateCartCount() {
+    $.ajax({
+        url: '/getCartCount',  // The backend route you created
+        method: 'GET',
+        success: function(response) {
+            const cartCountElement = document.getElementById('cart-count');
+            cartCountElement.innerHTML = response.cartLength; // Update the cart count badge with the fetched value
+        },
+        error: function() {
+            console.error('Failed to fetch cart count');
+        }
+    });
+}
+
+// Call the updateCartCount function when the page loads
+$(document).ready(function() {
+    updateCartCount(); // This will automatically update the cart count
+});
+
+    document.getElementById('combineSearchBtn').addEventListener('click', function() {
+        var form = document.getElementById('combineSearchForm');
+        form.classList.toggle('d-none'); // Toggle visibility of the form
+    });
+
+
+
+        function removeItem(productId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This action cannot be undone.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, remove it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/removeWishlist?productId=${productId}`;
+                }
+            });
+        }
+
+        function updateCartCount() {
+            $.ajax({
+                url: '/getCartCount',
+                method: 'GET',
+                success: function(response) {
+                    $('#cart-count').text(response.cartLength);
+                },
+                error: function() {
+                    console.error('Failed to fetch cart count');
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            updateCartCount();
+        });
+    </script>
+</body>
+
+</html>

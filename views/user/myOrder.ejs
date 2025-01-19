@@ -372,9 +372,9 @@ footer {
                                                             </div>
                                                             <div class="card-body">
                                                                 <p><strong>Placed on:</strong> <%= order.createdAt.toLocaleDateString() %></p>
-                                                                <p><strong>Status:</strong> <%= order.status %></p>
-                                                                <p><strong>Name:</strong> <%= order.orderedItems[0].product.productName %></p>
-                                                                <p><strong>Price:</strong> ₹<%= order.totalPrice.toFixed(2) %></p>
+                                                                <p><strong>Status:</strong> <%= order.orderStatus %></p>
+                            
+                                                                <p><strong>Price:</strong> ₹<%= order.finalAmount%></p>
                                                                 <a href="/orderDetails/<%= order.orderId %>" class="btn btn-sm btn-primary">View Details</a>
                                                             </div>
                                                         </div>

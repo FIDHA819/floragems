@@ -47,7 +47,7 @@ const getCartPage = async (req, res) => {
     }).filter(Boolean);
 
     const subtotal = cartItems.reduce((sum, item) => sum + item.total, 0);
-    const shippingCost = subtotal > 50000 ? 0 : 100;
+    const shippingCost = subtotal > 1000 ? 0 : 100;
     const grandTotal = subtotal + shippingCost;
 
     res.render("user/cartPage", {

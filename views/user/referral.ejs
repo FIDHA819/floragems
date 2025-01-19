@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referral Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        header, footer {
+            background-color: #343a40;
+            color: white;
+            padding: 15px 0;
+        }
+
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+            font-size: 14px;
+        }
+
+        .breadcrumb a {
+            color: #6c757d;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #28a745;
+        }
+
+        .dashboard-menu {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-menu ul {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .dashboard-menu .nav-item {
+            margin-bottom: 15px;
+        }
+
+        .dashboard-menu .nav-link {
+            color: #343a40;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .dashboard-menu .nav-link:hover,
+        .dashboard-menu .nav-link.active {
+            background-color: #cf876ba8;
+            color: white;
+        }
+
+        .main-content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: #cf876ba8;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-body {
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background-color: #218838;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 15px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container text-center">
+            <h2>Referral Dashboard</h2>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="page-header breadcrumb-wrap mb-3">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="/" rel="nofollow">Home</a>
+                    <span></span> Profile <span></span> Referrals
+                </div>
+            </div>
+        </div>
+
+        <section class="pt-10 pb-10">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 m-auto">
+                        <div class="row">
+                            <!-- Sidebar -->
+                            <div class="col-md-4">
+                                <div class="dashboard-menu">
+                                    <ul class="nav flex-column" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#orders" role="tab">My Orders</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#address" role="tab">My Address</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#wallet" role="tab">Wallet</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link active" href="#referral" role="tab">Referrals</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/logout">Logout</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Referral Content -->
+                            <div class="col-md-8">
+                                <div class="tab-content dashboard-content">
+                                    <!-- Referrals -->
+                                    <div class="tab-pane fade show active" id="referrals" role="tabpanel">
+                                        <div class="alert alert-info mt-4 text-center" role="alert">
+                                            <h4 class="alert-heading">🎉 Invite Your Friends, Earn Rewards! 🎉</h4>
+                                            <p>
+                                              Share your unique referral code with your friends, and everyone wins! 💰
+                                              <br />
+                                              <strong>You get ₹150</strong> added to your wallet when your friend signs up using your code.
+                                              <br />
+                                              <strong>Your friend gets ₹50</strong> credited to their wallet too!
+                                            </p>
+                                            <hr />
+                                            <p class="mb-0">
+                                              It's a win-win! Start sharing your code now and enjoy the benefits together.
+                                            </p>
+                                          </div>
+                                          
+                                        <div class="card">
+                                            <div class="card-header">Your Referral Code</div>
+                                            <div class="card-body">
+                                                <p>Your unique referral code:</p>
+                                                <div class="d-flex align-items-center">
+                                                    <input id="referralCode" type="text" class="form-control w-50" value="<%= referralCode %>" readonly />
+                                                    <button onclick="copyReferralCode()" class="btn btn-primary ms-2">Copy</button>
+                                                </div>
+                                                <div class="mt-3">
+                                                    <a href="https://wa.me/?text=Join%20us%20and%20get%20₹50%20on%20signup%20using%20my%20referral%20code%20<%= referralCode %>!"
+                                                        target="_blank" class="btn btn-success">Share on WhatsApp</a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Referral History -->
+                                        <div class="card mt-4">
+                                            <div class="card-header">Referral History</div>
+                                            <div class="card-body">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Referred User</th>
+                                                            <th>Signup Date</th>
+                                                            <th>Reward Earned</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <% if (redeemedUsers.length > 0) { %>
+                                                            <% redeemedUsers.forEach((referral) => { %>
+                                                              <tr>
+                                                                <td><%= referral.userName %></td>
+                                                                <td><%= referral.signupDate.toLocaleDateString() %></td>
+                                                                <td>₹<%= referral.reward %></td>
+                                                              </tr>
+                                                            <% }); %>
+                                                          <% } else { %>
+                                                            <tr>
+                                                              <td colspan="3">No referrals yet.</td>
+                                                            </tr>
+                                                          <% } %>
+                                                          
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- End Referrals -->
+                                </div>
+                            </div>
+                            <!-- End Content Area -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Your Company. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        function copyReferralCode() {
+            const referralCodeInput = document.getElementById("referralCode");
+            referralCodeInput.select();
+            referralCodeInput.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(referralCodeInput.value);
+            alert("Referral code copied!");
+        }
+    </script>
+</body>
+</html>

@@ -3,10 +3,13 @@ const router = express.Router();
 const userController = require("../controllers/user/userContoller");
 const passport = require("passport");
 const productController=require("../controllers/user/productController")
-const {userAuth}=require("../middlewares/auth")
+const {userAuth, adminAuth}=require("../middlewares/auth")
 const profileController=require("../controllers/user/profileController");
 const orderController = require("../controllers/user/orderController");
 const cartController = require("../controllers/user/cartController");
+const wishlistController=require("../controllers/user/wishlistController")
+const walletController=require("../controllers/user/walletController")
+
 
 router.get("/", userController.loadHomePage);
 router.get("/pageNotFound", userController.pageNotFound);
@@ -26,6 +29,7 @@ router.get("/productDetails",productController.productDetails)
 router.get("/shop",userAuth,userController.loadShoppingPage)
 
 router.get('/filtered',userAuth,userController.getFilteredProducts);
+router.get('/shop/category/:category',userAuth, userController.getFilteredProducts);
 // Google authentication route
 router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
@@ -92,6 +96,9 @@ router.get("/myOrders",userAuth,orderController.listMyorders)
 router.get("/addNewaddress",userAuth,orderController.addNewaddress)
 router.post("/addNewaddress",userAuth,orderController.postAddNewAddress);
 router.get("/myOrders",userAuth,orderController.listMyorders)
+router.post("/verifyPayment", userAuth, orderController.verify);
+router.post("/applyCoupon",userAuth,orderController.applyCoupon);
+router.post('/paymentConfirm',userAuth,orderController.paymentConfirm);
 
 
 // Cart Management
@@ -102,6 +109,28 @@ router.get("/deleteItem", userAuth, cartController.deleteProduct)
 router.get("/checkStock",userAuth,cartController.getCheckStock)
 router.get('/getCartCount',userAuth,cartController.getCartCount)
 router.post("/clearCart",userAuth,cartController.clearCart)
+
+
+//wishlist management//
+router.get("/wishlist",userAuth,wishlistController.loadwishlistPage)
+router.post("/addToWishlist",userAuth,wishlistController.addToWishlist)
+router.get("/removeWishlist",userAuth,wishlistController.removeProduct)
+
+
+
+
+
+//return 
+router.post("/requestReturn",userAuth,orderController.returnRequest)
+
+
+//wallet management//
+router.get("/wallet", userAuth,walletController.getWalletPage);
+
+//refferal
+
+router.get('/referral',userAuth,userController.getReferralPage);
+
 
 // Correct export statement
 module.exports = router;

@@ -216,7 +216,41 @@
             }
         }
         
+        .wishlist-btn {
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    z-index: 10; /* High z-index to stay above the image */
+}
+.no-products-message {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 1.2em;
+  color: #b46e59; /* Matches your pinkish color scheme */
+}
 
+
+/* Change the color of the heart when clicked */
+.wishlist-btn .fas {
+    color: #b46e59cc; /* Your pinkish color */
+}
+
+/* Hover effect for images */
+.hover-zoom {
+    transition: transform 0.3s ease;
+}
+
+.card-header:hover .hover-zoom {
+    transform: scale(1.1); /* Zoom in on hover */
+}
+
+/* Ensure the wishlist button is not affected by the image hover */
+.card-header {
+    position: relative;
+}
 </style>
 </head>         
 
@@ -335,11 +369,18 @@
     </a>
     <div class="dropdown-menu position-absolute bg-secondary border-0 rounded-0 w-100 m-0">
         <ul>
-            <% brands.forEach(brand => { %>
-                <li class="filter-item">
-                    <a href="/filtered?brand=<%= brand.brandName%>&query=<%= searchQuery %>&sort=<%= sortOption  %>" class="dropdown-item"><%= brand.brandName %></a>
-                </li>
-            <% }) %>
+            <% if (categories.length > 0) { %>
+                <% categories.forEach(category => { %>
+                  <li class="filter-item">
+                    <a href="/filtered?category=<%= category._id %>&query=<%= searchQuery %>&sort=<%= sortOption %>" class="dropdown-item">
+                      <%= category.name %>
+                    </a>
+                  </li>
+                <% }) %>
+              <% } else { %>
+                <li>No categories available</li>
+              <% } %>
+              
         </ul>
     </div>
 </div>
@@ -576,36 +617,59 @@
         <!-- Shop Sidebar End -->
 
 
-  
-<div class="col-lg-9 col-md-12">
-    <div class="row pb-3">
-        <% for(let i = 0; i < products.length; i++) { %>
-            <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
-                <div class="card product-item border-0 mb-4">
-                    <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
-                        <img class="img-fluid w-100" src="/uploads/re-image/<%= products[i].productImages[0] %>" alt="<%= products[i].productName %>">
-                    </div>
-                    <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
-                        <h6 class="text-truncate mb-3"><%= products[i].productName %></h6>
-                        <div class="d-flex justify-content-center">
-                            <h6>₹<%= products[i].salePrice %></h6>
-                            <h6 class="text-muted ml-2"><del>₹<%= products[i].regularPrice %></del></h6>
+        <div class="col-lg-9 col-md-12">
+            <div class="row pb-3">
+                <div class="product-list">
+                    <% if (products.length > 0) { %>
+                      <% products.forEach(product => { %>
+                        <div class="product-item">
+                          <!-- Product details -->
+                          <h3><%= product.name %></h3>
+                         
+                          <!-- Add more product details as needed -->
+                        </div>
+                      <% }) %>
+                    <% } else { %>
+                      <div class="no-products-message">
+                        <p>Sorry, your searched product is not there, but we will try to add that.</p>
+                      </div>
+                    <% } %>
+                  </div>
+                <% for(let i = 0; i < products.length; i++) { %>
+                    <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
+                        <div class="card product-item border-0 mb-4 position-relative">
+                            <!-- Wishlist Button -->
+                            <button 
+                                class="btn btn-love position-absolute wishlist-btn" 
+                                onclick="addToWishlist('<%= products[i]._id %>', this)"
+                            >
+                                <i class="far fa-heart"></i>
+                            </button>
+                            
+                            <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
+                                <img class="img-fluid w-100 hover-zoom" src="/uploads/re-image/<%= products[i].productImages[0] %>" alt="<%= products[i].productName %>">
+                            </div>
+                            <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
+                                <h6 class="text-truncate mb-3"><%= products[i].productName %></h6>
+                                <div class="d-flex justify-content-center">
+                                    <h6>₹<%= products[i].salePrice %></h6>
+                                    <h6 class="text-muted ml-2"><del>₹<%= products[i].regularPrice %></del></h6>
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between bg-light border">
+                                <a href="/productDetails?id=<%= products[i]._id %>" class="btn btn-sm text-dark p-0">
+                                    <i class="fas fa-eye text-primary mr-1"></i>View Detail
+                                </a>
+                                <a href="#" class="btn btn-sm text-dark p-0" onclick="addToCart('<%=products[i]._id%>')">
+                                    <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
+                                </a>
+                            </div>
                         </div>
                     </div>
-                    <div class="card-footer d-flex justify-content-between bg-light border">
-                        <a href="/productDetails?id=<%= products[i]._id %>" class="btn btn-sm text-dark p-0">
-                            <i class="fas fa-eye text-primary mr-1"></i>View Detail
-                        </a>
-                        <a href="#" class="btn btn-sm text-dark p-0" onclick="addToCart('<%=products[i]._id%>')">
-                            <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
-                        </a>
-                    </div>
-                </div>
+                <% } %>
             </div>
-            <% } %>
-    </div>
-</div>
-
+        </div>    
+     
               
 <div class="col-12 pb-1">
     <nav aria-label="Page navigation">
@@ -846,6 +910,52 @@ $(document).ready(function() {
         var form = document.getElementById('combineSearchForm');
         form.classList.toggle('d-none'); // Toggle visibility of the form
     });
+
+
+
+
+    function addToWishlist(productId, button) {
+    const icon = button.querySelector('i');
+
+    $.ajax({
+        url: "/addTowishlist",
+        method: "POST",
+        data: { productId: productId },
+        success: (response) => {
+            if (response.status === 'added') {
+                // Product successfully added to wishlist
+                Swal.fire({
+                    title: "Added to Wishlist",
+                    text: "The product has been added to your wishlist.",
+                    icon: "success",
+                    timer: 2000
+                });
+
+                // Update UI to show it's in the wishlist
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                button.style.color = '#b46e59cc'; // Your pinkish color
+            } else if (response.status === 'already') {
+                // Product is already in wishlist
+                Swal.fire({
+                    title: "Already in Wishlist",
+                    text: "This product is already in your wishlist.",
+                    icon: "info",
+                    timer: 2000
+                });
+            }
+        },
+        error: (err) => {
+            Swal.fire({
+                title: "Error",
+                text: "There was an error adding the product to your wishlist.",
+                icon: "error",
+                timer: 2000
+            });
+        }
+    });
+}
+
 
 </script>
 </body>

@@ -120,10 +120,9 @@ const getAllProducts = async (req, res) => {
         res.redirect("/admin/pageerror");
     }
 };
-
 const addProductOffer = async (req, res) => {
     try {
-        const { percentage, productId } = req.body;
+        const { percentage, productId, offerType, validUntil } = req.body;
 
         const product = await Product.findById(productId);
         if (!product) {
@@ -131,12 +130,14 @@ const addProductOffer = async (req, res) => {
         }
 
         const category = await Category.findById(product.category);
-        if (category.categoryOffer > percentage) {
+        if (!category || (category.categoryOffer && category.categoryOffer > percentage)) {
             return res.json({ status: false, message: "This product already has a better category offer" });
         }
 
         product.salePrice = product.regularPrice - Math.floor(product.regularPrice * (percentage / 100));
         product.productOffer = percentage;
+        product.offerType = offerType;
+        product.validUntil = validUntil;
 
         await product.save();
         res.json({ status: true });
@@ -152,11 +153,13 @@ const removeProductOffer = async (req, res) => {
 
         const product = await Product.findById(productId);
         if (!product) {
-            return res.status(400).json({ status: false, message: "Product not found" });
+            return res.status(400).json({ status: false, message: "Product not found for offer removal" });
         }
 
         product.salePrice = product.regularPrice;
         product.productOffer = 0;
+        product.offerType = null;
+        product.validUntil = null;
 
         await product.save();
         res.json({ status: true });
@@ -165,7 +168,6 @@ const removeProductOffer = async (req, res) => {
         res.status(500).json({ status: false, message: "Internal server error" });
     }
 };
-
 
 const blockProduct = async (req, res) => {
     try {

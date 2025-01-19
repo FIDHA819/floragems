@@ -32,6 +32,15 @@ const productSchema = new Schema(
       type: Number,
       default: 0,
     },
+    offerType: {
+      type: String,
+      enum: ["percentage", "flat"], // Add more types if needed
+      default: "percentage",
+    },
+    validUntil: {
+      type: Date, // Date field for offer expiration
+      required: false,
+    },
     quantity: {
       type: Number,
       required: true,

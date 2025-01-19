@@ -48,22 +48,48 @@ const orderSchema = new Schema(
         },
       },
     ],
-    payment: {
+    paymentMethod: {
       type: String,
-      required: true, // Payment method (e.g., 'COD', 'Credit Card')
+      required: true,
+      enum:[
+        "razorpay",
+        "cod"
+      ] // Payment method (e.g., 'COD', 'Credit Card')
     },
-    status: {
+    paymentStatus: {
       type: String,
       required: true,
       enum: [
-        "Pending",
-        "Processing",
-        "Shipped",
-        "Delivered",
-        "Cancelled",
-        "Return Request",
-        "Returned",
-      ], // Enum for order status
+        "Pending",   // Payment is not yet completed
+        "Paid",      // Payment has been completed
+        "Failed",    // Payment failed
+        "Refunded",
+        "Confirmed" ,
+        "Cancelled", // Payment was refunded
+        "Refund Processing"
+      ], // Enum for payment status
+      default: "Pending", // Default payment status
+    },
+    orderStatus: {
+      type: String,
+      required: true,
+      enum: [
+        "Pending",   // Order is placed but not processed yet
+        "Processing", // Order is being processed
+        "Shipped",    // Order is shipped
+        "Delivered",  // Order has been delivered
+        "Cancelled",  // Order has been cancelled
+        "Return Request", // Order has a return request
+        "Returned", 
+        "Refund Request",
+        "Return Request"  ,
+        "Return Pending",
+        "rejected",
+        "Return Failed",
+        "Return Processing"
+        // Order has been returned
+      ], // Enum for order status (shipping or fulfillment status)
+      default: "Pending", // Default order status
     },
     address: {
       addressType: { type: String, required: true },
@@ -82,6 +108,9 @@ const orderSchema = new Schema(
     couponApplied: {
       type: Boolean,
       default: false, // Indicates if a coupon was applied
+    },
+    couponName: {
+      type: String, // Store the coupon name (if applied)
     },
   },
   { timestamps: true } // Automatically add `createdAt` and `updatedAt`

@@ -23,7 +23,7 @@ const productDetails = async (req, res) => {
     const categoryOffer = findCategory?.categoryOffer || 0;
     const productOffer = product.productOffer || 0;
     const totalOffer = categoryOffer + productOffer;
-
+    
     res.render("user/details", {
       user: userData,
       product: product,
@@ -31,6 +31,8 @@ const productDetails = async (req, res) => {
       category: findCategory,
       totalOffer: totalOffer,
       topSellers: topSellers, 
+      validUntil: product.validUntil || null,
+      offerType: product.offerType || "percentage" 
     });
   } catch (error) {
     console.error("Error fetching product details:", error);

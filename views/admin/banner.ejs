@@ -1,0 +1,373 @@
+<%- include("../../views/partials/admin/header") %>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+ /* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-size: 1.5rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Form Container */
+.form-container {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+input[type="text"],
+input[type="file"],
+button {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+button {
+  background-color: #b46e59cc;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #9e5a4a;
+}
+
+/* Table Styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table th,
+table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+table th {
+  background-color: #f4f4f4;
+  color: #555;
+}
+
+table td {
+  background-color: #fff;
+  color: #333;
+}
+
+table td img {
+  max-width: 100px;
+  border-radius: 5px;
+}
+
+table .banner-actions button {
+  padding: 8px 12px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+table .banner-actions button:hover {
+  background-color: #45a049;
+}
+
+table .delete {
+  background-color: #f44336;
+}
+
+table .delete:hover {
+  background-color: #d32f2f;
+}
+
+/* Active Banner Status */
+table td:nth-child(5) {
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+table td:nth-child(5):not(.active) {
+  color: #f44336;
+}
+
+input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  table th, table td {
+    padding: 10px;
+  }
+
+  input[type="text"],
+  input[type="file"],
+  button {
+    font-size: 0.9rem;
+  }
+
+  .form-container {
+    padding: 15px;
+  }
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Banner Management</h2>
+
+    <!-- Add Banner Form -->
+    <div class="form-container" id="addBannerFormContainer">
+      <h3>Add New Banner</h3>
+      <form id="addBannerForm">
+        <input type="file" id="bannerImage" required />
+        <input type="text" id="bannerTitle" placeholder="Banner Title" required />
+        <input type="text" id="bannerSubtitle" placeholder="Banner Subtitle" required />
+        <input type="text" id="bannerLink" placeholder="Link" required />
+        <button type="submit">Add Banner</button>
+      </form>
+    </div>
+
+    <!-- Update Banner Form -->
+    <div class="form-container" id="updateBannerFormContainer" style="display: none;">
+      <h3>Update Banner</h3>
+      <form id="updateBannerForm">
+        <input type="hidden" id="updateBannerId" />
+        <input type="file" id="updateBannerImage" />
+        <input type="text" id="updateBannerTitle" placeholder="Banner Title" />
+        <input type="text" id="updateBannerSubtitle" placeholder="Banner Subtitle" />
+        <input type="text" id="updateBannerLink" placeholder="Link" />
+        <label>
+          <input type="checkbox" id="updateBannerActive" /> Active
+        </label>
+        <button type="submit">Update Banner</button>
+      </form>
+    </div>
+
+    <!-- Banner List Table -->
+    <table id="bannerTable">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Title</th>
+          <th>Subtitle</th>
+          <th>Link</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Banners will be dynamically inserted here -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+  <script>
+    // Add Banner
+    document.getElementById("addBannerForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const imageUrl = document.getElementById("bannerImage").files[0];
+      const title = document.getElementById("bannerTitle").value;
+      const subtitle = document.getElementById("bannerSubtitle").value;
+      const link = document.getElementById("bannerLink").value;
+
+      const formData = new FormData();
+      formData.append("image", imageUrl);
+      formData.append("title", title);
+      formData.append("subtitle", subtitle);
+      formData.append("link", link);
+
+      $.ajax({
+        url: "/admin/addBanner",
+        method: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+          if (response.status) {
+            Swal.fire("Success", "Banner added successfully!", "success");
+            location.reload();
+          }
+        },
+        error: function () {
+          Swal.fire("Error", "Error adding banner", "error");
+        }
+      });
+    });
+
+   // Fetch and display banners
+function fetchBanners() {
+    $.get("/admin/getBannerPage", function (response) {
+        console.log("Server response:", response);  // Log the full response to inspect its structure
+
+        // Check if banners data is present and is an array
+        if (response.banners && Array.isArray(response.banners)) {
+            const bannerTableBody = document.querySelector("#bannerTable tbody");
+            bannerTableBody.innerHTML = "";  // Clear any existing rows
+
+            // Loop through each banner and create a table row
+            response.banners.forEach(banner => {
+                const row = document.createElement("tr");
+
+                // Add banner details into the table row
+                row.innerHTML = `
+                    <td><img src="${banner.imageUrl || '/default-image.jpg'}" alt="${banner.title || 'No title'}" width="100"></td>
+                    <td>${banner.title || 'No title'}</td>
+                    <td>${banner.subtitle || 'No subtitle'}</td>
+                    <td><a href="${banner.link || '#'}" target="_blank">${banner.link || 'No link'}</a></td>
+                    <td>${banner.isActive ? 'Active' : 'Inactive'}</td>
+                    <td>
+                      <button class="btn btn-warning" onclick="editBanner('${banner._id}')">Edit</button>
+                       <button class="btn btn-danger" onclick="deleteBanner('${banner._id}')">Delete</button>
+
+                       
+                    </td>
+                `;
+
+                // Append the row to the table body
+                bannerTableBody.appendChild(row);
+            });
+        } else {
+            console.error("Banners data is missing or not an array.");
+        }
+    }).fail(function (error) {
+        console.error("Error fetching banners:", error);
+    });
+}
+
+// Call the fetchBanners function to load the data when the page loads
+document.addEventListener("DOMContentLoaded", function() {
+    fetchBanners();
+});
+
+    
+
+    // Edit Banner
+    function editBanner(bannerId) {
+      $.get(`/admin/getBanner/${bannerId}`, function (response) {
+        const banner = response.banner;
+        document.getElementById("updateBannerId").value = banner._id;
+        document.getElementById("updateBannerTitle").value = banner.title;
+        document.getElementById("updateBannerSubtitle").value = banner.subtitle;
+        document.getElementById("updateBannerLink").value = banner.link;
+        document.getElementById("updateBannerActive").checked = banner.isActive;
+        document.getElementById("addBannerFormContainer").style.display = "none";
+        document.getElementById("updateBannerFormContainer").style.display = "block";
+      });
+    }
+
+    // Update Banner
+    document.getElementById("updateBannerForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const bannerId = document.getElementById("updateBannerId").value;
+      const imageUrl = document.getElementById("updateBannerImage").files[0];
+      const title = document.getElementById("updateBannerTitle").value;
+      const subtitle = document.getElementById("updateBannerSubtitle").value;
+      const link = document.getElementById("updateBannerLink").value;
+      const isActive = document.getElementById("updateBannerActive").checked;
+
+      const formData = new FormData();
+      formData.append("bannerId", bannerId);
+      formData.append("imageUrl", imageUrl);
+      formData.append("title", title);
+      formData.append("subtitle", subtitle);
+      formData.append("link", link);
+      formData.append("isActive", isActive);
+
+      $.ajax({
+        url: "/admin/updateBanner",  // This should match the route path exactly
+    method: "POST",
+    data: formData,
+    processData: false,
+    contentType: false,
+    success: function (response) {
+        if (response.status) {
+            Swal.fire("Success", "Banner updated successfully!", "success");
+            location.reload();
+        }
+    },
+    error: function () {
+        Swal.fire("Error", "Error updating banner", "error");
+    }
+});
+    })
+
+    // Delete Banner
+    function deleteBanner(bannerId) {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "This will delete the banner permanently.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $.ajax({
+            url: `/admin/deleteBanner/${bannerId}`,
+            method: "DELETE",
+            success: function (response) {
+              if (response.status) {
+                Swal.fire("Deleted!", "Banner has been deleted.", "success");
+                location.reload();
+              }
+            },
+            error: function () {
+              Swal.fire("Error", "Error deleting banner", "error");
+            }
+          });
+        }
+      });
+    }
+
+    // Fetch banners on page load
+    fetchBanners();
+  </script>
+
+</body>
+<%- include("../../views/partials/admin/footer") %>

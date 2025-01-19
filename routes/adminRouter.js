@@ -11,6 +11,8 @@ const { adminAuth } = require("../middlewares/auth");
 const storage=require("../helpers/multer")
 const uploads=multer({storage:storage})
 const orderController = require("../controllers/admin/orderController");
+const couponController=require("../controllers/admin/couponController");
+const bannerController=require("../controllers/admin/bannerController")
 
 // Admin Routes
 router.get("/login", adminController.loadLogin);
@@ -63,6 +65,36 @@ router.post("/editCategory/:id",adminAuth,categoryController.editCategory);
 router.get("/orderList", adminAuth, orderController.getOrderListPageAdmin)
 router.get("/orderDetailsAdmin", adminAuth, orderController.getOrderDetailsPageAdmin)
 router.get("/changeStatus", adminAuth, orderController.changeOrderStatus);
+
+
+
+//coupon controller//
+router.get("/coupon",adminAuth,couponController.loadCoupon)
+router.post("/createcoupon",adminAuth,couponController.createCoupon)
+router.get("/editCoupon",adminAuth,couponController.editCoupon)
+router.post("/updateCoupon",adminAuth,couponController.updateCoupon)
+router.get("/deleteCoupon",adminAuth,couponController.deleteCoupon)
+
+//return controller
+router.post("/respondToReturn", adminAuth, orderController.respondReturn);
+router.post("/updateReturnStatus",adminAuth,orderController.updateReturnStatus);
+router.post("/changeOrderStatusToReturnProcessing",adminAuth,orderController.confirmReturnStatus)
+router.post("/completereturn",adminAuth,orderController.completeReturn)
+
+
+  // Banner routes
+router.get("/banner", adminAuth, bannerController.getBannerPage);
+router.post("/addBanner", adminAuth, uploads.single("image"), bannerController.addBanner);
+router.post("/updateBanner",adminAuth,uploads.single("image"),bannerController.updateBanner);
+router.get("/getBannerPage", adminAuth, bannerController.getBanner); // Ensure this route is defined
+router.get("/getBanner/:id", adminAuth, bannerController.getBannerById); // Get banner for editing
+router.delete("/deleteBanner/:id", adminAuth, bannerController.deleteBanner);
+
+//salesReport
+router.get('/salesReport',adminAuth,orderController.getSalesReport);
+router.get('/download-sales-report-pdf',adminAuth,orderController.downloadSalesReportPDF);
+router.get('/download-sales-report-excel',adminAuth,orderController.downloadSalesReportExcel);
+
 
 
 

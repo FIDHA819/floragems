@@ -10,7 +10,7 @@
         <h5 class="card-title">Order ID: <%= orders.orderId %></h5>
         <p><strong>Customer Name:</strong>
             <% if (orders.userId) { %>
-                <%= orders.userId.name %> <!-- Replace 'name' with the actual field in your User schema -->
+                <%= orders.userId.name %> <!-- Assuming 'name' is a field in your User schema -->
             <% } else { %>
                 N/A <!-- Fallback text if user is not found -->
             <% } %>
@@ -26,11 +26,21 @@
         <% } else { %>
             <p>No address available.</p>
         <% } %>
+        
         <p><strong>Payment Method:</strong> <%= orders.paymentMethod %></p>
-        <p><strong>Status:</strong> <%= orders.status %></p>
-        <p><strong>Total Price:</strong> $<%= orders.totalPrice.toFixed(2) %></p>
-        <p><strong>Discount Applied:</strong> $<%= discount.toFixed(2) %></p>
-        <p><strong>Final Amount:</strong> $<%= finalAmount.toFixed(2) %></p>
+        <p><strong>Payment Status:</strong> <%= orders.paymentStatus %></p> <!-- Added paymentStatus -->
+        <p><strong>Order Status:</strong> <%= orders.orderStatus %></p> <!-- Added orderStatus -->
+        <p><strong>Total Price:</strong> ₹<%= orders.totalPrice.toFixed(2) %></p>
+        
+        <% if (couponDetails) { %>
+            <p><strong>Coupon Applied:</strong> <%= couponDetails.name %></p>
+            <p><strong>Coupon Discount:</strong> ₹<%= couponDiscount.toFixed(2) %></p>
+        <% } else { %>
+            <p>No coupon applied.</p>
+        <% } %>
+        
+        <p><strong>Discount Applied:</strong> ₹<%= discount.toFixed(2) %></p>
+        <p><strong>Final Amount:</strong> ₹<%= finalAmount.toFixed(2) %></p>
         <hr>
         <h5>Products:</h5>
         <table class="table table-striped">
@@ -48,8 +58,8 @@
                     <tr>
                       <td><%= item.product.productName %></td> <!-- Assuming `productName` is a field in Product -->
                       <td><%= item.quantity %></td>
-                      <td>$<%= item.price.toFixed(2) %></td>
-                      <td>$<%= item.total.toFixed(2) %></td>
+                      <td>₹<%= item.price.toFixed(2) %></td>
+                      <td>₹<%= (item.price * item.quantity).toFixed(2) %></td> <!-- Calculate total -->
                     </tr>
                   <% }) %>
                 <% } else { %>
@@ -57,23 +67,75 @@
                     <td colspan="4">No products found for this order.</td>
                   </tr>
                 <% } %>
-              </tbody>
-              
+            </tbody>
         </table>
         <hr>
         <div class="d-flex justify-content-between">
             <div>
                 <h5>Order Status</h5>
-                <p><strong>Status:</strong> <%= orders.status %></p>
+
+                <p><strong>Status:</strong> <%= orders.orderStatus %></p>
+                <% if (orders.orderStatus === "Pending") { %>
                 <button class="btn btn-primary" onclick="changeOrderStatus('<%= orders.orderId %>', 'Processing')" style="width: 150px;">Start Processing</button>
-                <% if (orders.status === "Processing") { %>
+                <% } %>
+                <% if (orders.orderStatus === "Processing") { %>
                 <button class="btn btn-warning" onclick="changeOrderStatus('<%= orders.orderId %>', 'Shipped')" style="width: 150px;">Mark as Shipped</button>
                 <% } %>
-                <% if (orders.status === "Shipped") { %>
+                <% if (orders.orderStatus === "Shipped") { %>
                 <button class="btn btn-success" onclick="changeOrderStatus('<%= orders.orderId %>', 'Delivered')" style="width: 150px;">Mark as Delivered</button>
                 <% } %>
+
+                <% if (orders.orderStatus === "Return Pending") { %>
+                  <button class="btn btn-primary" onclick="changeOrderReturnStatus('<%= orders.orderId %>', 'Return Processing')" style="width: 150px;">Start Processing</button>
+              <% } %>
+              
+              <!-- Mark as Completed Button -->
+              <% if (orders.orderStatus === "Return Processing") { %>
+                  <button class="btn btn-success" onclick="completeReturn('<%= orders.orderId %>')" style="width: 150px;">Completed</button>
+              <% } %>
+              
+      
             </div>
             <div>
+              <div class="card mt-3">
+                <div class="card-header">
+                  <h5>Return Requests</h5>
+                </div>
+                <div class="card-body">
+                  <% if (orders.orderStatus === "Return Request") { %>
+                    <table class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th scope="col"><b>Order ID</b></th>
+                          <th scope="col"><b>Message</b></th>
+                          <th scope="col"><b>Action</b></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% if (notifications.length > 0) { %>
+                          <% notifications.forEach(notification => { %>
+                            <tr>
+                              <td><%= notification.orderId %></td>
+                              <td><%= notification.message %></td>
+                              <td>
+                                <button type="button" class="btn btn-success" onclick="updateReturnStatus('accepted', '<%= orders.orderId %>')">Accept</button>
+                                <button type="button" class="btn btn-danger" onclick="updateReturnStatus('rejected', '<%= orders.orderId %>')">Reject</button>
+                              </td>
+                            </tr>
+                          <% }) %>
+                        <% } else { %>
+                          <tr>
+                            <td colspan="3">No return requests.</td>
+                          </tr>
+                        <% } %>
+                      </tbody>
+                    </table>
+                  <% } else { %>
+                    <p>No return requests for this order.</p>
+                  <% } %>
+                </div>
+              </div>
+              
                 <h5>Invoice Date</h5>
                 <p><%= orders.invoiceDate ? orders.invoiceDate.toDateString() : "Not available" %></p>
             </div>
@@ -86,37 +148,100 @@
 
 <script>
   function changeOrderStatus(orderId, newStatus) {
-  Swal.fire({
-    title: `Change Status to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}?`,
-    text: `Are you sure you want to change the status of this order to ${newStatus}?`,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3885d6",
-    cancelButtonColor: "d33",
-    confirmButtonText: "Yes, change it!"
-  }).then((result) => {
-    if (result.isConfirmed) {
-      $.ajax({
-        url: `/admin/changeStatus`,
-        method: "GET",
-        data: {
-          orderId: orderId,
-          status: newStatus
-        },
-        success: (response) => {
-          if (response.status) {
-            Swal.fire("Status Updated", `Order status has been changed to ${newStatus}.`, "success");
-            location.reload(); // Reload the page to see the updated status
-          } else {
-            Swal.fire("Error", "Failed to update order status", "error");
+    Swal.fire({
+      title: `Change Status to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}?`,
+      text: `Are you sure you want to change the status of this order to ${newStatus}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3885d6",
+      cancelButtonColor: "d33",
+      confirmButtonText: "Yes, change it!"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $.ajax({
+          url: `/admin/changeStatus`,
+          method: "GET",
+          data: {
+            orderId: orderId,
+            status: newStatus
+          },
+          success: (response) => {
+            if (response.status) {
+              Swal.fire("Status Updated", `Order status has been changed to ${newStatus}.`, "success");
+              location.reload(); // Reload the page to see the updated status
+            } else {
+              Swal.fire("Error", "Failed to update order status", "error");
+            }
+          },
+          error: (error) => {
+            Swal.fire("Error", "An error occurred", "error");
           }
+        });
+      }
+    });
+  }
+  function updateReturnStatus(status, orderId) {
+    $.ajax({
+        url: '/admin/updateReturnStatus',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ orderId: orderId, status: status }),
+        success: (response) => {
+            if (response.success) {
+                Swal.fire("Success", `Return request ${status} successfully.`, "success").then(() => {
+                    window.location.reload(); // Reload the page to see the updated status
+                });
+            } else {
+                Swal.fire("Error", response.message || "Failed to update return status.", "error");
+            }
         },
         error: (error) => {
-          Swal.fire("Error", "An error occurred", "error");
+            Swal.fire("Error", error.responseText || "An unexpected error occurred.", "error");
         }
-      });
-    }
-  });
+    });
+}
+// Change order status to "Return Processing"
+function changeOrderReturnStatus(orderId, newStatus) {
+    $.ajax({
+        url: '/admin/changeOrderStatusToReturnProcessing',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ orderId: orderId }),
+        success: (response) => {
+            if (response.success) {
+                Swal.fire("Success", "Order status changed to Return Processing.", "success").then(() => {
+                    window.location.reload(); // Reload the page to see the updated status
+                });
+            } else {
+                Swal.fire("Error", response.message || "Failed to update order status.", "error");
+            }
+        },
+        error: (error) => {
+            Swal.fire("Error", error.responseText || "An unexpected error occurred.", "error");
+        }
+    });
+}
+
+// Complete the return process (mark as returned and process refund)
+function completeReturn(orderId) {
+    $.ajax({
+        url: '/admin/completeReturn',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ orderId: orderId }),
+        success: (response) => {
+            if (response.success) {
+                Swal.fire("Success", "Order marked as returned and refund processed.", "success").then(() => {
+                    window.location.reload(); // Reload the page to see the updated status
+                });
+            } else {
+                Swal.fire("Error", response.message || "Failed to process return and refund.", "error");
+            }
+        },
+        error: (error) => {
+            Swal.fire("Error", error.responseText || "An unexpected error occurred.", "error");
+        }
+    });
 }
 
 </script>

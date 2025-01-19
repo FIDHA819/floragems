@@ -20,7 +20,7 @@
                 <th scope="col"><b>Product name</b></th>
                 <th scope="col"><b>Category</b></th>
                 <th scope="col"><b>Sale Price</b></th>
-                <th scope="col"><b>Offer Price</b></th>
+                <th scope="col"><b>Offer Percentage</b></th>
                 <th scope="col"><b>Offer</b></th>
                 <th scope="col"><b>Quantity</b></th>
                 <th scope="col"><b>Action</b></th>
@@ -109,56 +109,104 @@
   }
 
   async function addOffer(productId) {
-      const { value: amount } = await Swal.fire({
+    const { value: percentage } = await Swal.fire({
         title: "Offer Percentage",
         input: "number",
         inputLabel: "Percentage",
         inputPlaceholder: "Enter percentage (%)",
         inputAttributes: { min: 1, max: 100, step: 1 },
         showCancelButton: true,
-      });
-      $.ajax({
+    });
+
+    if (!percentage || percentage < 1 || percentage > 100) {
+        Swal.fire("Invalid Input", "Please enter a valid percentage between 1 and 100.", "error");
+        return;
+    }
+
+    const { value: offerType } = await Swal.fire({
+        title: "Offer Type",
+        input: "select",
+        inputOptions: {
+            percentage: "Percentage",
+            flat: "Flat Discount",
+        },
+        inputPlaceholder: "Select offer type",
+        showCancelButton: true,
+    });
+
+    if (!offerType) {
+        Swal.fire("Invalid Input", "Please select a valid offer type.", "error");
+        return;
+    }
+
+    const { value: validUntil } = await Swal.fire({
+        title: "Offer Validity",
+        input: "text",
+        inputLabel: "Valid Until (YYYY-MM-DD)",
+        inputPlaceholder: "Enter expiry date",
+        showCancelButton: true,
+    });
+
+    if (!validUntil || isNaN(new Date(validUntil).getTime())) {
+        Swal.fire("Invalid Input", "Please enter a valid date in YYYY-MM-DD format.", "error");
+        return;
+    }
+
+    $.ajax({
         url: "/admin/addProductOffer",
         method: "POST",
-        data: { percentage: amount, productId: productId },
+        data: { percentage, productId, offerType, validUntil },
         success: (response) => {
             if (response.status) {
-                Swal.fire("Offer added", "Offer has been added successfully", "success");
-                location.reload();
+                Swal.fire("Offer added", "Offer has been added successfully", "success").then(() => location.reload());
             } else {
-                Swal.fire("Error", "Failed to add offer", "error");
+                Swal.fire("Error", response.message || "Failed to add offer", "error");
             }
-        }
-      });
-  }
+        },
+        error: () => {
+            Swal.fire("Error", "An unexpected error occurred", "error");
+        },
+    });
+}
+function removeOffer(productId) {
+    Swal.fire({
+        title: "Remove Offer",
+        text: "Are you sure you want to remove this offer?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3885d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, remove it!",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: "Processing...",
+                text: "Please wait while we remove the offer.",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
 
-  function removeOffer(productId) {
-      Swal.fire({
-          title: "Remove Offer",
-          text: "Are you sure you want to remove this offer?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3885d6",
-          cancelButtonColor: "d33",
-          confirmButtonText: "Yes, remove it!"
-      }).then((result) => {
-          if (result.isConfirmed) {
-              $.ajax({
-                  url: "/admin/removeProductOffer",
-                  method: "POST",
-                  data: { productId: productId },
-                  success: (response) => {
-                      if (response.status) {
-                          Swal.fire("Offer removed", "The offer has been removed successfully", "success");
-                          location.reload();
-                      } else {
-                          Swal.fire("Error", "Failed to remove offer", "error");
-                      }
-                  }
-              });
-          }
-      });
-  }
+            $.ajax({
+                url: "/admin/removeProductOffer",
+                method: "POST",
+                data: { productId },
+                success: (response) => {
+                    if (response.status) {
+                        Swal.fire("Offer removed", "The offer has been removed successfully", "success").then(() => location.reload());
+                    } else {
+                        Swal.fire("Error", response.message || "Failed to remove offer", "error");
+                    }
+                },
+                error: () => {
+                    Swal.fire("Error", "An unexpected error occurred", "error");
+                },
+            });
+        }
+    });
+}
+
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

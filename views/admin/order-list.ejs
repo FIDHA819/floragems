@@ -38,18 +38,18 @@
                     <% } %>
                   </td>
                   
-                <td>$<%= orders[i].totalPrice.toFixed(2) %></td>
-                <td><%= orders[i].status %></td>
-                <td><%= orders[i].payment %></td>
+                  <td>₹<%= orders[i].finalAmount.toFixed(2) %></td>
+                <td><%= orders[i].orderStatus %></td>
+                <td><%= orders[i].paymentMethod %></td>
                 <% if (orders[i]) { %>
                     <td>
                         
 
-                        <% if (orders[i].status === "Pending") { %>
+                        <% if (orders[i].orderStatus === "Pending") { %>
                             <button class="btn btn-success" onclick="changeOrderStatus('<%= orders[i].orderId %>', 'Processing')" style="width: 100px;">Start Processing</button>
-                        <% } else if (orders[i].status === "Processing") { %>
+                        <% } else if (orders[i].orderStatus === "Processing") { %>
                             <button class="btn btn-warning" onclick="changeOrderStatus('<%= orders[i].orderId %>', 'Shipped')" style="width: 100px;">Mark as Shipped</button>
-                        <% } else if (orders[i].status === "Shipped") { %>
+                        <% } else if (orders[i].orderStatus === "Shipped") { %>
                             <button class="btn btn-primary" onclick="changeOrderStatus('<%= orders[i].orderId %>', 'Delivered')" style="width: 100px;">Mark as Delivered</button>
                         <% } %>
                     </td>
@@ -83,7 +83,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
 <script>
- function changeOrderStatus(orderId, newStatus) {
+
+function changeOrderStatus(orderId, newStatus) {
   Swal.fire({
     title: `Change Status to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}?`,
     text: `Are you sure you want to change the status of this order to ${newStatus}?`,
@@ -116,6 +117,7 @@
     }
   });
 }
+
 
 </script>
 <%- include("../../views/partials/admin/footer") %>
