@@ -26,7 +26,7 @@ router.get("/logout",userController.logout)
 router.get("/productDetails",productController.productDetails)
 
 ///shopping page//
-router.get("/shop",userAuth,userController.loadShoppingPage)
+router.get("/shop",userController.loadShoppingPage)
 
 router.get('/filtered',userAuth,userController.getFilteredProducts);
 router.get('/shop/category/:category',userAuth, userController.getFilteredProducts);
@@ -86,11 +86,11 @@ router.get("/deleteAddress",userAuth,profileController.deleteAddress)
 
 
 // Order Management
-router.get("/checkout", orderController.getCheckoutPage);
+router.get("/checkout",userAuth, orderController.getCheckoutPage);
 router.get("/deleteItems", userAuth, orderController.deleteProduct);
 router.post("/orderPlaced", userAuth, orderController.orderPlaced);
 router.get("/orderDetails",  orderController.getOrderDetailsPage);
-router.get('/orderDetails/:orderId', orderController.getOrderDetailsPages);
+router.get('/orderDetails/:orderId', userAuth,orderController.getOrderDetailsPages);
 router.post("/cancelOrder", userAuth, orderController.cancelOrder);
 router.get("/myOrders",userAuth,orderController.listMyorders)
 router.get("/addNewaddress",userAuth,orderController.addNewaddress)
@@ -103,7 +103,7 @@ router.post('/paymentConfirm',userAuth,orderController.paymentConfirm);
 
 // Cart Management
 router.get("/cart",userAuth, cartController.getCartPage)
-router.post("/addToCart", cartController.addToCart)
+router.post("/addToCart", userAuth,cartController.addToCart)
 router.post("/changeQuantity", userAuth,cartController.changeQuantity)
 router.get("/deleteItem", userAuth, cartController.deleteProduct)
 router.get("/checkStock",userAuth,cartController.getCheckStock)
@@ -122,6 +122,8 @@ router.get("/removeWishlist",userAuth,wishlistController.removeProduct)
 
 //return 
 router.post("/requestReturn",userAuth,orderController.returnRequest)
+router.post("/checkWalletBalance",userAuth,orderController.checkBalance)
+
 
 
 //wallet management//

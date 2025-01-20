@@ -64,10 +64,12 @@ const getCartPage = async (req, res) => {
   }
 };
 
+//delete product from cart
+
 const deleteProduct = async (req, res) => {
   try {
-    const productId = req.query.id; // Get the productId from query parameters
-    const userId = req.session?.user?._id; // Get the userId from the session
+    const productId = req.query.id; 
+    const userId = req.session?.user?._id; 
     console.log("from backen:",productId)
 
     if (!ObjectId.isValid(userId) || !ObjectId.isValid(productId)) {
@@ -98,9 +100,8 @@ const deleteProduct = async (req, res) => {
 };
 
 
-
+//check stock availability
     
-
 const getCheckStock = async (req, res) => {
   try {
     const { productId } = req.query;
@@ -123,7 +124,7 @@ const getCheckStock = async (req, res) => {
 
 
 
-
+///add to cart
 
 const addToCart = async (req, res) => {
   try {
@@ -163,6 +164,7 @@ const addToCart = async (req, res) => {
       const cartItem = cart.items[itemIndex];
       const newQuantity = cartItem.quantity + quantityToAdd;
 
+      //for a product only 3 can be ordered once 
       if (newQuantity > maxQuantity) {
         return res.status(400).json({
           status: "Quantity limit exceeded",
@@ -195,6 +197,8 @@ const addToCart = async (req, res) => {
     res.status(500).json({ status: false, error: "Internal server error" });
   }
 };
+
+//change quantity 
 const changeQuantity = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
@@ -214,7 +218,7 @@ const changeQuantity = async (req, res) => {
       return res.status(404).json({ error: 'Product not found in cart' });
     }
 
-    // Check if the new quantity is available in stock
+    // Check if the  quantity is available or not in the  in stock
     if (parsedQuantity > product.quantity) {
       return res.status(400).json({ 
         error: 'Stock has been changed', 
@@ -243,8 +247,8 @@ const changeQuantity = async (req, res) => {
 
 const getCartCount = async (req, res) => {
   try {
-    const userId = req.session.user._id; // Get the user ID from session
-    const cart = await Cart.findOne({ userId: userId }); // Find the user's cart
+    const userId = req.session.user._id; 
+    const cart = await Cart.findOne({ userId: userId }); 
 
     if (!cart) {
       return res.status(404).json({ error: 'Cart not found' });
@@ -253,7 +257,7 @@ const getCartCount = async (req, res) => {
     // Calculate the total number of items in the cart
     const totalProductsInCart = cart.items.reduce((total, item) => total + item.quantity, 0);
 
-    // Send the cart length (total number of products) as a response
+    
     res.json({ cartLength: totalProductsInCart });
   } catch (error) {
     console.error('Error fetching cart count:', error);
@@ -262,20 +266,20 @@ const getCartCount = async (req, res) => {
 };
 const clearCart = async (req, res) => {
   try {
-    const userId = req.session?.user?._id; // Get the user ID from session
+    const userId = req.session?.user?._id; 
     if (!userId || !ObjectId.isValid(userId)) {
       return res.status(400).json({ success: false, message: "Invalid user ID" });
     }
 
-    // Find the user's cart
+
     const cart = await Cart.findOne({ userId });
     if (!cart) {
       return res.status(404).json({ success: false, message: "Cart not found" });
     }
 
-    // Clear the cart by setting items to an empty array
+    
     cart.items = [];
-    await cart.save(); // Save the cleared cart
+    await cart.save(); 
 
     res.json({ success: true, message: "Cart cleared successfully" });
   } catch (error) {

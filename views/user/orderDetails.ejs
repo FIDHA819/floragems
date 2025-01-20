@@ -149,7 +149,8 @@
         <section class="content-main">
             <div class="content-header">
                 <h2 class="content-title card-title">Order Detail</h2>
-                <% if (orders.orderStatus !== 'Cancelled') { %>
+                <% if (orders.orderStatus !== 'Cancelled' && orders.orderStatus !== 'Delivered') { %>
+
                     <a href="javascript:void(0);" id="cancelOrderButton" class="cancel-order-btn" 
                        onclick="confirmCancelOrder('<%= orders.orderId %>', '<%= orders.paymentMethod %>')">
                        Cancel Order

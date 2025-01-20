@@ -551,6 +551,11 @@ button[type="button"].btn:hover {
                                 <input class="form-check-input payment" type="radio" value="razorpay" name="payment_option" id="Razorpay">
                                 <label class="form-check-label" for="Razorpay">Razorpay</label>
                             </div>
+                            <div class="custome-radio ml-150">
+                                <input class="form-check-input payment" type="radio" value="wallet" name="payment_option" id="Wallet">
+                                <label class="form-check-label" for="Wallet">Wallet</label>
+                            </div>
+                            
                         </div>
                         <div class="card-footer border-secondary bg-transparent">
                             <button type="button" class="btn btn-primary" onclick="placeOrder('<%= user._id %>', '<%= orderId %>')">Place Order</button>
@@ -589,12 +594,14 @@ button[type="button"].btn:hover {
 
 function updateShipping() {
     let total = parseFloat(document.getElementById('subTotalDisplay').textContent.replace('₹', ''));
-    let shippingCost = total > 5000 ? 0 : 100;
+    let shippingCost = total > 1000 ? 0 : 100;
     document.getElementById('shipping').textContent = `₹${shippingCost.toFixed(2)}`;
     let grandTotal = total + shippingCost;
     document.getElementById('total').textContent = `₹${grandTotal.toFixed(2)}`;
 }
-function placeOrder(userId, orderId) {
+
+
+    function placeOrder(userId, orderId) {
     if (!orderId) {
         Swal.fire({
             title: 'Missing Order ID!',
@@ -640,52 +647,106 @@ function placeOrder(userId, orderId) {
         couponName: couponName, // Include the coupon name
     };
 
-    console.log("Request Data:", requestData); // Debugging log
     $.ajax({
-    url: "/orderPlaced",
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify(requestData),
-    success: function (response) {
-        if (paymentMethod === "razorpay") {
-            let options = {
-                key: "rzp_test_WcjmbBeSCVDL9b",
-                amount: Math.round(response.razorPayOrder.finalAmount * 100), // Correct amount after discount and shipping
-                currency: "INR",
-                name: "FloraGems",
-                description: "Order Payment",
-                image: "https://www.dropbox.com/scl/fi/9zytl7wt67wkgl7p9s0zw/removal.ai-_f9e2b53c-dc7e-488a-a0da-fa14f2059a6a_Flora-Gems.png?rlkey=b8wmnqhmtg26gjyril91u3qkm&st=z9i26gci&dl=0",
-                order_id: response.razorPayOrder.orderId,
-                handler: function (payment) {
-                    verifyPayment(response.razorPayOrder, payment, response.order._id, userId);
-                },
-                prefill: {
-                    name: "Customer Name",
-                    email: "customer@example.com",
-                    contact: "9961618585",
-                },
-                theme: {
-                    color: "#f8d0d0",
-                },
-            };
-            let rzp1 = new Razorpay(options);
-            rzp1.open();
-        } else if (paymentMethod === "cod") {
-            // Handle Cash on Delivery Order
-            handleSuccessfulOrder(response.orderId, userId); // Ensure response.orderId is used here
-        }
-    },
-    error: function (error) {
-        console.error("AJAX Error:", error); // Log the error for debugging
-        Swal.fire({
-            title: 'Order Placement Failed!',
-            text: 'An error occurred while placing your order. Please try again.',
-            icon: 'error',
-            timer: 5000,
-        });
-    },
-});
+        url: "/orderPlaced",
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(requestData),
+        success: function (response) {
+            if (paymentMethod === "razorpay") {
+                let options = {
+                    key: "rzp_test_WcjmbBeSCVDL9b",
+                    amount: Math.round(response.razorPayOrder.finalAmount * 100), // Correct amount after discount and shipping
+                    currency: "INR",
+                    name: "FloraGems",
+                    description: "Order Payment",
+                    image: "https://www.dropbox.com/scl/fi/9zytl7wt67wkgl7p9s0zw/removal.ai-_f9e2b53c-dc7e-488a-a0da-fa14f2059a6a_Flora-Gems.png?rlkey=b8wmnqhmtg26gjyril91u3qkm&st=z9i26gci&dl=0",
+                    order_id: response.razorPayOrder.orderId,
+                    handler: function (payment) {
+                        verifyPayment(response.razorPayOrder, payment, response.order._id, userId);
+                    },
+                    prefill: {
+                        name: "Customer Name",
+                        email: "customer@example.com",
+                        contact: "9188339324",
+                    },
+                    theme: {
+                        color: "#f8d0d0",
+                    },
+                };
+                let rzp1 = new Razorpay(options);
+                rzp1.open();
+            } else if (paymentMethod === "wallet") {
+                // Check if wallet balance is less than final amount
+                $.ajax({
+                    url: "/checkWalletBalance",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ userId: userId }),
+                    success: function (walletResponse) {
+                        if (walletResponse.success) {
+                            if (walletResponse.walletBalance < response.finalAmount) {
+                                Swal.fire({
+                                    title: 'Insufficient Wallet Balance!',
+                                    text: 'Your wallet balance is insufficient to complete this order. Please add funds to your wallet.',
+                                    icon: 'error',
+                                    timer: 5000,
+                                });
+                            } else {
+                                handleSuccessfulOrder(response.orderId, userId); // Proceed with the order
+                            }
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Unable to check wallet balance. Please try again later.',
+                                icon: 'error',
+                                timer: 5000,
+                            });
+                        }
+                    },
+                    error: function (error) {
+    console.error("AJAX Error:", error);
+    if (error.responseJSON && error.responseJSON.error) {
+        console.log("Error Message:", error.responseJSON.error);
+    }
+    Swal.fire({
+        title: 'Error!',
+        text: error.responseJSON ? error.responseJSON.error : 'An unknown error occurred.',
+        icon: 'error',
+        timer: 5000,
+    });
 }
+
+
+                });
+            } else if (paymentMethod === "cod") {
+                // Handle Cash on Delivery Order
+                handleSuccessfulOrder(response.orderId, userId); // Ensure response.orderId is used here
+            }
+        },
+        error: function (error) {
+        const errorMessage = error.responseJSON?.error || 'An unknown error occurred.';
+        // Check if the error is due to insufficient balance
+        if (errorMessage === 'Insufficient wallet balance') {
+            Swal.fire({
+                title: 'Insufficient Wallet Balance!',
+                text: 'Your wallet balance is insufficient to complete this order. Please add funds to your wallet.',
+                icon: 'error',
+                timer: 5000,
+            });
+        } else {
+            Swal.fire({
+                title: 'Error!',
+                text: errorMessage,
+                icon: 'error',
+                timer: 5000,
+            });
+        }
+        }
+
+    });
+}
+
 
 
 function handleSuccessfulOrder(orderId, userId) {
@@ -964,4 +1025,4 @@ function verifyPayment(order, payment, orderId, userId) {
                         </script>
                         </body>
                         </html>
-                        
+                    

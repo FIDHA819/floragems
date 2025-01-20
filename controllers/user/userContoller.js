@@ -437,9 +437,8 @@ const profilename = async (req, res) => {
 
       const { name, phone } = req.body;
 
-      // Update user in the database
       const updatedUser = await User.findByIdAndUpdate(
-          req.user._id, // Use req.user._id instead of req.user.id
+          req.user._id,
           { name, phone },
           { new: true }
       );
@@ -448,7 +447,7 @@ const profilename = async (req, res) => {
           return res.status(404).json({ error: "User not found" });
       }
 
-      res.redirect('/userProfile'); // Redirect to the dashboard after updating
+      res.redirect('/userProfile');
   } catch (error) {
       console.error("Error updating profile:", error);
       res.status(500).send("Internal server error");
@@ -621,9 +620,9 @@ console.log(brands)
 };
 const getReferralPage = async (req, res) => {
   try {
-    const userId = req.session.user ? req.session.user._id : null;
-    if (!userId) {
-        return res.status(401).send("Unauthorized access");
+    const userId = req.session?.user?._id;
+    if (!ObjectId.isValid(userId)) {
+      return res.redirect("/login");
     }
 
     // Fetch user from database

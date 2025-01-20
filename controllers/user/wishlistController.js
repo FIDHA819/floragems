@@ -32,12 +32,11 @@ res.render("user/wishlist",{
 const addToWishlist = async (req, res) => {
   try {
       const productId = req.body.productId;
-      const userid = req.session?.userId || req.user?.id;
+      const userId = req.session?.userId || req.user?.id; // Corrected variable name
 
-      if (!userid) {
+      if (!userId) {
           return res.status(401).json({ error: 'User not authenticated' });
       }
-      
 
       // Fetch the user from the database
       const user = await User.findById(userId);
@@ -57,6 +56,7 @@ const addToWishlist = async (req, res) => {
       return res.status(500).json({ status: 'error', message: "Server error" });
   }
 };
+
 
 const removeProduct=async(req,res)=>{
   try {

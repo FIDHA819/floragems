@@ -15,28 +15,28 @@ const Razorpay=require("razorpay")
 const Coupon=require("../../models/couponSchema");
 const Notification=require("../../models/notificationSchema")
 const Wallet = require("../../models/walletSchema");
+const WalletTransaction=require("../../models/walletSchema");
+
 let razorpayInstance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 const { v4: uuidv4 } = require('uuid');
-const objectId = new mongoose.Types.ObjectId(); // Generates a new ObjectId
+const objectId = new mongoose.Types.ObjectId(); 
 const getOrderListPageAdmin = async (req, res) => {
   try {
-    const orders = await Order.find({}).sort({ createdAt: -1 }).lean(); // Sorting by createdAt instead of createdOn
+    const orders = await Order.find({}).sort({ createdAt: -1 }).lean(); 
 
-    // Fetch user details for each order and calculate the final amount correctly
+
     for (let order of orders) {
-      const userDetails = await User.findById(order.userId); // Fetch user by userId
-      order.user = userDetails || null; // Add user details or set to null
+      const userDetails = await User.findById(order.userId); 
+      order.user = userDetails || null; 
 
-      // Shipping cost rule: if total price > 1000, charge 100 as shipping cost
       let shippingCost = order.totalPrice < 1000 ? 100 : 0; // Apply shipping cost if totalPrice > 1000
 
-      // Apply the shipping cost and discount to calculate the final amount
-      let discount = order.discount || 0; // Default to 0 if no discount
-      order.finalAmount = order.totalPrice + shippingCost - discount; // Apply shipping and discount
 
+      let discount = order.discount || 0; 
+      order.finalAmount = order.totalPrice + shippingCost - discount; 
       // Ensure that finalAmount is not negative
       if (order.finalAmount < 0) {
         order.finalAmount = 0;
@@ -50,7 +50,7 @@ const getOrderListPageAdmin = async (req, res) => {
     let totalPages = Math.ceil(orders.length / itemsPerPage);
     const currentOrder = orders.slice(startIndex, endIndex);
 
-    // Ensure payment and status are passed correctly
+    
     res.render("admin/order-list", { orders: currentOrder, totalPages, currentPage });
   } catch (error) {
     console.error(error);
@@ -62,7 +62,7 @@ const changeOrderStatus = async (req, res) => {
   try {
     const { orderId, status } = req.query;
 
-    // Validate the status to ensure it matches the allowed statuses
+    
     const validStatuses = [
       "Pending", "Processing", "Shipped", "Delivered", "Cancelled", 
       "Return Request", "Returned"
@@ -72,7 +72,7 @@ const changeOrderStatus = async (req, res) => {
       return res.status(400).json({ status: false, message: "Invalid status" });
     }
 
-    // Find the order by orderId
+ 
     const order = await Order.findOne({ orderId });
     if (!order) {
       return res.status(404).json({ status: false, message: "Order not found" });
@@ -168,10 +168,10 @@ const respondReturn=async (req, res) => {
   }
 }
 const updateReturnStatus= async (req, res) => {
-  const { orderId, status } = req.body; // Get the orderId and status from the request body
+  const { orderId, status } = req.body; 
 
     try {
-        // Find the order by its orderId
+     
         const order = await Order.findOne({ orderId: orderId });
 
         if (!order) {
@@ -181,12 +181,11 @@ const updateReturnStatus= async (req, res) => {
         // Update the return status and other related fields based on the action
         if (status === 'accepted') {
             order.orderStatus = 'Return Pending';
-            order.paymentStatus = 'Pending'; // Assuming payment is pending for returns
+            order.paymentStatus = 'Pending'; 
         } else if (status === 'rejected') {
             order.orderStatus = 'Return Failed';
         }
 
-        // Save the updated order
         await order.save();
 
         return res.json({ success: true, message: `Return request ${status} successfully.` });
@@ -227,11 +226,11 @@ const completeReturn = async (req, res) => {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    // Change the order status to "Returned" and payment status to "Refunded"
+    
     order.orderStatus = "Returned";
     order.paymentStatus = "Refunded";
 
-    // Handle refund logic
+    // Handle refund logic for Razorpay
     if (order.paymentMethod === "razorpay" && order.paymentDetails?.orderId) {
       const refund = await razorpayInstance.payments.refund(order.paymentDetails.orderId, {
         amount: Math.round(order.finalAmount * 100), // Refund amount in paise
@@ -242,44 +241,70 @@ const completeReturn = async (req, res) => {
       }
       console.log("Refund initiated:", refund);
 
-      // Add refund amount to wallet
-      const wallet = new Wallet({
+      // Add refund amount to wallet for Razorpay
+      const walletTransaction = new WalletTransaction({
         userId: order.userId,
         amount: order.finalAmount,
         type: "Credit",
         description: `Refund for returned order ${orderId}`,
+        status: "Success",
+        source: "Refund",
       });
 
-      await wallet.save();
+      await walletTransaction.save();
 
       // Update the user's wallet balance
       const user = await User.findById(order.userId);
       if (user) {
-        user.wallet += order.finalAmount;  // Increase the wallet balance
+        user.wallet += order.finalAmount; 
+        console.log("User wallet updated successfully:", user.wallet);
+      }
+
+    // Handle wallet payment refund
+    } else if (order.paymentMethod === "wallet") {
+     
+      const walletTransaction = new WalletTransaction({
+        userId: order.userId,
+        amount: order.finalAmount,
+        type: "Credit",
+        description: `Refund for returned order ${orderId}`,
+        status: "Success",
+        source: "Refund",
+      });
+
+      await walletTransaction.save();
+
+      // Update the user's wallet balance
+      const user = await User.findById(order.userId);
+      if (user) {
+        user.wallet += order.finalAmount; 
         await user.save();
         console.log("User wallet updated successfully:", user.wallet);
       }
+
     } else if (order.paymentStatus === "Refunded") {
-      // Add refund amount to wallet if already refunded
-      const wallet = new Wallet({
+    
+      const walletTransaction = new WalletTransaction({
         userId: order.userId,
         amount: order.finalAmount,
         type: "Credit",
         description: `Refund for returned order ${orderId}`,
+        status: "Success",
+        source: "Refund",
       });
 
-      await wallet.save();
+      await walletTransaction.save();
 
-      // Update the user's wallet balance
+    
       const user = await User.findById(order.userId);
       if (user) {
-        user.wallet += order.finalAmount;  // Increase the wallet balance
+        user.wallet += order.finalAmount; 
         await user.save();
         console.log("User wallet updated successfully:", user.wallet);
       }
     }
 
-    // Save the updated order with refund status
+   
     await order.save();
 
     return res.json({ success: true, message: "Order marked as returned and refund processed" });
@@ -289,11 +314,12 @@ const completeReturn = async (req, res) => {
   }
 };
 
+
 const getSalesReport = async (req, res) => {
   try {
     let matchCondition = {};
     let filter = req.query.filter || 'daily';
-    let startDate = req.query.startDate || ''; // Default empty if not provided
+    let startDate = req.query.startDate || ''; 
     let endDate = req.query.endDate || '';
 
     let filterLabel = ' ';
@@ -331,7 +357,7 @@ const getSalesReport = async (req, res) => {
     ]);
 
     res.render('admin/salesreport', {
-      salesReport: salesReport[0] || {}, // Ensure a fallback for empty reports
+      salesReport: salesReport[0] || {}, 
       filter,
       filterLabel,
       startDate,
@@ -343,14 +369,12 @@ const getSalesReport = async (req, res) => {
   }
 };
 
-
-// Route to generate PDF report
 const downloadSalesReportPDF = async (req, res) => {
   try {
     const { filter, startDate, endDate } = req.query;
     let matchCondition = {};
 
-    // Filter based on date
+    // Apply date filters
     if (filter === 'daily') {
       matchCondition.invoiceDate = { $gte: moment().startOf('day').toDate() };
     } else if (filter === 'weekly') {
@@ -361,7 +385,7 @@ const downloadSalesReportPDF = async (req, res) => {
       matchCondition.invoiceDate = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-    // MongoDB Aggregation pipeline to get sales data
+    // Fetch sales data using aggregation
     const salesReport = await Order.aggregate([
       { $match: matchCondition },
       {
@@ -377,25 +401,50 @@ const downloadSalesReportPDF = async (req, res) => {
     ]);
 
     const reportData = salesReport[0];
-    const doc = new PDFDocument();
+
+    if (!reportData) {
+      return res.status(404).send('No sales data found for the selected period.');
+    }
+
+    // Initialize PDF document
+    const doc = new PDFDocument({ margin: 50 });
     const fileName = `sales-report-${moment().format('YYYY-MM-DD')}.pdf`;
 
-    // Set headers for the response
+    // Set response headers
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
 
-    // Write PDF content
+    // Pipe the PDF document to the response
     doc.pipe(res);
-    doc.fontSize(18).text('Sales Report', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(12).text(`Date: ${moment().format('YYYY-MM-DD')}`);
-    doc.moveDown();
-    doc.text(`Total Sales: ₹${reportData.totalSales.toFixed(2)}`);
-    doc.text(`Total Orders: ${reportData.totalOrders}`);
-    doc.text(`Total Discount: ₹${reportData.totalDiscount.toFixed(2)}`);
-    doc.text(`Total Coupon Discount: ₹${reportData.totalCouponDiscount.toFixed(2)}`);
-    doc.text(`Total Final Amount: ₹${reportData.totalFinalAmount.toFixed(2)}`);
 
+    // Add title and date
+    doc
+      .fontSize(20)
+      .text('Sales Report', { align: 'center' })
+      .moveDown()
+      .fontSize(12)
+      .text(`Generated on: ${moment().format('YYYY-MM-DD')}`, { align: 'right' })
+      .moveDown();
+
+    // Add table headers
+    doc
+      .fontSize(14)
+      .text('Summary', { underline: true })
+      .moveDown()
+      .fontSize(12)
+      .text(`Total Sales: ₹${reportData.totalSales.toFixed(2)}`)
+      .text(`Total Orders: ${reportData.totalOrders}`)
+      .text(`Total Discount: ₹${reportData.totalDiscount.toFixed(2)}`)
+      .text(`Total Coupon Discount: ₹${reportData.totalCouponDiscount.toFixed(2)}`)
+      .text(`Total Final Amount: ₹${reportData.totalFinalAmount.toFixed(2)}`)
+      .moveDown();
+
+    // Footer
+    doc
+      .fontSize(10)
+      .text('Generated by Floragems System', { align: 'center', baseline: 'bottom' });
+
+    // Finalize the document
     doc.end();
   } catch (error) {
     console.error('Error generating PDF:', error);
