@@ -38,24 +38,32 @@
     <div class="card">
       <div class="card-body">
         <div class="row">
-          <!-- Add Category Form -->
-          <div class="col-md-3">
-            <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
-              <div class="mb-4">
-                <label for="product_name" class="form-label">Name</label>
-                <input type="text" name="name" placeholder="Type here" class="form-control" id="product_name" />
-                <div id="name-error" class="error-message"></div>
-              </div>
-              <div class="mb-4">
-                <label class="form-label">Description</label>
-                <textarea placeholder="Type here" name="description" class="form-control" id="descriptionId"></textarea>
-                <div id="description-error" class="error-message"></div>
-              </div>
-              <div class="d-grid">
-                <button class="btn btn-primary" type="submit">Create category</button>
-              </div>
-            </form>
-          </div>
+       <!-- Add Category Form -->
+<div class="col-md-3">
+  <form method="post" action="/admin/addCategory" enctype="multipart/form-data" onsubmit="return handleFormSubmit(event)">
+    <div class="mb-4">
+      <label for="product_name" class="form-label">Name</label>
+      <input type="text" name="name" placeholder="Type here" class="form-control" id="product_name" />
+      <div id="name-error" class="error-message"></div>
+    </div>
+    
+    <div class="mb-4">
+      <label for="category_image" class="form-label">Category Image</label>
+      <input class="form-control border" name="image" type="file" id="category_image" accept="image/*" />
+      <div id="image-error" class="error-message"></div>
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label">Description</label>
+      <textarea placeholder="Type here" name="description" class="form-control" id="descriptionId"></textarea>
+      <div id="description-error" class="error-message"></div>
+    </div>
+    
+    <div class="d-grid">
+      <button class="btn btn-primary" type="submit">Create category</button>
+    </div>
+  </form>
+</div>
 
           <!-- Category Table -->
           <div class="col-md-8 ml-10">
@@ -64,6 +72,7 @@
                 <thead>
                   <tr>
                     <th>Name</th>
+                    <th>Image</th>
                     <th>Description</th>
                     <th>Offer Price</th>
                     <th>Offer</th>
@@ -76,6 +85,19 @@
                   <% cat.reverse().forEach((category) => { %>
                   <tr>
                     <td><%= category.name %></td>
+                    <td class="text-start">
+                      <div
+                        class="d-flex align-items-center justify-content-center"
+                        style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden;"
+                      >
+                        <img
+                          src="/uploads/re-image/<%= category.categoryImage[0] %>"
+                          alt="<%=category.name%>"
+                          class="img-fluid rounded-circle"
+                          style="width: 100%; height: auto"
+                        />
+                      </div>
+                    </td>
                     <td><%= category.description %></td>
                     <td><%= category.categoryOffer ? category.categoryOffer : '0%' %></td>
                     <td>
@@ -269,56 +291,84 @@ function removeCategoryOffer(categoryId) {
         }
     });
 }
+function validateForm() {
+  let isValid = true;
+
+  // Check if the name field is empty
+  const name = document.getElementsByName("name")[0].value.trim();
+  if (!name) {
+    document.getElementById("name-error").textContent = "Name is required";
+    document.getElementById("name-error").style.display = "block";
+    isValid = false;
+  } else {
+    document.getElementById("name-error").style.display = "none";
+  }
+
+  // Check if the description field is empty
+  const description = document.getElementById("descriptionId").value.trim();
+  if (!description) {
+    document.getElementById("description-error").textContent = "Description is required";
+    document.getElementById("description-error").style.display = "block";
+    isValid = false;
+  } else {
+    document.getElementById("description-error").style.display = "none";
+  }
+
+  // Check if the image is selected
+  const imageFile = document.querySelector('input[name="image"]').files[0];
+  if (!imageFile) {
+    document.getElementById("image-error").textContent = "Image is required";
+    document.getElementById("image-error").style.display = "block";
+    isValid = false;
+  } else {
+    document.getElementById("image-error").style.display = "none";
+  }
+
+  return isValid;
+}
 
 
-    function handleFormSubmit(event) {
-      event.preventDefault();
-      if (!validateForm()) return;
+function handleFormSubmit(event) {
+  event.preventDefault();
+  if (!validateForm()) return;
 
-      const name = document.getElementsByName("name")[0].value.trim();
-      const description = document.getElementById("descriptionId").value.trim();
+  const name = document.getElementsByName("name")[0].value.trim();
+  const description = document.getElementById("descriptionId").value.trim();
+  const imageFile = document.querySelector('input[name="image"]').files[0];
 
-      fetch("/admin/addCategory", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          Swal.fire("Success", "Category added successfully", "success").then(() => {
-            location.reload();
-          });
-        })
-        .catch(() => {
-          Swal.fire("Error", "Failed to add category", "error");
+  console.log(name, description, imageFile); // Log the form data
+
+  if (!imageFile) {
+    document.getElementById("image-error").textContent = "Image is required";
+    document.getElementById("image-error").style.display = "block";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("description", description);
+  formData.append("image", imageFile);
+
+  fetch("/admin/addCategory", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status) {
+        Swal.fire("Success", "Category added successfully", "success").then(() => {
+          location.reload();
         });
-    }
-
-    function validateForm() {
-      const name = document.getElementsByName("name")[0].value.trim();
-      const description = document.getElementById("descriptionId").value.trim();
-
-      let isValid = true;
-      const nameError = document.getElementById("name-error");
-      const descriptionError = document.getElementById("description-error");
-
-      nameError.style.display = "none";
-      descriptionError.style.display = "none";
-
-      if (!name) {
-        nameError.textContent = "Name is required";
-        nameError.style.display = "block";
-        isValid = false;
+      } else {
+        Swal.fire("Error", "Failed to add category", "error");
       }
+    })
+    .catch(() => {
+      Swal.fire("Error", "Failed to add category", "error");
+    });
+}
 
-      if (!description) {
-        descriptionError.textContent = "Description is required";
-        descriptionError.style.display = "block";
-        isValid = false;
-      }
 
-      return isValid;
-    }
   </script>
 </body>
 <%- include("../../views/partials/admin/footer") %>

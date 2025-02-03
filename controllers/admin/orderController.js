@@ -4,8 +4,10 @@ const Address = require("../../models/addressSchema");
 const Order = require("../../models/orderSchema");
 const mongodb = require("mongodb");
 const PDFDocument = require('pdfkit');
+const pdfMake = require('pdfmake/build/pdfmake');
+const pdfFonts = require('pdfmake/build/vfs_fonts');
 const ExcelJS = require('exceljs');
-const moment = require('moment');
+const moment = require('moment-timezone');
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose')
@@ -16,6 +18,7 @@ const Coupon=require("../../models/couponSchema");
 const Notification=require("../../models/notificationSchema")
 const Wallet = require("../../models/walletSchema");
 const WalletTransaction=require("../../models/walletSchema");
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 let razorpayInstance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -57,74 +60,44 @@ const getOrderListPageAdmin = async (req, res) => {
     res.redirect("/pageerror");
   }
 };
-
-const changeOrderStatus = async (req, res) => {
-  try {
-    const { orderId, status } = req.query;
-
-    
-    const validStatuses = [
-      "Pending", "Processing", "Shipped", "Delivered", "Cancelled", 
-      "Return Request", "Returned"
-    ];
-
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ status: false, message: "Invalid status" });
-    }
-
- 
-    const order = await Order.findOne({ orderId });
-    if (!order) {
-      return res.status(404).json({ status: false, message: "Order not found" });
-    }
-
-    // Update the order status
-    order.orderStatus = status;
-    await order.save();
-
-    return res.status(200).json({ status: true, message: "Order status updated successfully" });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ status: false, message: "An error occurred" });
-  }
-};
-const getOrderDetailsPageAdmin = async (req, res) => {
+const getOrderDetailsPageAdmin = async (req, res) => { 
   try {
     const orderId = req.query.orderId;
     if (!orderId) throw new Error("Order ID is required.");
 
-    const findOrder = await Order.findOne({ orderId })
+    
+    const findOrder = await Order.findOne({ orderId: orderId.toString() })
       .populate("orderedItems.product")
       .populate("userId")
       .lean();
 
     if (!findOrder) throw new Error("Order not found.");
 
-    const addressDocument = await Address.findOne({ "address._id": findOrder.addressId });
-    const specificAddress = addressDocument
-      ? addressDocument.address.find((addr) => addr._id.toString() === findOrder.addressId.toString())
-      : null;
+    
+    const address = findOrder.address;
+
 
     const totalGrant = findOrder.orderedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const discount = totalGrant - findOrder.totalPrice;
     const finalAmount = findOrder.totalPrice;
 
-    const coupon = findOrder.couponName
-      ? await Coupon.findOne({ name: findOrder.couponName })
-      : null;
+    const userId = findOrder.userId._id; 
+
+    const coupon = await Coupon.findOne({ userId: userId });
+
     const couponDiscount = coupon ? coupon.offerPrice || 0 : 0;
 
-    const notifications = await Notification.find({ orderId: findOrder._id });
+    const notifications = await Notification.find({ orderId: orderId });
 
     res.render("admin/order-details-admin", {
       orders: findOrder,
       orderId,
       finalAmount,
       discount: discount + couponDiscount,
-      address: specificAddress,
+      address: address,  
       paymentStatus: findOrder.paymentStatus,
       orderStatus: findOrder.orderStatus,
-      couponDetails: coupon,
+      couponDetails: coupon,  
       couponDiscount,
       notifications,
     });
@@ -135,213 +108,25 @@ const getOrderDetailsPageAdmin = async (req, res) => {
 };
 
 
-const respondReturn=async (req, res) => {
-  const { notificationId, action } = req.body;
-
-  try {
-    const notification = await Notification.findById(notificationId);
-    if (!notification) {
-      return res.status(404).send({ status: false, message: "Notification not found." });
-    }
-
-    // Update order status based on action
-    const order = await Order.findById(notification.orderId);
-    if (!order) {
-      return res.status(404).send({ status: false, message: "Order not found." });
-    }
-
-    if (action === "Accept") {
-      order.orderStatus = "Refund Approved";
-    } else if (action === "Reject") {
-      order.orderStatus = "Refund Rejected";
-    }
-
-    await order.save();
-
-    // Mark the notification as read or remove it
-    await Notification.findByIdAndDelete(notificationId);
-
-    res.send({ status: true, message: `Return request ${action.toLowerCase()}ed successfully.` });
-  } catch (error) {
-    console.error("Error responding to return request:", error);
-    res.status(500).send({ status: false, message: "Failed to respond to return request." });
-  }
-}
-const updateReturnStatus= async (req, res) => {
-  const { orderId, status } = req.body; 
-
-    try {
-     
-        const order = await Order.findOne({ orderId: orderId });
-
-        if (!order) {
-            return res.status(404).json({ success: false, message: "Order not found" });
-        }
-
-        // Update the return status and other related fields based on the action
-        if (status === 'accepted') {
-            order.orderStatus = 'Return Pending';
-            order.paymentStatus = 'Pending'; 
-        } else if (status === 'rejected') {
-            order.orderStatus = 'Return Failed';
-        }
-
-        await order.save();
-
-        return res.json({ success: true, message: `Return request ${status} successfully.` });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: "Failed to update return status." });
-    }
-};
-const confirmReturnStatus=async (req, res) => {
-  const { orderId } = req.body;
-
-  try {
-      const order = await Order.findOne({ orderId: orderId });
-
-      if (!order) {
-          return res.status(404).json({ success: false, message: "Order not found" });
-      }
-
-      // Change the order status to "Return Processing" and payment status to "Refund Processing"
-      order.orderStatus = "Return Processing";
-      order.paymentStatus = "Refund Processing";
-
-      await order.save();
-
-      return res.json({ success: true, message: "Order status changed to Return Processing" });
-  } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: "Failed to update order status" });
-  }
-};
-const completeReturn = async (req, res) => {
-  const { orderId } = req.body;
-
-  try {
-    const order = await Order.findOne({ orderId: orderId });
-
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
-    }
-
-    
-    order.orderStatus = "Returned";
-    order.paymentStatus = "Refunded";
-
-    // Handle refund logic for Razorpay
-    if (order.paymentMethod === "razorpay" && order.paymentDetails?.orderId) {
-      const refund = await razorpayInstance.payments.refund(order.paymentDetails.orderId, {
-        amount: Math.round(order.finalAmount * 100), // Refund amount in paise
-      });
-
-      if (!refund) {
-        return res.status(500).json({ success: false, message: "Refund failed, please try again." });
-      }
-      console.log("Refund initiated:", refund);
-
-      // Add refund amount to wallet for Razorpay
-      const walletTransaction = new WalletTransaction({
-        userId: order.userId,
-        amount: order.finalAmount,
-        type: "Credit",
-        description: `Refund for returned order ${orderId}`,
-        status: "Success",
-        source: "Refund",
-      });
-
-      await walletTransaction.save();
-
-      // Update the user's wallet balance
-      const user = await User.findById(order.userId);
-      if (user) {
-        user.wallet += order.finalAmount; 
-        console.log("User wallet updated successfully:", user.wallet);
-      }
-
-    // Handle wallet payment refund
-    } else if (order.paymentMethod === "wallet") {
-     
-      const walletTransaction = new WalletTransaction({
-        userId: order.userId,
-        amount: order.finalAmount,
-        type: "Credit",
-        description: `Refund for returned order ${orderId}`,
-        status: "Success",
-        source: "Refund",
-      });
-
-      await walletTransaction.save();
-
-      // Update the user's wallet balance
-      const user = await User.findById(order.userId);
-      if (user) {
-        user.wallet += order.finalAmount; 
-        await user.save();
-        console.log("User wallet updated successfully:", user.wallet);
-      }
-
-    } else if (order.paymentStatus === "Refunded") {
-    
-      const walletTransaction = new WalletTransaction({
-        userId: order.userId,
-        amount: order.finalAmount,
-        type: "Credit",
-        description: `Refund for returned order ${orderId}`,
-        status: "Success",
-        source: "Refund",
-      });
-
-      await walletTransaction.save();
-
-    
-      const user = await User.findById(order.userId);
-      if (user) {
-        user.wallet += order.finalAmount; 
-        await user.save();
-        console.log("User wallet updated successfully:", user.wallet);
-      }
-    }
-
-   
-    await order.save();
-
-    return res.json({ success: true, message: "Order marked as returned and refund processed" });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: "Failed to process return and refund" });
-  }
-};
-
-
 const getSalesReport = async (req, res) => {
   try {
+    const { filter, startDate, endDate, format } = req.query;
     let matchCondition = {};
-    let filter = req.query.filter || 'daily';
-    let startDate = req.query.startDate || ''; 
-    let endDate = req.query.endDate || '';
-
-    let filterLabel = ' ';
+    let selectedFilter = filter || 'daily'; 
 
     if (filter === 'daily') {
-      matchCondition.invoiceDate = { $gte: moment().startOf('day').toDate() };
-      filterLabel = 'Sales Report for Today';
+      matchCondition.createdAt = { $gte: moment().startOf('day').toDate() };
     } else if (filter === 'weekly') {
-      matchCondition.invoiceDate = { $gte: moment().startOf('week').toDate() };
-      filterLabel = 'Sales Report for This Week';
+      matchCondition.createdAt = { $gte: moment().startOf('week').toDate() };
     } else if (filter === 'monthly') {
-      matchCondition.invoiceDate = { $gte: moment().startOf('month').toDate() };
-      filterLabel = 'Sales Report for This Month';
+      matchCondition.createdAt = { $gte: moment().startOf('month').toDate() };
+    } else if (filter === 'yearly') {
+      matchCondition.createdAt = { $gte: moment().startOf('year').toDate() };
     } else if (filter === 'custom') {
-      if (startDate && endDate) {
-        matchCondition.invoiceDate = { $gte: new Date(startDate), $lte: new Date(endDate) };
-        filterLabel = `Sales Report from ${startDate} to ${endDate}`;
-      } else {
-        filterLabel = 'Please provide a valid date range';
-      }
+      matchCondition.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
+    // MongoDB aggregation to fetch sales data
     const salesReport = await Order.aggregate([
       { $match: matchCondition },
       {
@@ -356,36 +141,155 @@ const getSalesReport = async (req, res) => {
       },
     ]);
 
-    res.render('admin/salesreport', {
-      salesReport: salesReport[0] || {}, 
-      filter,
-      filterLabel,
-      startDate,
-      endDate,
-    });
+    const reportData = salesReport[0];
+
+    if (!reportData) {
+      if (format === 'pdf' || format === 'excel') {
+        return res.status(404).send('No sales data found for the selected period.');
+      }
+      return res.render('admin/salesReport', {
+        totalSales: 0,
+        totalOrders: 0,
+        totalDiscount: 0,
+        totalCouponDiscount: 0,
+        totalFinalAmount: 0,
+        error: 'No sales data found for the selected period.',
+        selectedFilter: selectedFilter, 
+        startDate: startDate || '',    
+        endDate: endDate || '' 
+      });
+    }
+
+if (format === 'pdf') {
+  // Generate and send PDF
+  const doc = new PDFDocument();
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename=Sales_Report.pdf');
+
+  doc.pipe(res);
+
+  doc.fontSize(18).text('Sales Report', { align: 'center' }).moveDown();
+  doc.fontSize(12).text(`Filter: ${selectedFilter}`).moveDown();
+
+  // Table headers
+  const headers = ['Total Sales', 'Total Orders', 'Total Discount', 'Coupon Discount', 'Final Amount'];
+  const values = [
+    `Rs.${reportData.totalSales}`,
+    `Rs.${reportData.totalOrders}`,
+    `Rs.${reportData.totalDiscount}`,
+    `Rs.${reportData.totalCouponDiscount}`,
+    `Rs.${reportData.totalFinalAmount}`,
+  ];
+
+  // Table formatting
+  const tableWidth = 500;
+  const rowHeight = 20;
+  const columnWidths = [tableWidth * 0.3, tableWidth * 0.2, tableWidth * 0.2, tableWidth * 0.2, tableWidth * 0.2];
+
+
+  let yPosition = doc.y;
+
+  
+  doc.fontSize(12).font('Helvetica-Bold');
+  doc.text(headers[0], 50, yPosition, { width: columnWidths[0], align: 'center' });
+  doc.text(headers[1], 50 + columnWidths[0], yPosition, { width: columnWidths[1], align: 'center' });
+  doc.text(headers[2], 50 + columnWidths[0] + columnWidths[1], yPosition, { width: columnWidths[2], align: 'center' });
+  doc.text(headers[3], 50 + columnWidths[0] + columnWidths[1] + columnWidths[2], yPosition, { width: columnWidths[3], align: 'center' });
+  doc.text(headers[4], 50 + columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3], yPosition, { width: columnWidths[4], align: 'center' });
+  
+ 
+  yPosition += rowHeight;
+
+  // Draw table row
+  doc.fontSize(12).font('Helvetica');
+  doc.text(values[0], 50, yPosition, { width: columnWidths[0], align: 'center' });
+  doc.text(values[1], 50 + columnWidths[0], yPosition, { width: columnWidths[1], align: 'center' });
+  doc.text(values[2], 50 + columnWidths[0] + columnWidths[1], yPosition, { width: columnWidths[2], align: 'center' });
+  doc.text(values[3], 50 + columnWidths[0] + columnWidths[1] + columnWidths[2], yPosition, { width: columnWidths[3], align: 'center' });
+  doc.text(values[4], 50 + columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3], yPosition, { width: columnWidths[4], align: 'center' });
+
+  
+  yPosition += rowHeight;
+
+  // Footer
+  doc.moveDown();
+ 
+const pageWidth = doc.page.width;
+
+const footerText = `Generated on: ${moment().format('YYYY-MM-DD HH:mm:ss')}\n\nThank you for choosing Floragems! Don't forget to check out your latest company reports.`;
+
+const textWidth = doc.widthOfString(footerText);
+const xPosition = (pageWidth - textWidth) / 2;
+
+doc.text(footerText, xPosition, doc.y, { align: 'center' });
+
+  doc.end();
+
+
+
+    } else if (format === 'excel') {
+      // Generate and send Excel
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet('Sales Report');
+
+      sheet.columns = [
+        { header: 'Field', key: 'field', width: 25 },
+        { header: 'Value', key: 'value', width: 25 },
+      ];
+
+      sheet.addRow({ field: 'Total Sales', value: `₹${reportData.totalSales}` });
+      sheet.addRow({ field: 'Total Orders', value: reportData.totalOrders });
+      sheet.addRow({ field: 'Total Discount', value: `₹${reportData.totalDiscount}` });
+      sheet.addRow({ field: 'Coupon Discount', value: `₹${reportData.totalCouponDiscount}` });
+      sheet.addRow({ field: 'Final Amount', value: `₹${reportData.totalFinalAmount}` });
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=Sales_Report.xlsx');
+
+      await workbook.xlsx.write(res);
+      res.end();
+    } else {
+      // Render the sales report page
+      res.render('admin/salesReport', {
+        totalSales: reportData.totalSales,
+        totalOrders: reportData.totalOrders,
+        totalDiscount: reportData.totalDiscount,
+        totalCouponDiscount: reportData.totalCouponDiscount,
+        totalFinalAmount: reportData.totalFinalAmount,
+        error: null,
+        selectedFilter: selectedFilter, 
+          startDate: startDate || '',   
+  endDate: endDate || '' 
+      });
+    }
   } catch (error) {
-    console.error('Error generating sales report:', error);
+    console.error('Error fetching sales report:', error);
     res.status(500).send('Internal Server Error');
   }
 };
+
+
+
 
 const downloadSalesReportPDF = async (req, res) => {
   try {
     const { filter, startDate, endDate } = req.query;
     let matchCondition = {};
 
-    // Apply date filters
+    // Apply date filters as per the user's selection
     if (filter === 'daily') {
-      matchCondition.invoiceDate = { $gte: moment().startOf('day').toDate() };
+      matchCondition.createdAt = { $gte: moment().startOf('day').toDate() };
     } else if (filter === 'weekly') {
-      matchCondition.invoiceDate = { $gte: moment().startOf('week').toDate() };
+      matchCondition.createdAt = { $gte: moment().startOf('week').toDate() };
     } else if (filter === 'monthly') {
-      matchCondition.invoiceDate = { $gte: moment().startOf('month').toDate() };
+      matchCondition.createdAt = { $gte: moment().startOf('month').toDate() };
+    } else if (filter === 'yearly') {
+      matchCondition.createdAt = { $gte: moment().startOf('year').toDate() };
     } else if (filter === 'custom') {
-      matchCondition.invoiceDate = { $gte: new Date(startDate), $lte: new Date(endDate) };
+      matchCondition.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-    // Fetch sales data using aggregation
+    // MongoDB aggregation to fetch sales data
     const salesReport = await Order.aggregate([
       { $match: matchCondition },
       {
@@ -406,70 +310,63 @@ const downloadSalesReportPDF = async (req, res) => {
       return res.status(404).send('No sales data found for the selected period.');
     }
 
-    // Initialize PDF document
-    const doc = new PDFDocument({ margin: 50 });
-    const fileName = `sales-report-${moment().format('YYYY-MM-DD')}.pdf`;
+    // Create PDF document definition
+    const docDefinition = {
+      content: [
+        { text: 'Sales Report', style: 'header' },
+        { text: `Period: ${filter}`, style: 'subheader' },
+        {
+          table: {
+            body: [
+              ['Total Sales', `₹${reportData.totalSales.toFixed(2)}`],
+              ['Total Orders', reportData.totalOrders],
+              ['Total Discount', `₹${reportData.totalDiscount.toFixed(2)}`],
+              ['Total Coupon Discount', `₹${reportData.totalCouponDiscount.toFixed(2)}`],
+              ['Total Final Amount', `₹${reportData.totalFinalAmount.toFixed(2)}`],
+            ],
+          },
+        },
+      ],
+      styles: {
+        header: { fontSize: 18, bold: true },
+        subheader: { fontSize: 14, italics: true },
+      },
+    };
 
-    // Set response headers
+    // Create PDF document
+    const pdfDoc = pdfMake.createPdf(docDefinition);
+    
+    // Send PDF as a download
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Disposition', 'attachment; filename=sales_report.pdf');
+    pdfDoc.pipe(res);
+    pdfDoc.end();
 
-    // Pipe the PDF document to the response
-    doc.pipe(res);
-
-    // Add title and date
-    doc
-      .fontSize(20)
-      .text('Sales Report', { align: 'center' })
-      .moveDown()
-      .fontSize(12)
-      .text(`Generated on: ${moment().format('YYYY-MM-DD')}`, { align: 'right' })
-      .moveDown();
-
-    // Add table headers
-    doc
-      .fontSize(14)
-      .text('Summary', { underline: true })
-      .moveDown()
-      .fontSize(12)
-      .text(`Total Sales: ₹${reportData.totalSales.toFixed(2)}`)
-      .text(`Total Orders: ${reportData.totalOrders}`)
-      .text(`Total Discount: ₹${reportData.totalDiscount.toFixed(2)}`)
-      .text(`Total Coupon Discount: ₹${reportData.totalCouponDiscount.toFixed(2)}`)
-      .text(`Total Final Amount: ₹${reportData.totalFinalAmount.toFixed(2)}`)
-      .moveDown();
-
-    // Footer
-    doc
-      .fontSize(10)
-      .text('Generated by Floragems System', { align: 'center', baseline: 'bottom' });
-
-    // Finalize the document
-    doc.end();
   } catch (error) {
     console.error('Error generating PDF:', error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send('Error generating PDF report.');
   }
 };
 
-// Route to generate Excel report
 const downloadSalesReportExcel = async (req, res) => {
   try {
     const { filter, startDate, endDate } = req.query;
     let matchCondition = {};
 
-    // Filter based on date
+    // Apply date filters as per the user's selection
     if (filter === 'daily') {
-      matchCondition.invoiceDate = { $gte: moment().startOf('day').toDate() };
+      matchCondition.createdAt = { $gte: moment().startOf('day').toDate() };
     } else if (filter === 'weekly') {
-      matchCondition.invoiceDate = { $gte: moment().startOf('week').toDate() };
+      matchCondition.createdAt = { $gte: moment().startOf('week').toDate() };
     } else if (filter === 'monthly') {
-      matchCondition.invoiceDate = { $gte: moment().startOf('month').toDate() };
+      matchCondition.createdAt = { $gte: moment().startOf('month').toDate() };
+    } else if (filter === 'yearly') {
+      matchCondition.createdAt = { $gte: moment().startOf('year').toDate() };
     } else if (filter === 'custom') {
-      matchCondition.invoiceDate = { $gte: new Date(startDate), $lte: new Date(endDate) };
+      matchCondition.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-    // MongoDB Aggregation pipeline to get sales data
+    // MongoDB aggregation to fetch sales data
     const salesReport = await Order.aggregate([
       { $match: matchCondition },
       {
@@ -486,54 +383,158 @@ const downloadSalesReportExcel = async (req, res) => {
 
     const reportData = salesReport[0];
 
-    // Create Excel workbook and worksheet
+    if (!reportData) {
+      return res.status(404).send('No sales data found for the selected period.');
+    }
+
+    // Create Excel workbook
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Sales Report');
 
-    // Add column headers
-    worksheet.columns = [
-      { header: 'Total Sales', key: 'totalSales', width: 20 },
-      { header: 'Total Orders', key: 'totalOrders', width: 15 },
-      { header: 'Total Discount', key: 'totalDiscount', width: 20 },
-      { header: 'Total Coupon Discount', key: 'totalCouponDiscount', width: 25 },
-      { header: 'Total Final Amount', key: 'totalFinalAmount', width: 20 },
-    ];
-
-    // Add data to the worksheet
+    // Add header row
+    worksheet.addRow(['Total Sales', 'Total Orders', 'Total Discount', 'Total Coupon Discount', 'Total Final Amount']);
+    
+    // Add data row
     worksheet.addRow([
       `₹${reportData.totalSales.toFixed(2)}`,
       reportData.totalOrders,
       `₹${reportData.totalDiscount.toFixed(2)}`,
       `₹${reportData.totalCouponDiscount.toFixed(2)}`,
-      `₹${reportData.totalFinalAmount.toFixed(2)}`,
+      `₹${reportData.totalFinalAmount.toFixed(2)}`
     ]);
 
-    // Set the file name
-    const fileName = `sales-report-${moment().format('YYYY-MM-DD')}.xlsx`;
-
-    // Set headers for the response
+    // Set the response headers for Excel file download
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Disposition', 'attachment; filename=sales_report.xlsx');
 
-    // Write Excel file to the response
+    // Write Excel file to response
     await workbook.xlsx.write(res);
     res.end();
+
   } catch (error) {
     console.error('Error generating Excel:', error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send('Error generating Excel report.');
   }
 };
 
+const changeOrderStatus = async (req, res) => {
+  try {
+    const { orderId, status, itemId } = req.query;
+
+    // List of valid statuses
+    const validStatuses = [
+      "Pending", "Processing", "Shipped", "Delivered", "Cancelled",
+      "Return Request", "Returned"
+    ];
+
+    // Validate the status
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ status: false, message: "Invalid status" });
+    }
+
+    // Find the order
+    const order = await Order.findOne({ orderId });
+    if (!order) {
+      return res.status(404).json({ status: false, message: "Order not found" });
+    }
+    if (!order.orderedItems || order.orderedItems.length === 0) {
+      return res.status(400).json({ status: false, message: "No items found in the order" });
+    }
+    
+    if (itemId) {
+      // Update specific item's status
+      const item = order.orderedItems.find((item) => item._id.toString() === itemId);
+      if (!item) {
+        return res.status(404).json({ status: false, message: "Item not found in the order" });
+      }
+      item.status = status;
+    } else {
+      // Update all items' statuses
+      order.orderedItems.forEach((item) => {
+        item.status = status;
+      });
+    }
+    
+
+    // Update the order status
+    order.orderStatus = status;
+    await order.save();
+
+    return res.status(200).json({ status: true, message: "Status updated successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: false, message: "An error occurred" });
+  }
+};
+const updateItemStatus=async (req, res) => {
+  const { itemId, status, orderId } = req.query;
+
+  if (!itemId || !status || !orderId) {
+    return res.status(400).json({ status: false, message: 'Missing required parameters' });
+  }
+
+  try {
+    // Find the order by orderId
+    const order = await Order.findOne({orderId:orderId});
+    if (!order) {
+      return res.status(404).json({ status: false, message: 'Order not found' });
+    }
+
+    // Find the item in the order by itemId
+    const item = order.orderedItems.find(item => item._id.toString() === itemId);
+    if (!item) {
+      return res.status(404).json({ status: false, message: 'Item not found' });
+    }
+   
+    // Update the return status of the item
+    item.status = status;
+    item.paymentStatus = 'Refunded';
+   // Update the return status field for the item
+    // Refund the amount to the user's wallet balance
+    const user = await User.findById(order.userId);
+    if (!user) {
+      return res.status(404).json({ status: false, message: 'User not found' });
+    }
+
+    const refundAmount = item.price * item.quantity;  // Assuming item price * quantity is the total refund amount
+    user.wallet += refundAmount;
+    await user.save();
+
+    // Create a new wallet transaction for the refund
+    const walletTransaction = new WalletTransaction({
+      userId: user._id,
+      amount: refundAmount,
+      type: 'Credit',  // Refund is a credit to the user's wallet
+      description: `Refund for item in order ${orderId}`,
+      source: 'Refund',
+    });
+
+    await walletTransaction.save();
+  
+
+  // Save the updated order with the new item status and payment status
+  await order.save();
+
+   
+    // Respond with a success message
+    res.json({ status: true, message: 'Item return status updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ status: false, message: 'An error occurred while updating item return status' });
+  }
+}
+
+
 module.exports = {
   getOrderListPageAdmin,
-  changeOrderStatus,
   getOrderDetailsPageAdmin,
-  respondReturn,
-  updateReturnStatus,
-confirmReturnStatus,
-completeReturn,
+
 getSalesReport,
 downloadSalesReportPDF,
   downloadSalesReportExcel,
+  changeOrderStatus,
+  updateItemStatus
+
+  
 }
 

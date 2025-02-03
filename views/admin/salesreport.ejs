@@ -1,274 +1,307 @@
 <%- include("../../views/partials/admin/header") %>
-<head>
-    <style>
-        body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f8f8;
-    margin: 0;
-    padding: 0;
-}
+<style>
+  .pagination {
+    display: flex;
+    justify-content: center;
+  }
 
-.container {
-    max-width: 1200px;
-    margin: 30px auto;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.card {
-    border: none;
-    border-radius: 8px;
-    margin-bottom: 30px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-    background-color: #b46e59cc;
-    color: white;
-    padding: 15px;
-    border-radius: 8px 8px 0 0;
-}
-
-.card-body {
-    padding: 20px;
-}
-
-.card-title {
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.card-text {
-    font-size: 14px;
-}
-
-.card-body .row {
-    margin-top: 20px;
-}
-
-.card-body .row .col-lg-4,
-.card-body .row .col-md-6 {
-    padding: 10px;
-}
-
-.card-body .row .col-lg-4 .card {
-    border-radius: 8px;
-    text-align: center;
-    padding: 15px;
-    background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.card-body .row .col-lg-4 .card .card-title {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.card-body .row .col-lg-4 .card .card-text {
-    font-size: 14px;
-    color: #777;
-}
-
-.card-body .row .col-lg-4 .card.border-primary .card-title {
-    color: #007bff;
-}
-
-.card-body .row .col-lg-4 .card.border-success .card-title {
-    color: #28a745;
-}
-
-.card-body .row .col-lg-4 .card.border-warning .card-title {
-    color: #ffc107;
-}
-
-.card-body .row .col-lg-4 .card.border-info .card-title {
-    color: #17a2b8;
-}
-
-.card-body .row .col-lg-4 .card.border-secondary .card-title {
-    color: #6c757d;
-}
-
-select, input[type="date"] {
-    padding: 8px 12px;
-    font-size: 14px;
-    margin: 0 10px;
+  .btn {
+    /* Add your button styling here */
+    margin: 0 5px;
+    padding: 5px 10px;
+    background-color: #f0f0f0;
     border: 1px solid #ccc;
-    border-radius: 4px;
-}
+    text-decoration: none;
+    color: #333;
+  }
 
-select {
-    width: 200px;
-}
+  .active {
+    /* Add styles for the active page */
 
-input[type="date"] {
-    width: 150px;
-}
+    color: #fff;
+  }
 
-button {
+  .btn:hover {
+    /* Add styles for button hover state */
+    background-color: #ddd;
+  }
+
+  .table-spacing th,
+  .table-spacing td {
+    padding-left: 80px; /* Adjust the value as needed for the desired spacing */
+  }
+  
+  /* General Styles */
+  .content-header {
+    margin-bottom: 20px;
+  }
+
+  .card-header {
+    background-color: #f7f7f7;
+    padding: 20px;
+  }
+
+  .card-title {
+    font-size: 24px;
+    color: #333;
+  }
+
+  .btn {
+    padding: 8px 15px;
+    background-color: #b46e59cc;
+    border: 1px solid #b46e59cc;
+    color: white;
+    text-decoration: none;
+    margin: 5px;
+    transition: background-color 0.3s;
+  }
+
+  .btn:hover {
+    background-color: #a35c4c;
+  }
+
+  .btn-primary {
+    background-color: #b46e59cc;
+    border: 1px solid #b46e59cc;
+  }
+
+  .btn-primary:hover {
+    background-color: #a35c4c;
+  }
+
+  .table-spacing th,
+  .table-spacing td {
+    padding-left: 80px;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .pagination button {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .pagination button:hover {
+    background-color: #ddd;
+  }
+
+  .pagination .active {
     background-color: #b46e59cc;
     color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-    margin-top: 20px;
+    border-color: #b46e59cc;
+  }
+
+  .table-hover {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table-hover th,
+  .table-hover td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .table-hover th {
+    background-color: #f7f7f7;
+  }
+
+  .table-hover tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  .table-hover td {
+    color: #333;
+  }
+
+  .table-hover .text-end {
+    text-align: right;
+  }
+
+  .table-hover .active {
+    background-color: #f7f7f7;
+  }
+
+  .form-select {
+    width: 100%;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+  }
+
+  .form-select:focus {
+    border-color: #b46e59cc;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  .form-control:focus {
+    border-color: #b46e59cc;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .right {
+    margin-top: 30px;
+  }
+
+  .d-flex {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .ms-auto {
+    margin-left: auto;
+  }
+
+  .text-md-end {
+    text-align: right;
+  }
+
+  .card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+
+  .mb-4 {
+    margin-bottom: 1.5rem;
+  }
+
+  .mb-2 {
+    margin-bottom: 1rem;
+  }
+  .alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+  padding: 1.5rem;
+  border-radius: 5px;
 }
 
-button:hover {
-    background-color: #a85d4b;
+.alert-dismissible .close {
+  color: #721c24;
+  font-size: 1.5rem;
 }
 
-@media (max-width: 768px) {
-    .container {
-        padding: 15px;
-    }
 
-    .card-body .row .col-lg-4 {
-        flex: 0 0 100%;
-        max-width: 100%;
-    }
+</style>
+<div class="container mt-4">
+  <h2 class="text-center">
+    Sales Report
+    <small class="d-block mt-2">
+      <strong>Filter:</strong> <%= selectedFilter.charAt(0).toUpperCase() + selectedFilter.slice(1) %>
+    </small>
+  </h2>
 
-    .card-body .row .col-md-6 {
-        flex: 0 0 100%;
-        max-width: 100%;
-    }
-
-    .card-header {
-        text-align: center;
-    }
-
-    select, input[type="date"] {
-        width: 100%;
-        margin-bottom: 10px;
-    }
-
-    button {
-        width: 100%;
-    }
-}
-
-    </style>
-</head>
-<div class="container">
-    <div class="col-lg-12 col-xl-8">
-        <div class="card m-b-30">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Sales Report</h5>
-            </div>
-            <div class="card-body">
-                <form method="get" action="/admin/salesreport" class="mb-4">
-                    <select name="filter" class="form-select" onchange="toggleCustomDateRange(this.value)">
-                        <option value="daily" <%= filter === 'daily' ? 'selected' : '' %>>Daily</option>
-                        <option value="weekly" <%= filter === 'weekly' ? 'selected' : '' %>>Weekly</option>
-                        <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>Monthly</option>
-                        <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Date Range</option>
-                    </select>
-                    <div id="custom-date-range" style="display: <%= filter === 'custom' ? 'block' : 'none' %>;">
-                        <input type="date" name="startDate" value="<%= startDate %>" class="form-control w-auto d-inline-block mb-2" />
-                        <input type="date" name="endDate" value="<%= endDate %>" class="form-control w-auto d-inline-block" />
-                    </div>
-                    <button type="submit" class="btn btn-primary">Confirm</button>
-                </form>
-
-                <% if (salesReport && Object.keys(salesReport).length > 0) { %>
-                    <h4 class="mb-4"><%= filterLabel %></h4>
-                    <div class="row">
-                        <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="card border-primary rounded text-center py-3">
-                                <h5 class="card-title text-primary mb-1">₹<%= salesReport.totalSales.toFixed(2) %></h5>
-                                <p class="text-primary mb-0">Total Sales</p>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="card border-success rounded text-center py-3">
-                                <h5 class="card-title text-success mb-1">₹<%= salesReport.totalDiscount.toFixed(2) %></h5>
-                                <p class="text-success mb-0">Total Discount</p>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="card border-warning rounded text-center py-3">
-                                <h5 class="card-title text-warning mb-1">₹<%= salesReport.totalCouponDiscount.toFixed(2) %></h5>
-                                <p class="text-warning mb-0">Total Coupon Discount</p>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="card border-info rounded text-center py-3">
-                                <h5 class="card-title text-info mb-1">₹<%= salesReport.totalFinalAmount.toFixed(2) %></h5>
-                                <p class="text-info mb-0">Total Final Amount</p>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="card border-secondary rounded text-center py-3">
-                                <h5 class="card-title text-secondary mb-1"><%= salesReport.totalOrders %></h5>
-                                <p class="text-secondary mb-0">Total Orders</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between mt-4">
-                        <button onclick="window.location.href='/admin/download-sales-report-pdf'" class="btn btn-primary">Download PDF</button>
-                        <button onclick="window.location.href='/admin/download-sales-report-excel'" class="btn btn-success">Download Excel</button>
-                    </div>
-                <% } else { %>
-                    <h4 class="text-center text-muted mt-4">No orders found for the selected period.</h4>
-                <% } %>
-            </div>
-        </div>
+  <% if (error) { %>
+    <!-- Display error message -->
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <strong>Error:</strong> <%= error %>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
     </div>
+  <% } %>
+
+  <!-- Filter Options -->
+  <div class="filter-options mb-4">
+    <label for="filterSelect">Select Filter:</label>
+    <select id="filterSelect" class="form-control">
+      <option value="daily" <%= selectedFilter === 'daily' ? 'selected' : '' %>>Daily</option>
+      <option value="weekly" <%= selectedFilter === 'weekly' ? 'selected' : '' %>>Weekly</option>
+      <option value="monthly" <%= selectedFilter === 'monthly' ? 'selected' : '' %>>Monthly</option>
+      <option value="yearly" <%= selectedFilter === 'yearly' ? 'selected' : '' %>>Yearly</option>
+      <option value="custom" <%= selectedFilter === 'custom' ? 'selected' : '' %>>Custom Date Range</option>
+    </select>
+
+    <div id="customDateRange" class="<%= selectedFilter === 'custom' ? '' : 'd-none' %> mt-3">
+      <label>Start Date:</label>
+      <input type="date" id="startDate" class="form-control" value="<%= startDate || '' %>" max="<%= new Date().toISOString().split('T')[0] %>">
+      <label>End Date:</label>
+      <input type="date" id="endDate" class="form-control" value="<%= endDate || '' %>" max="<%= new Date().toISOString().split('T')[0] %>">
+    </div>
+
+    <button id="generateReportBtn" class="btn btn-primary mt-3">Generate Report</button>
+  </div>
+
+  <!-- Report Card -->
+  <% if (!error) { %>
+    <div id="salesReportCard" class="card mt-4">
+      <div class="card-body">
+        <h5 class="card-title">Report Summary</h5>
+        <p>Total Sales: ₹<%= totalSales.toFixed(2) %></p>
+        <p>Total Orders: <%= totalOrders %></p>
+        <p>Total Discount: ₹<%= totalDiscount.toFixed(2) %></p>
+        <p>Total Coupon Discount: ₹<%= totalCouponDiscount.toFixed(2) %></p>
+        <p>Total Final Amount: ₹<%= totalFinalAmount.toFixed(2) %></p>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- Download Options -->
+  <% if (!error) { %>
+    <div class="mt-4">
+      <button id="downloadPdf" class="btn btn-primary">Download PDF</button>
+      <button id="downloadExcel" class="btn btn-secondary">Download Excel</button>
+    </div>
+  <% } %>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
 <script>
-    function toggleDateRange() {
-        const filter = document.getElementById('filter-select').value;
-        const customDateRange = document.getElementById('custom-date-range');
-        if (filter === 'custom') {
-            customDateRange.style.display = 'block';
-        } else {
-            customDateRange.style.display = 'none';
-        }
+  document.getElementById('filterSelect').addEventListener('change', function () {
+    if (this.value === 'custom') {
+      document.getElementById('customDateRange').classList.remove('d-none');
+    } else {
+      document.getElementById('customDateRange').classList.add('d-none');
     }
+  });
 
-    window.onload = function() {
-        toggleDateRange();
-    }
-    <script>
-    $('#filter-form').on('submit', function(e) {
-        e.preventDefault(); // Prevent default form submission
+  document.getElementById('generateReportBtn').addEventListener('click', function () {
+    const filter = document.getElementById('filterSelect').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
 
-        var filter = $('#filter-select').val();
-        var startDate = $('input[name="startDate"]').val();
-        var endDate = $('input[name="endDate"]').val();
+    const queryParams = new URLSearchParams({ filter, startDate, endDate }).toString();
+    window.location.href = `/admin/salesReport?${queryParams}`;
+  });
+// Frontend trigger to download the PDF
+document.getElementById('downloadPdf').addEventListener('click', function () {
+  const filter = document.getElementById('filterSelect').value;
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
 
-        $.ajax({
-            url: 'admin/salesReport',
-            method: 'GET',
-            data: { filter: filter, startDate: startDate, endDate: endDate },
-            success: function(response) {
-                // Handle the response (e.g., update the page with the new sales data)
-                $('#sales-report').html(response);
-            },
-            error: function(err) {
-                console.error('Error fetching sales report:', err);
-            }
-        });
-    });
-    function toggleCustomDateRange(filter) {
-        const customDateRange = document.getElementById('custom-date-range');
-        customDateRange.style.display = filter === 'custom' ? 'block' : 'none';
-    }
+  const queryParams = new URLSearchParams({ filter, startDate, endDate, format: 'pdf' }).toString();
+  window.location.href = `/admin/salesReport?${queryParams}`;
+});
 
-    window.onload = function() {
-        toggleCustomDateRange('<%= filter %>');
-    };
+  document.getElementById('downloadExcel').addEventListener('click', function () {
+    const filter = document.getElementById('filterSelect').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
 
+    const queryParams = new URLSearchParams({ filter, startDate, endDate, format: 'excel' }).toString();
+    window.location.href = `/admin/salesReport?${queryParams}`;
+  });
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

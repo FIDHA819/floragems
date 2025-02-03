@@ -4,117 +4,176 @@ const { v4: uuidv4 } = require("uuid");
 
 const orderSchema = new Schema(
   {
-    orderId: {
-      type: String,
-      required: true,
-      default: () => uuidv4(),
-      unique: true,
+    orderId: { 
+      type: String, 
+      required: true, 
+      default: () => uuidv4(), 
+      unique: true 
     },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true, // Reference to User model
+    razorpayOrderId: { 
+      type: String, 
+      unique: true, 
+      sparse: true 
+    }, 
+    userId: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "User", 
+      required: true 
+    }, 
+    totalPrice: { 
+      type: Number, 
+      required: true 
     },
-    totalPrice: {
-      type: Number,
-      required: true, // Total price of the order
+    discount: { 
+      type: Number, 
+      default: 0 
+    }, 
+    finalAmount: { 
+      type: Number, 
+      required: true 
     },
-    discount: {
-      type: Number,
-      default: 0, // Discount applied to the order
+    refundAmount: { 
+      type: Number, 
+      default: 0 
+    }, 
+    cancellationReason: { 
+      type: String, 
+      default: null 
     },
-    finalAmount: {
-      type: Number,
-      required: true, // Final amount after discount
-    },
+    returnReason: { 
+      type: String, 
+      default: null 
+    }, 
     orderedItems: [
       {
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product", // Reference to Product model
-          required: true,
+        product: { 
+          type: mongoose.Schema.Types.ObjectId, 
+          ref: "Product", 
+          required: true 
+        }, 
+        quantity: { 
+          type: Number, 
+          required: true 
+        }, 
+        price: { 
+          type: Number, 
+          required: true 
+        }, 
+        total: { 
+          type: Number, 
+          required: true 
+        }, 
+        status: {
+          type: String,
+          enum: [
+            "Pending", 
+            "Processing", 
+            "Cancelled", 
+            "Delivered", 
+            "Return Requested", 
+            "Returned",
+            "Shipped", 
+            "Refund Requested", 
+            "Return Pending", 
+            "Rejected", 
+            "Return Failed", 
+            "Return Processing"
+          ],
+          default: "Pending",
         },
-        quantity: {
-          type: Number,
-          required: true, // Quantity of the product
-        },
-        price: {
-          type: Number,
-          required: true, // Price of the product
-        },
-        total: {
-          type: Number,
-          required: true, // Total price for this item (price * quantity)
-        },
+        paymentStatus: {
+          type: String,
+          enum: [
+            "Pending", 
+            "Paid", 
+            "Refunded", 
+            "Failed", 
+            "Confirmed",
+            "Partial Refund Processing"
+          ],
+          default: "Pending",
+        }, 
+        cancellationReason: { 
+          type: String,
+          default:null,
+        }, 
+        returnReason: { 
+          type: String, 
+          default: null 
+        }, 
       },
     ],
-    paymentMethod: {
-      type: String,
-      required: true,
-      enum:[
-        "razorpay",
-        "cod",
-        "wallet"
-      ] // Payment method (e.g., 'COD', 'Credit Card')
-    },
+    paymentMethod: { 
+      type: String, 
+      required: true, 
+      enum: ["razorpay", "cod", "wallet"] 
+    }, 
     paymentStatus: {
       type: String,
       required: true,
       enum: [
-        "Pending",   // Payment is not yet completed
-        "Paid",      // Payment has been completed
-        "Failed",    // Payment failed
-        "Refunded",
-        "Confirmed" ,
-        "Cancelled", // Payment was refunded
-        "Refund Processing"
-      ], // Enum for payment status
-      default: "Pending", // Default payment status
+        "Pending", 
+        "Paid", 
+        "Failed", 
+        "Refunded", 
+        "Confirmed", 
+        "Refund Processing", 
+        "Partial Refund Processing"
+      ],
+      default: "Pending",
     },
     orderStatus: {
       type: String,
       required: true,
       enum: [
-        "Pending",   // Order is placed but not processed yet
-        "Processing", // Order is being processed
-        "Shipped",    // Order is shipped
-        "Delivered",  // Order has been delivered
-        "Cancelled",  // Order has been cancelled
-        "Return Request", // Order has a return request
+        "Pending", 
+        "Processing", 
+        "Shipped", 
+        "Delivered", 
+        "Cancelled", 
+        "Return Requested", 
         "Returned", 
-        "Refund Request",
-        "Return Request"  ,
-        "Return Pending",
-        "rejected",
-        "Return Failed",
+        "Refund Requested", 
+        "Return Pending", 
+        "Rejected", 
+        "Return Failed", 
         "Return Processing"
-        // Order has been returned
-      ], // Enum for order status (shipping or fulfillment status)
-      default: "Pending", // Default order status
-    },
+      ],
+      default: "Pending",
+    }, 
     address: {
-      addressType: { type: String, required: true },
-      name: { type: String, required: true },
-      city: { type: String, required: true },
-      landMark: { type: String },
-      state: { type: String, required: true },
-      pincode: { type: String, required: true },
-      phone: { type: String, required: true },
-      altPhone: { type: String },
-    }, // Embedded address details
-    invoiceDate: {
-      type: Date,
-      default: Date.now, // Default to current date
-    },
-    couponApplied: {
-      type: Boolean,
-      default: false, // Indicates if a coupon was applied
-    },
-    couponName: {
-      type: String, // Store the coupon name (if applied)
-    },
+      addressType: { 
+        type: String 
+      },
+      name: { 
+        type: String 
+      },
+      landMark: { 
+        type: String 
+      }, 
+      city: { 
+        type: String 
+      }, 
+      state: { 
+        type: String 
+      }, 
+      pincode: { 
+        type: String 
+      },
+      phone: { 
+        type: String 
+      }, 
+    }, 
+    createdAt: { 
+      type: Date, 
+      default: Date.now 
+    }, 
+    updatedAt: { 
+      type: Date, 
+      default: Date.now 
+    }, 
   },
-  { timestamps: true } // Automatically add `createdAt` and `updatedAt`
+  { timestamps: true } 
 );
 
 const Order = mongoose.model("Order", orderSchema);

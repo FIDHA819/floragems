@@ -1,248 +1,287 @@
 <%- include("../../views/partials/admin/header") %>
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+    <style>
+        .card-custom {
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status-pending { background-color: #ffc107; color: #000; }
+        .status-processing { background-color: #17a2b8; color: #fff; }
+        .status-shipped { background-color: #28a745; color: #fff; }
+        .status-delivered { background-color: #28a745; color: #fff; }
+        .status-return-requested { background-color: #dc3545; color: #fff; }
+        .status-returned { background-color: #6c757d; color: #fff; }
+    </style>
 </head>
-<div class="content-header">
-    <h2 class="content-title card-title">Order Details</h2>
-</div>
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">Order ID: <%= orders.orderId %></h5>
-        <p><strong>Customer Name:</strong>
-            <% if (orders.userId) { %>
-                <%= orders.userId.name %> <!-- Assuming 'name' is a field in your User schema -->
-            <% } else { %>
-                N/A <!-- Fallback text if user is not found -->
-            <% } %>
-        </p>
-        
-        <% if (address) { %>
-            <p>
-                Address: <%= address.landMark %>, <%= address.city %> <br>
-                <%= address.state %>, <%= address.addressType %> <br>
-                Pincode: <%= address.pincode %> <br>
-                Phone: <%= address.phone %>, Alt Phone: <%= address.altPhone %>
-            </p>
-        <% } else { %>
-            <p>No address available.</p>
-        <% } %>
-        
-        <p><strong>Payment Method:</strong> <%= orders.paymentMethod %></p>
-        <p><strong>Payment Status:</strong> <%= orders.paymentStatus %></p> <!-- Added paymentStatus -->
-        <p><strong>Order Status:</strong> <%= orders.orderStatus %></p> <!-- Added orderStatus -->
-        <p><strong>Total Price:</strong> ₹<%= orders.totalPrice.toFixed(2) %></p>
-        
-        <% if (couponDetails) { %>
-            <p><strong>Coupon Applied:</strong> <%= couponDetails.name %></p>
-            <p><strong>Coupon Discount:</strong> ₹<%= couponDiscount.toFixed(2) %></p>
-        <% } else { %>
-            <p>No coupon applied.</p>
-        <% } %>
-        
-        <p><strong>Discount Applied:</strong> ₹<%= discount.toFixed(2) %></p>
-        <p><strong>Final Amount:</strong> ₹<%= finalAmount.toFixed(2) %></p>
-        <hr>
-        <h5>Products:</h5>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th scope="col"><b>Product Name</b></th>
-                    <th scope="col"><b>Quantity</b></th>
-                    <th scope="col"><b>Price</b></th>
-                    <th scope="col"><b>Total</b></th>
-                </tr>
-            </thead>
-            <tbody>
-                <% if (orders.orderedItems && orders.orderedItems.length > 0) { %>
-                  <% orders.orderedItems.forEach(item => { %>
-                    <tr>
-                      <td><%= item.product.productName %></td> <!-- Assuming `productName` is a field in Product -->
-                      <td><%= item.quantity %></td>
-                      <td>₹<%= item.price.toFixed(2) %></td>
-                      <td>₹<%= (item.price * item.quantity).toFixed(2) %></td> <!-- Calculate total -->
-                    </tr>
-                  <% }) %>
-                <% } else { %>
-                  <tr>
-                    <td colspan="4">No products found for this order.</td>
-                  </tr>
-                <% } %>
-            </tbody>
-        </table>
-        <hr>
-        <div class="d-flex justify-content-between">
-            <div>
-                <h5>Order Status</h5>
 
-                <p><strong>Status:</strong> <%= orders.orderStatus %></p>
-                <% if (orders.orderStatus === "Pending") { %>
-                <button class="btn btn-primary" onclick="changeOrderStatus('<%= orders.orderId %>', 'Processing')" style="width: 150px;">Start Processing</button>
-                <% } %>
-                <% if (orders.orderStatus === "Processing") { %>
-                <button class="btn btn-warning" onclick="changeOrderStatus('<%= orders.orderId %>', 'Shipped')" style="width: 150px;">Mark as Shipped</button>
-                <% } %>
-                <% if (orders.orderStatus === "Shipped") { %>
-                <button class="btn btn-success" onclick="changeOrderStatus('<%= orders.orderId %>', 'Delivered')" style="width: 150px;">Mark as Delivered</button>
-                <% } %>
 
-                <% if (orders.orderStatus === "Return Pending") { %>
-                  <button class="btn btn-primary" onclick="changeOrderReturnStatus('<%= orders.orderId %>', 'Return Processing')" style="width: 150px;">Start Processing</button>
-              <% } %>
-              
-              <!-- Mark as Completed Button -->
-              <% if (orders.orderStatus === "Return Processing") { %>
-                  <button class="btn btn-success" onclick="completeReturn('<%= orders.orderId %>')" style="width: 150px;">Completed</button>
-              <% } %>
-              
-      
-            </div>
-            <div>
-              <div class="card mt-3">
+<div class="container-fluid">
+    <div class="row">
+        <!-- Order Summary Card -->
+        <div class="col-md-4">
+            <div class="card card-custom">
                 <div class="card-header">
-                  <h5>Return Requests</h5>
+                    <h5 class="card-title">Order Summary</h5>
                 </div>
                 <div class="card-body">
-                  <% if (orders.orderStatus === "Return Request") { %>
-                    <table class="table table-striped">
-                      <thead>
-                        <tr>
-                          <th scope="col"><b>Order ID</b></th>
-                          <th scope="col"><b>Message</b></th>
-                          <th scope="col"><b>Action</b></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <% if (notifications.length > 0) { %>
-                          <% notifications.forEach(notification => { %>
-                            <tr>
-                              <td><%= notification.orderId %></td>
-                              <td><%= notification.message %></td>
-                              <td>
-                                <button type="button" class="btn btn-success" onclick="updateReturnStatus('accepted', '<%= orders.orderId %>')">Accept</button>
-                                <button type="button" class="btn btn-danger" onclick="updateReturnStatus('rejected', '<%= orders.orderId %>')">Reject</button>
-                              </td>
-                            </tr>
-                          <% }) %>
-                        <% } else { %>
-                          <tr>
-                            <td colspan="3">No return requests.</td>
-                          </tr>
-                        <% } %>
-                      </tbody>
-                    </table>
-                  <% } else { %>
-                    <p>No return requests for this order.</p>
-                  <% } %>
+                    <p><strong>Order ID:</strong> <%= orders.orderId %></p>
+                    <p>
+                        <strong>Order Status:</strong>
+                        <span class="status-badge status-<%= orders.orderStatus.toLowerCase().replace(' ', '-') %>">
+                            <%= orders.orderStatus %>
+                        </span>
+                    </p>
+                    <p><strong>Total Price:</strong> ₹<%= orders.totalPrice.toFixed(2) %></p>
+                    <p><strong>Discount:</strong> ₹<%= orders.discount.toFixed(2) %></p>
+                    <p><strong>Final Amount:</strong> ₹<%= orders.finalAmount.toFixed(2) %></p>
+                    <p><strong>Payment Method:</strong> <%= orders.paymentMethod.toUpperCase() %></p>
+                    <p>
+                        <strong>Payment Status:</strong>
+                        <span class="status-badge status-<%= orders.paymentStatus.toLowerCase().replace(' ', '-') %>">
+                            <%= orders.paymentStatus %>
+                        </span>
+                    </p>
                 </div>
-              </div>
-              
-                <h5>Invoice Date</h5>
-                <p><%= orders.invoiceDate ? orders.invoiceDate.toDateString() : "Not available" %></p>
             </div>
         </div>
-    </div>
+
+
+      <!-- Customer and Shipping Details Card -->
+<div class="col-md-4">
+  <div class="card card-custom">
+      <div class="card-header">
+          <h5 class="card-title">Customer & Shipping Details</h5>
+      </div>
+      <div class="card-body">
+          <% if (orders.userId) { %>
+              <p><strong>Customer Name:</strong> <%= orders.userId.name %></p>
+          <% } %>
+
+          <% if (address) { %>
+              <h6>Shipping Address:</h6>
+              <p>
+                  <%= address.addressType %><br>
+                  <%= address.landMark %>, <%= address.city %><br>
+                  <%= address.state %> - <%= address.pincode %><br>
+                  Phone: <%= address.phone %>
+                  <% if (address.altPhone) { %>
+                      , Alt: <%= address.altPhone %>
+                  <% } %>
+              </p>
+          <% } else { %>
+              <p>No address available.</p>
+          <% } %>
+      </div>
+  </div>
 </div>
+
+
+
+       <!-- Coupon and Invoice Details Card -->
+<div class="col-md-4">
+  <div class="card card-custom">
+      <div class="card-header">
+          <h5 class="card-title">Additional Details</h5>
+      </div>
+      <div class="card-body">
+          <% if (couponDetails) { %>
+              <p><strong>Coupon Applied:</strong> <%= couponDetails.name %></p>
+              <p><strong>Coupon Discount:</strong> ₹<%= couponDiscount.toFixed(2) %></p>
+          <% } else { %>
+              <p>No coupon applied.</p>
+          <% } %>
+
+          <p><strong>Invoice Date:</strong> <%= orders.createdAt ? orders.createdAt.toDateString() : "Not available" %></p>
+      </div>
+  </div>
+</div>
+
+    <div class="col-md-4">
+      <div class="card card-custom">
+          <div class="card-header">
+              <h5 class="card-title">Reason for Cancellation/Return</h5>
+          </div>
+          <div class="card-body">
+              <% if (orders.orderStatus === "Cancelled" || orders.orderStatus === "Return Requested") { %>
+                  <% if (orders.cancellationReason) { %>
+                      <p><strong>Cancellation Reason:</strong> <%= orders.cancellationReason %></p>
+                  <% } else if (orders.returnReason) { %>
+                      <p><strong>Return Reason:</strong> <%= orders.returnReason %></p>
+                  <% } else { %>
+                      <p>No reason provided for cancellation or return.</p>
+                  <% } %>
+              <% } else { %>
+                  <p>No cancellation or return request for this order.</p>
+              <% } %>
+          </div>
+      </div>
+  </div>
+  
+    <div class="container my-5">
+      <h2 class="mb-4">Order Details</h2>
+    
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Payment Status</th>
+            <th>Actions</th>
+            <th>Reason</th> <!-- New column for reasons -->
+          </tr>
+        </thead>
+        <tbody>
+          <% if (orders.orderedItems && orders.orderedItems.length > 0) { %>
+            <% orders.orderedItems.forEach(item => { %>
+              <tr>
+                <td><%= item.product?.productName || "Unknown Product" %></td>
+                <td><%= item.quantity %></td>
+                <td><%= item.price %></td>
+                <td><%= item.status %></td>
+                <td><%= item.paymentStatus %></td>
+                <td>
+                  <% if (item.status === 'Return Requested') { %>
+                    <button class="btn btn-sm btn-success" onclick="updateItemStatus('<%= item._id %>', 'Returned', '<%= orders.orderId %>', '<%= item.price %>', '<%= orders.userId._id %>')">
+                      Accept Return
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="updateItemStatus('<%= item._id %>', 'Rejected', '<%= orders.orderId %>')">
+                      Reject Return
+                    </button>
+                  <% } else { %>
+                    <span>No Actions Available</span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (item.cancellationReason) { %>
+                    <strong>Cancellation Reason:</strong> <%= item.cancellationReason %>
+                  <% } else if (item.returnReason) { %>
+                    <strong>Return Reason:</strong> <%= item.returnReason %>
+                  <% } else { %>
+                    <span>No reason provided</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="7" class="text-center">No products found for this order.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+      
+    </div>
+    
+    <!-- Order Action Buttons -->
+    <div class="card card-custom mt-3">
+      <div class="card-header">
+        <h5 class="card-title">Order Actions</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex justify-content-start">
+          <% if (orders.orderStatus === "Pending") { %>
+            <button class="btn btn-primary mr-2" onclick="changeOrderStatus('<%= orders.orderId %>', 'Processing')">Start Processing</button>
+          <% } %>
+          <% if (orders.orderStatus === "Processing") { %>
+            <button class="btn btn-warning mr-2" onclick="changeOrderStatus('<%= orders.orderId %>', 'Shipped')">Mark as Shipped</button>
+          <% } %>
+          <% if (orders.orderStatus === "Shipped") { %>
+            <button class="btn btn-success mr-2" onclick="changeOrderStatus('<%= orders.orderId %>', 'Delivered')">Mark as Delivered</button>
+          <% } %>
+          <% if (orders.orderStatus === "Return Pending") { %>
+            <button class="btn btn-success mr-2" onclick="processReturnAndRefund('<%= orders.orderId %>')">Mark as Returned</button>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
+<!-- Include previous scripts here -->
 <script>
-  function changeOrderStatus(orderId, newStatus) {
-    Swal.fire({
-      title: `Change Status to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}?`,
-      text: `Are you sure you want to change the status of this order to ${newStatus}?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3885d6",
-      cancelButtonColor: "d33",
-      confirmButtonText: "Yes, change it!"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        $.ajax({
-          url: `/admin/changeStatus`,
-          method: "GET",
-          data: {
-            orderId: orderId,
-            status: newStatus
-          },
-          success: (response) => {
-            if (response.status) {
-              Swal.fire("Status Updated", `Order status has been changed to ${newStatus}.`, "success");
-              location.reload(); // Reload the page to see the updated status
-            } else {
-              Swal.fire("Error", "Failed to update order status", "error");
-            }
-          },
-          error: (error) => {
-            Swal.fire("Error", "An error occurred", "error");
+ function updateItemStatus(itemId, newStatus, orderId) {
+  Swal.fire({
+    title: `Change Item Return Status to ${newStatus}?`,
+    text: `Are you sure you want to change the return status of this item to ${newStatus}?`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3885d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, change it!"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      $.ajax({
+        url: `/admin/updateItemStatus`,
+        method: "GET",
+        data: {
+          itemId: itemId,
+          status: newStatus,
+          orderId: orderId // Pass orderId here
+        },
+        success: (response) => {
+          if (response.status) {
+            Swal.fire("Status Updated", `Item return status has been changed to ${newStatus}.`, "success");
+            location.reload();
+          } else {
+            Swal.fire("Error", "Failed to update item return status", "error");
           }
-        });
-      }
-    });
-  }
-  function updateReturnStatus(status, orderId) {
-    $.ajax({
-        url: '/admin/updateReturnStatus',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ orderId: orderId, status: status }),
-        success: (response) => {
-            if (response.success) {
-                Swal.fire("Success", `Return request ${status} successfully.`, "success").then(() => {
-                    window.location.reload(); // Reload the page to see the updated status
-                });
-            } else {
-                Swal.fire("Error", response.message || "Failed to update return status.", "error");
-            }
         },
         error: (error) => {
-            Swal.fire("Error", error.responseText || "An unexpected error occurred.", "error");
+          Swal.fire("Error", "An error occurred", "error");
         }
-    });
-}
-// Change order status to "Return Processing"
-function changeOrderReturnStatus(orderId, newStatus) {
-    $.ajax({
-        url: '/admin/changeOrderStatusToReturnProcessing',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ orderId: orderId }),
-        success: (response) => {
-            if (response.success) {
-                Swal.fire("Success", "Order status changed to Return Processing.", "success").then(() => {
-                    window.location.reload(); // Reload the page to see the updated status
-                });
-            } else {
-                Swal.fire("Error", response.message || "Failed to update order status.", "error");
-            }
-        },
-        error: (error) => {
-            Swal.fire("Error", error.responseText || "An unexpected error occurred.", "error");
-        }
-    });
+      });
+    }
+  });
 }
 
-// Complete the return process (mark as returned and process refund)
-function completeReturn(orderId) {
-    $.ajax({
-        url: '/admin/completeReturn',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ orderId: orderId }),
+
+function changeOrderStatus(orderId, newStatus) {
+  Swal.fire({
+    title: `Change Status to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}?`,
+    text: `Are you sure you want to change the status of this order to ${newStatus}?`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3885d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, change it!"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      $.ajax({
+        url: `/admin/changeOrderStatus`,
+        method: "GET",
+        data: {
+          orderId: orderId,
+          status: newStatus,
+        },
         success: (response) => {
-            if (response.success) {
-                Swal.fire("Success", "Order marked as returned and refund processed.", "success").then(() => {
-                    window.location.reload(); // Reload the page to see the updated status
-                });
-            } else {
-                Swal.fire("Error", response.message || "Failed to process return and refund.", "error");
-            }
+          if (response.status) {
+            Swal.fire("Status Updated", `Order status has been changed to ${newStatus}.`, "success");
+            location.reload(); // Reload the page to see the updated status
+          } else {
+            Swal.fire("Error", response.message || "Failed to update order status", "error");
+          }
         },
         error: (error) => {
-            Swal.fire("Error", error.responseText || "An unexpected error occurred.", "error");
-        }
-    });
+          Swal.fire("Error", "An error occurred while updating the order status.", "error");
+          console.error("AJAX error:", error.responseText);
+        },
+      });
+    }
+  });
 }
+
 
 </script>
 

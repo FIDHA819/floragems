@@ -10,10 +10,30 @@ const Brand=require("../../models/brandSchema")
 const Banner=require("../../models/bannerSchema")
 
 
-// Utility: Generate OTP
 function generateOtp() {
-  return Math.floor(100000 + Math.random() * 900000).toString(); // js fixed way to Always 6 digits
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
+
+const generateAndSendOtp = async (req, res) => {
+  try {
+    if (req.session.userOtp && Date.now() < req.session.otpExpiration) {
+      return res.status(400).json({ success: false, message: "OTP already sent. Please check your email/phone." });
+    }
+
+    const otp = generateOtp();
+    const otpExpiration = Date.now() + 5 * 60 * 1000;
+
+    req.session.userOtp = otp;
+    req.session.otpExpiration = otpExpiration;
+
+    sendOtp(req.session.userData, otp);
+
+    return res.json({ success: true, message: "OTP sent successfully." });
+  } catch (error) {
+    console.error("Error generating OTP:", error);
+    res.status(500).json({ success: false, message: "An error occurred" });
+  }
+};
 
 // Utility: Send Verification Email
 async function sendVerificationEmail(email, otp) {
@@ -70,8 +90,10 @@ const loadHomePage = async (req, res) => {
       const userData = userId ? await User.findById(userId) : null;
       const banners = await Banner.find({ isActive: true });
 
-
+      const brands = await Brand.find({ isBlocked: false });
+      console.log(brands); 
       const categories = await Category.find({ isListed: true });
+
       let productData = await Product.find({
           isBlocked: false,
           category: { $in: categories.map((category) => category._id) },
@@ -81,16 +103,13 @@ const loadHomePage = async (req, res) => {
       productData.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
       productData = productData.slice(0, 4);
 
-      res.render("user/home", { user: userData, products: productData,banners:banners });
+      res.render("user/home", { user: userData, products: productData,banners:banners,categories:categories ,brands:brands});
   } catch (error) {
       console.error("Home Page Error:", error);
       res.status(500).send("Server error: Unable to load home page");
   }
 };
 
-
-
-// Signup Page Controller
 // Signup Page Controller
 const loadSignup = async (req, res) => {
   try {
@@ -101,8 +120,9 @@ const loadSignup = async (req, res) => {
     console.error("Signup page not loading:", error);
     res.status(500).send("Server error: Unable to load signup page");
   }
-
 };
+
+// Handle Signup Submission
 const signup = async (req, res) => {
   try {
     const { name, email, password, phone, cPassword, referralCode } = req.body;
@@ -132,21 +152,27 @@ const signup = async (req, res) => {
       }
     }
 
+    // Check if OTP is already generated in the session
+    if (req.session.userOtp) {
+      return res.render("user/verify-otp", { message: "OTP already sent. Please verify it." });
+    }
+
     // Generate OTP for email verification
     const otp = generateOtp();
     const otpExpiration = Date.now() + 5 * 60 * 1000;
-
+ 
     const emailSent = await sendVerificationEmail(email, otp);
-    console.log(otp)
     if (!emailSent) {
       return res.render("user/signup", { message: "Error sending email. Try again." });
     }
+    
 
     // Save the session data
     req.session.userOtp = otp;
     req.session.userData = { name, email, password, phone, referralCode: newReferralCode };
     req.session.referrer = referrer; // Save referrer information if available
     req.session.otpExpiration = otpExpiration;
+    console.log("Generated otp:",otp)
 
     // Render OTP verification page
     res.render("user/verify-otp", { resendAllowed: true });
@@ -160,6 +186,8 @@ const signup = async (req, res) => {
 const generateReferralCode = () => {
   return Math.random().toString(36).substr(2, 8).toUpperCase();
 };
+
+// Handle Referral Code Processing
 const handleReferralCode = async (req, res) => {
   try {
     const { referralCode } = req.body;
@@ -182,85 +210,63 @@ const handleReferralCode = async (req, res) => {
     res.status(500).json({ success: false, message: "An error occurred." });
   }
 };
+
+// Verify OTP
 const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body;
-    console.log("Received OTP:", otp);
 
-    // Check if session data is valid
-    if (!req.session.userOtp || !req.session.userData) {
-      return res.status(400).json({ success: false, message: "Session expired. Please try again." });
+    if (req.session.otpVerified) {
+      return res.status(400).json({ success: false, message: "OTP already verified." });
     }
 
-    // Check if OTP has expired
-    if (Date.now() > req.session.otpExpiration) {
-      return res.send({ success: false, message: "OTP has expired. Please request a new one." });
+    if (!req.session.userOtp || Date.now() > req.session.otpExpiration) {
+      return res.status(400).json({ success: false, message: "OTP has expired or session is invalid. Please request a new OTP." });
     }
 
-    // Verify OTP
     if (otp.trim() === req.session.userOtp) {
       const user = req.session.userData;
-
-      // Hash the password before saving
       const passwordHash = await securePassword(user.password);
 
-      // Create a new user
       const newUser = new User({
         name: user.name,
         email: user.email,
         phone: user.phone,
         password: passwordHash,
-        referralCode: user.referralCode, // Store the referral code for the new user
+        referralCode: user.referralCode,
       });
 
-      // Save the new user
       await newUser.save();
 
       if (req.session.referrer) {
         const referrer = await User.findOne({ referralCode: req.session.referrer.referralCode });
-      
-        if (referrer) {
-          // Referrer gets 150 rupees
-          referrer.wallet += 150; // Add reward to the referrer's wallet
-          await referrer.save();
 
-          console.log("Saving wallet transaction for referrer...");
-          // Create wallet transaction for the referrer
+        if (referrer) {
+          referrer.wallet += 150;
+          await referrer.save();
           await createWalletTransaction(referrer._id, 150, "Credit", "Referral Bonus");
 
-          console.log("Referrer rewarded with 150 rupees.");
-      
-          // New user gets 50 rupees
-          newUser.wallet += 50; // Add reward to the new user's wallet
+          newUser.wallet += 50;
           await newUser.save();
-
-          console.log("Saving wallet transaction for new user...");
-          // Create wallet transaction for the new user
           await createWalletTransaction(newUser._id, 50, "Credit", "Referral Bonus");
 
-          console.log("New user rewarded with 50 rupees.");
-
-          // Update referrer's redeemedUsers array with the new user details
           referrer.redeemedUsers.push({
             userName: newUser.name,
             signupDate: newUser.createdOn,
-            reward: 50, // New user’s reward
+            reward: 50,
           });
           await referrer.save();
-
-          console.log("Referrer's redeemedUsers array updated.");
         }
       }
-      
-      // Set session data for the new user
+
       req.session.user = {
         _id: newUser._id,
         name: newUser.name,
         email: newUser.email,
       };
 
-      // Render the success response or redirect
-      console.log("User saved and logged in:", req.session.user);
+      req.session.otpVerified = true;
+
       return res.json({ success: true, redirectUrl: "/" });
     } else {
       res.status(400).json({ success: false, message: "Invalid OTP" });
@@ -463,7 +469,7 @@ const loadShoppingPage = async (req, res) => {
     const query = req.query.query || '';
     const sort = req.query.sort || 'latest';
     const page = parseInt(req.query.page) || 1;
-    const limit = 9;
+    const limit = 6;
     const skip = (page - 1) * limit;
 
     console.log("Query Parameters:", req.query);
@@ -540,7 +546,7 @@ const getFilteredProducts = async (req, res) => {
     const brands = await Brand.find({ isBlocked: false }).select("brandName brandImage");
 console.log(brands)
     const page = parseInt(req.query.page) || 1;
-    const limit = 9;
+    const limit = 6;
     const skip = (page - 1) * limit;
 
     console.log("Query Parameters:", req.query);
@@ -620,18 +626,17 @@ console.log(brands)
 };
 const getReferralPage = async (req, res) => {
   try {
-    const userId = req.session?.user?._id;
-    if (!ObjectId.isValid(userId)) {
-      return res.redirect("/login");
-    }
+    const userId = req.session?.user?._id; 
 
-    // Fetch user from database
+    if (!userId) {
+      return res.status(401).redirect("/login"); 
+    }
     const user = await User.findById(userId);
     if (!user) {
-        return res.status(404).send("User not found");
+        return res.status(404).send("User not found").redirect("/login");
     }
 
-    // Pass the redeemedUsers array directly, no need to query again
+    
     res.render("user/referral", {
         referralCode: user.referralCode,
         walletBalance: user.wallet, 

@@ -37,6 +37,7 @@
         body {
             font-family: Arial, sans-serif;
             color: #333;
+            background-color: #F2E6EB;
         }
         
         a {
@@ -244,13 +245,26 @@
 }
 
 .card-header:hover .hover-zoom {
-    transform: scale(1.1); /* Zoom in on hover */
+    transform: scale(1.1); 
 }
 
-/* Ensure the wishlist button is not affected by the image hover */
 .card-header {
     position: relative;
 }
+.navbar {
+    background-color: transparent !important; 
+    border: none; 
+}
+
+.navbar .navbar-collapse {
+    background-color: transparent !important; 
+}
+
+.navbar .dropdown-menu {
+    background-color: #ffffff; 
+    border-radius: 0; 
+}
+
 </style>
 </head>         
 
@@ -369,16 +383,16 @@
     </a>
     <div class="dropdown-menu position-absolute bg-secondary border-0 rounded-0 w-100 m-0">
         <ul>
-            <% if (categories.length > 0) { %>
-                <% categories.forEach(category => { %>
+            <% if (brands.length > 0) { %>
+                <% brands.forEach(brands => { %>
                   <li class="filter-item">
-                    <a href="/filtered?category=<%= category._id %>&query=<%= searchQuery %>&sort=<%= sortOption %>" class="dropdown-item">
-                      <%= category.name %>
+                    <a href="/filtered?brands=<%= brands._id %>&query=<%= searchQuery %>&sort=<%= sortOption %>" class="dropdown-item">
+                      <%= brands.brandName%>
                     </a>
                   </li>
                 <% }) %>
               <% } else { %>
-                <li>No categories available</li>
+                <li>No brands available</li>
               <% } %>
               
         </ul>
@@ -404,14 +418,12 @@
                     <div class="navbar-nav mr-auto py-0">
                         <a href="/" class="nav-item nav-link active">Home</a>
                         <a href="/shop" class="nav-item nav-link">Shop</a>
-                        <a href="/detail" class="nav-item nav-link">Shop Detail</a>
-                        <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pages</a>
+                       
                             <div class="dropdown-menu rounded-0 m-0">
                                 <a href="/cart" class="dropdown-item">Shopping Cart</a>
                                 <a href="/checkout" class="dropdown-item">Checkout</a>
                             </div>
-                        </div>
+                       
                         <a href="/contact" class="nav-item nav-link">Contact</a>
                     </div>
                     <div class="navbar-nav ml-auto py-0">
@@ -433,19 +445,19 @@
                 </div>
             </nav>
       <!-- Sorting Dropdown -->
-<div class="dropdown">
-    <button class="btn border dropdown-toggle" type="button" id="sortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Sort by
-    </button>
-    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="sortDropdown">
-        <a class="dropdown-item" href="/filtered?sort=latest">Latest</a>
-        <a class="dropdown-item" href="/filtered?sort=priceAsc">Price: Low to High</a>
-        <a class="dropdown-item" href="/filtered?sort=priceDesc">Price: High to Low</a>
-        <a class="dropdown-item" href="/filtered?sort=popularity">Popularity</a>
-        <a class="dropdown-item" href="/filtered?sort=az">A-Z</a>
-        <a class="dropdown-item" href="/filtered?sort=za">Z-A</a>
+      <div class="dropdown mb-3">
+        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="sortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Sort by
+        </button>
+        <div class="dropdown-menu w-100" aria-labelledby="sortDropdown">
+            <a class="dropdown-item" href="/filtered?sort=latest">Latest</a>
+            <a class="dropdown-item" href="/filtered?sort=priceAsc">Price: Low to High</a>
+            <a class="dropdown-item" href="/filtered?sort=priceDesc">Price: High to Low</a>
+            <a class="dropdown-item" href="/filtered?sort=popularity">Popularity</a>
+            <a class="dropdown-item" href="/filtered?sort=az">A-Z</a>
+            <a class="dropdown-item" href="/filtered?sort=za">Z-A</a>
+        </div>
     </div>
-</div>
 
     </div>
 </div>
@@ -461,52 +473,52 @@
         <div class="col-lg-3 col-md-12">
             <!-- Price Start -->
           <!-- Price Filter -->
-<div class="border-bottom mb-4 pb-4">
-    <h5 class="font-weight-semi-bold mb-4">Filter by price</h5>
-    <form action="/filtered" method="get">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <a href="/filtered?price=0-50000" class="btn btn-link p-0">under ₹50000</a>
+          <div class="border-bottom mb-4 pb-4">
+            <h5 class="font-weight-semi-bold mb-4">Filter by price</h5>
+            <form action="/filtered" method="get">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <a href="/filtered?price=0-500" class="btn btn-link p-0">under ₹500</a>
+                </div>
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <a href="/filtered?price=500-1000" class="btn btn-link p-0">₹500 - ₹1000</a>
+                </div>
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <a href="/filtered?price=1000-1500" class="btn btn-link p-0">₹1000 - ₹1500</a>
+                </div>
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <a href="/filtered?price=15000-100000000000" class="btn btn-link p-0">Above ₹15000</a>
+                </div>
+            </form>
         </div>
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <a href="/filtered?price=50000-100000" class="btn btn-link p-0">₹50000 - ₹100000</a>
+        
+                    <!-- Price End -->
+                    
+                    <!-- Color Start -->
+              <!-- Metal Type Start -->
+        <!-- Metal Type Filter -->
+        <div class="border-bottom mb-4 pb-4">
+            <h5 class="font-weight-semi-bold mb-4">Filter by Metal Type</h5>
+            <form>
+                <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                    <a href="/filtered?metal=" class="custom-control-label">All Metals</a>
+                </div>
+                <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                    <a href="/filtered?metal=Gold" class="custom-control-label">Gold</a>
+                </div>
+                <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                    <a href="/filtered?metal=Diamond" class="custom-control-label">Diamond</a>
+                </div>
+                <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                    <a href="/filtered?metal=Silver" class="custom-control-label">Silver</a>
+                </div>
+                <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                    <a href="/filtered?metal=Platinum" class="custom-control-label">Platinum</a>
+                </div>
+                <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
+                    <a href="/filtered?metal=Other" class="custom-control-label">Other</a>
+                </div>
+            </form>
         </div>
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <a href="/filtered?price=100000-150000" class="btn btn-link p-0">₹100000 - ₹150000</a>
-        </div>
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <a href="/filtered?price=150000-100000000000" class="btn btn-link p-0">Above ₹150000</a>
-        </div>
-    </form>
-</div>
-
-            <!-- Price End -->
-            
-            <!-- Color Start -->
-      <!-- Metal Type Start -->
-<!-- Metal Type Filter -->
-<div class="border-bottom mb-4 pb-4">
-    <h5 class="font-weight-semi-bold mb-4">Filter by Metal Type</h5>
-    <form>
-        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-            <a href="/filtered?metal=" class="custom-control-label">All Metals</a>
-        </div>
-        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-            <a href="/filtered?metal=Gold" class="custom-control-label">Gold</a>
-        </div>
-        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-            <a href="/filtered?metal=Diamond" class="custom-control-label">Diamond</a>
-        </div>
-        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-            <a href="/filtered?metal=Silver" class="custom-control-label">Silver</a>
-        </div>
-        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-            <a href="/filtered?metal=Platinum" class="custom-control-label">Platinum</a>
-        </div>
-        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
-            <a href="/filtered?metal=Other" class="custom-control-label">Other</a>
-        </div>
-    </form>
-</div>
 
 <!-- Combined Search Form (Initially Hidden) -->
 <!-- Button to Trigger the Form -->
@@ -551,41 +563,38 @@
         </div>
 
         <!-- Price Filter -->
-        <div class="border-bottom mb-4 pb-4">
-            <h5 class="font-weight-semi-bold mb-4">Filter by Price</h5>
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <input type="radio" name="price" value="0-50000"> under ₹50000
-            </div>
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <input type="radio" name="price" value="50000-100000"> ₹50000 - ₹100000
-            </div>
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <input type="radio" name="price" value="100000-150000"> ₹100000 - ₹150000
-            </div>
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <input type="radio" name="price" value="150000-100000000000"> Above ₹150000
-            </div>
+      <!-- Price Filter as Dropdown -->
+<div class="border-bottom mb-4 pb-4">
+    <h5 class="font-weight-semi-bold mb-4">Filter by Price</h5>
+    <form>
+        <div class="form-group">
+            <select name="price" class="form-control">
+                <option value="">Select Price Range</option>
+                <option value="0-500">under ₹500</option>
+                <option value="500-1000">₹500 - ₹1000</option>
+                <option value="1000-1500">₹1000 - ₹1500</option>
+                <option value="1500-100000000000">Above ₹1500</option>
+            </select>
         </div>
+    </form>
+</div>
 
-        <!-- Metal Type Filter -->
-        <div class="border-bottom mb-4 pb-4">
-            <h5 class="font-weight-semi-bold mb-4">Filter by Metal Type</h5>
-            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                <input type="checkbox" name="metal" value="Gold"> Gold
-            </div>
-            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                <input type="checkbox" name="metal" value="Diamond"> Diamond
-            </div>
-            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                <input type="checkbox" name="metal" value="Silver"> Silver
-            </div>
-            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                <input type="checkbox" name="metal" value="Platinum"> Platinum
-            </div>
-            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
-                <input type="checkbox" name="metal" value="Other"> Other
-            </div>
+<!-- Metal Type Filter as Dropdown -->
+<div class="border-bottom mb-4 pb-4">
+    <h5 class="font-weight-semi-bold mb-4">Filter by Metal Type</h5>
+    <form>
+        <div class="form-group">
+            <select name="metal" class="form-control">
+                <option value="">Select Metal Type</option>
+                <option value="Gold">Gold</option>
+                <option value="Diamond">Diamond</option>
+                <option value="Silver">Silver</option>
+                <option value="Platinum">Platinum</option>
+                <option value="Other">Other</option>
+            </select>
         </div>
+    </form>
+</div>
 
         <!-- Sorting Dropdown -->
         <div class="border-bottom mb-4 pb-4">
@@ -616,78 +625,69 @@
 
         <!-- Shop Sidebar End -->
 
-
         <div class="col-lg-9 col-md-12">
             <div class="row pb-3">
-                <div class="product-list">
+                <div class="product-list w-100">
                     <% if (products.length > 0) { %>
-                      <% products.forEach(product => { %>
-                        <div class="product-item">
-                          <!-- Product details -->
-                          <h3><%= product.name %></h3>
-                         
-                          <!-- Add more product details as needed -->
-                        </div>
-                      <% }) %>
-                    <% } else { %>
-                      <div class="no-products-message">
-                        <p>Sorry, your searched product is not there, but we will try to add that.</p>
-                      </div>
-                    <% } %>
-                  </div>
-                <% for(let i = 0; i < products.length; i++) { %>
-                    <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
-                        <div class="card product-item border-0 mb-4 position-relative">
-                            <!-- Wishlist Button -->
-                            <button 
-                                class="btn btn-love position-absolute wishlist-btn" 
-                                onclick="addToWishlist('<%= products[i]._id %>', this)"
-                            >
-                                <i class="far fa-heart"></i>
-                            </button>
-                            
-                            <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
-                                <img class="img-fluid w-100 hover-zoom" src="/uploads/re-image/<%= products[i].productImages[0] %>" alt="<%= products[i].productName %>">
-                            </div>
-                            <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
-                                <h6 class="text-truncate mb-3"><%= products[i].productName %></h6>
-                                <div class="d-flex justify-content-center">
-                                    <h6>₹<%= products[i].salePrice %></h6>
-                                    <h6 class="text-muted ml-2"><del>₹<%= products[i].regularPrice %></del></h6>
+                        <div class="row">
+                            <% products.forEach(product => { %>
+                                <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
+                                    <div class="card product-item border-0 mb-4 position-relative">
+                                        <!-- Wishlist Button -->
+                                        <button 
+                                            class="btn btn-love position-absolute wishlist-btn" 
+                                            onclick="addToWishlist('<%= product._id %>', this)"
+                                        >
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        
+                                        <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
+                                            <img class="img-fluid w-100 hover-zoom" src="/uploads/re-image/<%= product.productImages[0] %>" alt="<%= product.productName %>">
+                                        </div>
+                                        <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
+                                            <h6 class="text-truncate mb-3"><%= product.productName %></h6>
+                                            <div class="d-flex justify-content-center">
+                                                <h6>₹<%= product.salePrice %></h6>
+                                                <h6 class="text-muted ml-2"><del>₹<%= product.regularPrice %></del></h6>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer d-flex justify-content-between bg-light border">
+                                            <a href="/productDetails?id=<%= product._id %>" class="btn btn-sm text-dark p-0">
+                                                <i class="fas fa-eye text-primary mr-1"></i>View Detail
+                                            </a>
+                                            <a href="#" class="btn btn-sm text-dark p-0" onclick="addToCart('<%=product._id%>')">
+                                                <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card-footer d-flex justify-content-between bg-light border">
-                                <a href="/productDetails?id=<%= products[i]._id %>" class="btn btn-sm text-dark p-0">
-                                    <i class="fas fa-eye text-primary mr-1"></i>View Detail
-                                </a>
-                                <a href="#" class="btn btn-sm text-dark p-0" onclick="addToCart('<%=products[i]._id%>')">
-                                    <i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart
-                                </a>
-                            </div>
+                            <% }) %>
                         </div>
-                    </div>
+                    <% } else { %>
+                        <div class="no-products-message text-center w-100">
+                            <p>Sorry, your searched product is not there, but we will try to add that.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 pb-1">
+            <nav aria-label="Page navigation" class="d-flex justify-content-center">
+                <% if (currentPage > 1) { %>
+                    <a class="btn btn-sm btn-outline-primary mx-1" href="/shop?page=<%= currentPage - 1 %>">Prev</a>
                 <% } %>
-            </div>
-        </div>    
-     
-              
-<div class="col-12 pb-1">
-    <nav aria-label="Page navigation">
-        <% if (currentPage > 1) { %>
-            <a class="btn" href="/shop?page=<%= currentPage - 1 %>">Prev</a>
-        <% } %>
-
-        <% for (let i = 1; i <= totalPages; i++) { %>
-            <a class="btn <%= currentPage === i ? 'active' : '' %>" href="/shop?page=<%= i %>"><%= i %></a>
-        <% } %>
-
-        <% if (currentPage < totalPages) { %>
-            <a class="btn" href="/shop?page=<%= currentPage + 1 %>">Next</a>
-        <% } %>
-    </nav>
-</div>
-
-            </div>
+                
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a class="btn btn-sm mx-1 <%= currentPage === i ? 'btn-primary' : 'btn-outline-primary' %>" href="/shop?page=<%= i %>"><%= i %></a>
+                <% } %>
+                
+                <% if (currentPage < totalPages) { %>
+                    <a class="btn btn-sm btn-outline-primary mx-1" href="/shop?page=<%= currentPage + 1 %>">Next</a>
+                <% } %>
+            </nav>
+        </div>
+               </div>
         </div>
         <!-- Shop Product End -->
     </div>
@@ -889,11 +889,11 @@
 
     function updateCartCount() {
     $.ajax({
-        url: '/getCartCount',  // The backend route you created
+        url: '/getCartCount',  
         method: 'GET',
         success: function(response) {
             const cartCountElement = document.getElementById('cart-count');
-            cartCountElement.innerHTML = response.cartLength; // Update the cart count badge with the fetched value
+            cartCountElement.innerHTML = response.cartLength; 
         },
         error: function() {
             console.error('Failed to fetch cart count');
@@ -901,14 +901,14 @@
     });
 }
 
-// Call the updateCartCount function when the page loads
+
 $(document).ready(function() {
-    updateCartCount(); // This will automatically update the cart count
+    updateCartCount();
 });
 
     document.getElementById('combineSearchBtn').addEventListener('click', function() {
         var form = document.getElementById('combineSearchForm');
-        form.classList.toggle('d-none'); // Toggle visibility of the form
+        form.classList.toggle('d-none'); 
     });
 
 
@@ -923,7 +923,7 @@ $(document).ready(function() {
         data: { productId: productId },
         success: (response) => {
             if (response.status === 'added') {
-                // Product successfully added to wishlist
+                
                 Swal.fire({
                     title: "Added to Wishlist",
                     text: "The product has been added to your wishlist.",
@@ -931,12 +931,12 @@ $(document).ready(function() {
                     timer: 2000
                 });
 
-                // Update UI to show it's in the wishlist
+                
                 icon.classList.remove('far');
                 icon.classList.add('fas');
-                button.style.color = '#b46e59cc'; // Your pinkish color
+                button.style.color = '#b46e59cc'; 
             } else if (response.status === 'already') {
-                // Product is already in wishlist
+           
                 Swal.fire({
                     title: "Already in Wishlist",
                     text: "This product is already in your wishlist.",

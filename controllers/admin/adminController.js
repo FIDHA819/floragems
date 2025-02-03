@@ -2,6 +2,7 @@ const User = require("../../models/userschema");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const Category = require("../../models/categorySchema");
+const Product =require("../../models/productSchema");
 
 const pageerror=async(req,res)=>{
     res.render("admin/page-404")
@@ -15,12 +16,12 @@ const loadLogin = (req, res) => {
     res.render("admin/admin-login", { message: null });
 };
 
-// Admin Login
+
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Find admin by email and check isAdmin flag
+        
         const admin = await User.findOne({ email: email, isAdmin: true });
 
         if (!admin) {
@@ -45,11 +46,119 @@ const login = async (req, res) => {
     }
 };
 
-// Load Admin Dashboard
+
 const loadDashboard = async (req, res) => {
     if (req.session.admin) {
         try {
-            return res.render("admin/admin-dashboard");
+            const products = await Product.aggregate([
+                {
+                  $lookup: {
+                    from: "orders", 
+                    localField: "_id",
+                    foreignField: "products.productId", 
+                    as: "orders"
+                  }
+                },
+                {
+                  $addFields: {
+                    orderCount: { $size: "$orders" } 
+                  }
+                },
+                {
+                  $sort: { orderCount: -1 } 
+                },
+                {
+                  $limit: 4 
+                }
+              ]);
+          
+
+              const customers = await User.aggregate([
+                {
+                  $lookup: {
+                    from: "orders", 
+                    localField: "_id",
+                    foreignField: "userId", 
+                    as: "orders"
+                  }
+                },
+                {
+                  $addFields: {
+                    orderCount: { $size: "$orders" } 
+                  }
+                },
+                {
+                  $project: {
+                    name: 1, 
+                    email: 1, 
+                    orderCount: 1 
+                  }
+                },
+                {
+                  $sort: { orderCount: -1 } 
+                },
+                {
+                  $limit: 10 
+                }
+              ]);
+              const topCategories = await Product.aggregate([
+                {
+                  $group: {
+                    _id: "$category",
+                    productCount: { $sum: 1 } 
+                  }
+                },
+                {
+                  $lookup: {
+                    from: "categories", 
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "categoryInfo"
+                  }
+                },
+                {
+                  $unwind: "$categoryInfo" 
+                },
+                {
+                  $project: {
+                    categoryName: "$categoryInfo.name",
+                    productCount: 1 
+                  }
+                },
+                {
+                  $sort: { productCount: -1 } 
+                },
+                {
+                  $limit: 10 
+                }
+              ]);
+              
+              const topBrands = await Product.aggregate([
+                {
+                  $group: {
+                    _id: "$brand", 
+                    productCount: { $sum: 1 } 
+                  }
+                },
+                {
+                  $project: {
+                    brandName: "$_id", 
+                    productCount: 1 
+                  }
+                },
+                {
+                  $sort: { productCount: -1 }
+                },
+                {
+                  $limit: 10 
+                }
+              ]);
+              
+       
+              
+              
+          
+            return res.render("admin/admin-dashboard",{ products,customers,topCategories,topBrands});
         } catch (error) {
             console.error("Error loading admin dashboard:", error);
             return res.redirect("/pageerror");

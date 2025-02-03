@@ -28,43 +28,178 @@
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
     <style> /* General Styles */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-        }
-        
-        .container-fluid {
-            max-width: 100%;
-            padding: 0 15px;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-            font-weight: 600;
-        }
-        
-        .text-primary {
-            color: #007bff;
-        }
-        
-        .text-dark {
-            color: #343a40;
-        }
-        
-        .btn-outline-primary {
-            border-color: #007bff;
-            color: #007bff;
-        }
-        
-        .btn-outline-primary:hover {
-            background-color: #007bff;
-            color: #fff;
-        }
-        
-        .text-muted {
-            color: #6c757d;
-        }
-        
-        /* Featured Section */
+    /* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #fffaf5;
+    color: #333;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 5%;
+    background-color: #b46e59cc;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    margin: 0 15px;
+    transition: 0.3s;
+}
+
+.navbar a:hover {
+    color: #fdd7b0;
+}
+
+.menu {
+    display: flex;
+}
+
+.hamburger {
+    display: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Hero Section */
+.hero {
+    height: 80vh;
+    background: url('https://source.unsplash.com/1600x900/?jewelry') center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+}
+
+.hero h1 {
+    font-size: 48px;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero p {
+    font-size: 20px;
+    margin-top: 10px;
+}
+
+.btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 25px;
+    background: #b46e59;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background: #a05a49;
+}
+
+/* Product Grid */
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 50px 5%;
+}
+
+.product-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(255, 249, 249, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-card img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.product-card h3 {
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+.product-card p {
+    color: #777;
+    font-size: 14px;
+}
+
+.product-card .price {
+    color: #b46e59;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.product-card .btn {
+    display: block;
+    margin-top: 10px;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 20px;
+    background: #333;
+    color: white;
+    margin-top: 50px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .menu {
+        display: none;
+        flex-direction: column;
+        background: #b46e59cc;
+        position: absolute;
+        width: 100%;
+        top: 60px;
+        left: 0;
+        padding: 10px 0;
+        text-align: center;
+    }
+
+    .menu a {
+        display: block;
+        padding: 10px;
+    }
+
+    .hamburger {
+        display: block;
+    }
+
+    .hero h1 {
+        font-size: 32px;
+    }
+
+    .hero p {
+        font-size: 16px;
+    }
+}
+
+       
         .featured .fa {
             font-size: 24px;
         }
@@ -79,8 +214,8 @@
         
         /* Categories Section */
         .cat-item {
-            background-color: #fff;
-            border-radius: 10px;
+            background-color:#F2E6EB;          ;
+            border-radius: 100px;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
@@ -128,7 +263,8 @@
         
         .product-item .card-footer a {
             text-decoration: none;
-            color: #007bff;
+            color: #59595a;
+            background-color: transparent;
         }
         
         /* Vendor Section */
@@ -299,6 +435,7 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    background-color: #F2E6EB;
 }
 .dropdown {
             position: relative;
@@ -432,10 +569,11 @@
 .banner-container {
     position: relative;
     overflow: hidden;
-    background-color: #f8d0d0; /* Pinkish color for the banner background */
+    background-color: transparent
+    ; /* Pinkish color for the banner background */
     border-radius: 5px;
     padding: 10px 20px;
-    margin: 10px 0;
+    margin: 20px 0;
 }
 
 /* Moving Banner Text */
@@ -467,6 +605,494 @@
         font-size: 14px;
     }
 }
+@keyframes fall {
+  0% {
+    transform: translateY(-100px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.falling-diamond {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-image: url('/images/home/images-removebg-preview.png'); /* Replace with your diamond image */
+  background-size: cover;
+  animation: fall 5s linear infinite;
+  z-index: -1;
+}
+.container-fluid.mb-5 {
+    background-color:#F2E6EB; /* Light background color */
+    border-bottom: 2px solid #F2E6EB; /* Subtle border for separation */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.navbar {
+    padding: 1rem 2rem; /* Adjust padding for a balanced layout */
+}
+
+.navbar-brand h1 {
+    color: #333; /* Logo text color */
+    font-size: 2rem; /* Adjust font size */
+}
+
+.navbar-nav .nav-link {
+    color: #555; /* Link text color */
+    font-weight: 500; /* Slightly bold */
+    margin: 0 10px; /* Add spacing between links */
+    transition: color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    color: #007bff; /* Highlight color on hover or active */
+}
+
+.btn.border {
+    background-color:#F2E6EB; /* Button background */
+    border-color: #ddd; /* Button border color */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for hover */
+}
+
+.btn.border:hover {
+    background-color:  #555; /* Hover background color */
+    color: #fff; /* Hover text color */
+}
+
+.badge {
+    background-color: transparent; /* Badge background color */
+    color:black; /* Badge text color */
+    font-size: 0.8rem; /* Adjust font size */
+    border-radius: 50%; /* Make it circular */
+    padding: 5px 8px; /* Adjust padding */
+}
+
+.dropdown-menu {
+    background-color: #ffffff; /* Dropdown background */
+    border: 1px solid #ddd; /* Dropdown border */
+    border-radius: 5px; /* Rounded corners */
+}
+
+.dropdown-menu .dropdown-item {
+    color: #333; /* Dropdown item color */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #f1f1f1; /* Hover background */
+}
+
+.navbar-toggler {
+    border: none; /* Remove default border */
+}
+
+.navbar-toggler-icon {
+    background-color: #33333300; /* Toggler icon color */
+    border-radius: 2px; /* Slight rounding */
+}
+.navbar {
+    background-color: transparent !important; /* Makes the background transparent */
+    border: none; /* Removes any borders */
+    padding: 1rem 2rem; /* Adjust padding for better spacing */
+}
+
+.navbar-collapse {
+    background-color: transparent; /* Ensures dropdowns also have a transparent background */
+}
+
+.navbar-nav .nav-link {
+    color: #333; /* Link text color */
+    font-weight: 500; /* Slightly bold */
+    margin: 0 10px; /* Add spacing between links */
+    transition: color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    color: #007bff; /* Highlight color on hover or active */
+}
+
+.brand-carousel {
+            padding: 30px 0;
+        }
+        .category-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin: 0 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .category-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        .category-item .cat-img {
+            display: block;
+            height: 250px;
+            overflow: hidden;
+        }
+        .category-item .cat-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .category-item:hover .cat-img img {
+            transform: scale(1.1);
+        }
+        .category-item h5 {
+            padding: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            color: #33333338;
+            font-weight: bold;
+        }
+        .owl-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+        .owl-nav .owl-prev,
+        .owl-nav .owl-next {
+            background: rgba(0,0,0,0.5) !important;
+            color: white !important;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+/* Owl Carousel Container */
+.vendor-carousel {
+  display: flex;
+  gap: 20px;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+/* Vendor Item Styling */
+.vendor-item {
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #fff;
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Hover Effect on Vendor Items */
+.vendor-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Vendor Image Styling */
+.vendor-item img {
+  width: 100%;
+  height: auto;
+  max-width: 200px; /* You can adjust the width as per the requirement */
+  display: block;
+  margin: 0 auto;
+}
+
+/* Owl Carousel Default Styling (Optional) */
+.owl-carousel .owl-nav {
+  display: none; /* Hide navigation arrows */
+}
+
+.owl-carousel .owl-dots {
+  display: none; /* Hide dots */
+}
+
+@media (max-width: 768px) {
+  /* For mobile devices */
+  .vendor-item {
+    padding: 10px;
+  }
+
+  .vendor-item img {
+    max-width: 150px; /* Adjust image size for mobile */
+  }
+}
+
+/* Owl Carousel Container */
+.vendor-carousel-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 30px 0;
+}
+
+/* Owl Carousel Container */
+.vendor-carousel-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 30px 0;
+}
+
+/* Vendor Carousel */
+.vendor-carousel {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-around;
+  align-items: center;
+}
+
+/* Vendor Item Styling */
+.vendor-item {
+  border: 2px solid #ddd;
+  border-radius: 50%;  /* Make the border round */
+  padding: 15px;
+  background-color: #fff;
+  transition: transform 0.3s ease-in-out;
+  width: 150px;  /* Fixed width for each item */
+  height: 150px; /* Fixed height for each item */
+  margin: 0 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Vendor Item Hover Effect */
+.vendor-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Vendor Image Styling */
+.vendor-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;  /* Ensures the image covers the circular container */
+  border-radius: 50%;  /* Makes the image round */
+  display: block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .vendor-item {
+    width: 120px;  /* Adjust the width for smaller screens */
+    height: 120px; /* Adjust the height for smaller screens */
+  }
+}/* Container for the top sellers section */
+.container-fluid.pt-5 {
+  padding-top: 50px;
+}
+
+/* Title of the section */
+.section-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.section-title .px-2 {
+  background-color: #DCAE96;
+  padding: 5px 20px;
+  border-radius: 30px;
+  font-size: 28px;
+}
+
+/* Product grid */
+.row.px-xl-5.pb-3 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+}
+
+/* Individual product card */
+.card.product-item {
+  width: 100%;
+  border: none;
+  box-shadow: 0 4px 15px rgba(228, 225, 225, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+}
+
+.card.product-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Product image styling */
+.product-img img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.product-img:hover img {
+  transform: scale(1.05);
+}
+
+/* Product body */
+.card-body {
+  padding: 20px;
+  background-color: #fff;
+  text-align: center;
+  color: #333;
+}
+
+.card-body h6 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.card-body .d-flex {
+  justify-content: center;
+  align-items: center;
+}
+
+.card-body .d-flex h6 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #DCAE96;
+}
+
+.card-body .d-flex h6.del {
+  color: #888;
+  text-decoration: line-through;
+  margin-left: 10px;
+}
+
+/* Card footer */
+.card-footer {
+  padding: 15px 0;
+  background-color: #f8f8f8;
+  text-align: center;
+  border-top: 1px solid #ddd;
+}
+
+.card-footer .btn {
+  padding: 8px 15px;
+  font-size: 14px;
+  color: #DCAE96;
+  border: 1px solid #DCAE96;
+  border-radius: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.card-footer .btn:hover {
+  background-color: #DCAE96;
+  color: #fff;
+  border-color: #DCAE96;
+}
+
+/* Responsive styling */
+@media (max-width: 1200px) {
+  .col-lg-3 {
+    width: 48%;
+  }
+}
+
+@media (max-width: 768px) {
+  .col-md-6 {
+    width: 100%;
+  }
+
+  .section-title {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 576px) {
+  .section-title {
+    font-size: 24px;
+  }
+
+  .card-body h6 {
+    font-size: 16px;
+  }
+} */
+.navbar-brand h1 {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.navbar-nav .nav-link {
+    padding: 0.5rem 1rem;
+}
+
+.navbar-nav .nav-item {
+    margin-right: 15px;
+}
+
+.navbar-nav .nav-item:last-child {
+    margin-right: 0;
+}
+
+.navbar-nav .btn {
+    padding: 8px 12px;
+    font-size: 1rem;
+}
+.carousel-caption {
+    background-color: rgba(0, 0, 0, 0.5); /* Optional: Slight dark background for better text contrast */
+}
+/* Ensure the image stretches to fill the container and maintains aspect ratio */
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* This ensures the image covers the entire container without stretching */
+}
+
+/* Make the caption responsive */
+.carousel-caption {
+    position: absolute;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    padding: 0 15px; /* Add padding for smaller screens */
+}
+
+/* Adjust font sizes for different screen sizes */
+@media (max-width: 1200px) {
+    .carousel-caption h4 {
+        font-size: 1.5rem; /* Slightly smaller subtitle */
+    }
+    .carousel-caption h3 {
+        font-size: 2.5rem; /* Slightly smaller title */
+    }
+}
+
+@media (max-width: 768px) {
+    .carousel-caption h4 {
+        font-size: 1.2rem; /* Further reduce subtitle font */
+    }
+    .carousel-caption h3 {
+        font-size: 2rem; /* Further reduce title font */
+    }
+    .carousel-caption .btn {
+        font-size: 1rem; /* Reduce button font size */
+    }
+}
+
+@media (max-width: 576px) {
+    .carousel-caption h4 {
+        font-size: 1rem; /* Subtitle font even smaller */
+    }
+    .carousel-caption h3 {
+        font-size: 1.5rem; /* Title font smaller */
+    }
+    .carousel-caption .btn {
+        font-size: 0.9rem; /* Smaller button */
+    }
+}
 
 
         
@@ -474,10 +1100,29 @@
 </head>         
 
 <body>
+    <div class="falling-diamond"></div>
+    <div class="falling-diamond" style="left: 20%; animation-delay: 2s;"></div>
+    <div class="falling-diamond" style="left: 40%; animation-delay: 4s;"></div>
+    <div class="falling-diamond" style="left: 60%; animation-delay: 1s;"></div>
+    <div class="falling-diamond" style="left: 80%; animation-delay: 3s;"></div>
+    <div class="falling-diamond" style="left: 60%; animation-delay: 1s;"></div>
+    <div class="falling-diamond" style="left: 80%; animation-delay: 3s;"></div>
+    <div class="falling-diamond" style="left: 60%; animation-delay: 1s;"></div>
+    <div class="falling-diamond" style="left: 80%; animation-delay: 3s;"></div>
+    <div class="falling-diamond" style="left: 20%; animation-delay: 2s;"></div>
+    <div class="falling-diamond" style="left: 40%; animation-delay: 4s;"></div>
+    <div class="falling-diamond" style="left: 60%; animation-delay: 1s;"></div>
+    <div class="falling-diamond" style="left: 80%; animation-delay: 3s;"></div>
+    <div class="falling-diamond" style="left: 60%; animation-delay: 1s;"></div>
+    <div class="falling-diamond" style="left: 80%; animation-delay: 3s;"></div>
+    <div class="falling-diamond" style="left: 60%; animation-delay: 1s;"></div>
+    <div class="falling-diamond" style="left: 80%; animation-delay: 3s;"></div>
+    
+
     <!-- Topbar Start -->
     <div class="container-fluid">
         <div class="row bg-secondary py-2 px-xl-5">
-            <div class="col-lg-6 d-none d-lg-block">
+            <div class="col-lg-4 d-none d-lg-block">
                 <div class="d-inline-flex align-items-center">
                     <a class="text-dark" href="">FAQs</a>
                     <span class="text-muted px-2">|</span>
@@ -486,7 +1131,12 @@
                     <a class="text-dark" href="">Support</a>
                 </div>
             </div>
-            <div class="col-lg-6 text-center text-lg-right">
+            <div class="col-lg-4 col-6 text-left">
+                <div class="moving-banner">
+                    <span>Free Shipping on Products Above ₹1000</span>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center text-lg-right">
                 <div class="d-inline-flex align-items-center">
                     <a class="text-dark px-2" href="">
                         <i class="fab fa-facebook-f"></i>
@@ -506,151 +1156,103 @@
                 </div>
             </div>
         </div>
-        <div class="row align-items-center py-3 px-xl-5">
-            <div class="col-lg-3 d-none d-lg-block">
-                <a href="" class="text-decoration-none">
-                    <h1 class="m-0 display-5 font-weight-semi-bold">Flora</span>Gems</h1>
-                </a>
-            </div>
-            <div class="col-lg-6 col-6 text-left">
-                <div class="banner-container">
-                    <div class="moving-banner">
-                        <span>Free Shipping on Products Above ₹1000</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-6 text-right">
-                <a href="/wishlist" class="btn border">
-                    <i class="fas fa-heart text-primary"></i>
-                  
-                </a>
-                <a href="/cart" class="btn border">
-                    <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge" id="cart-count">0</span> <!-- Cart count displayed here -->
-                    <!-- Cart count displayed here -->
-                </a>
-                
-            </div>
-        </div>
-    </div>
     <!-- Topbar End -->
 
-
-    <!-- Navbar Start -->
     <div class="container-fluid mb-5">
-        <div class="row border-top px-xl-5">
-            <div class="col-lg-12">
-                <nav class="navbar navbar-expand-lg bg-light navbar-light py-3 py-lg-0 px-0">
-                    <a href="" class="text-decoration-none d-block d-lg-none">
-                        <h1 class="m-0 display-5 font-weight-semi-bold">FloraGems</h1>
-                    </a>
-                    <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse justify-content-center" id="navbarCollapse">
-                        <div class="navbar-nav py-0">
-                            <a href="index" class="nav-item nav-link active">Home</a>
-                            <a href="/shop" class="nav-item nav-link">Shop</a>
-                            <div class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pages</a>
-                                <div class="dropdown-menu rounded-0 m-0">
-                                    <a href="/cart" class="dropdown-item">Shopping Cart</a>
-                                    <a href="checkout.html" class="dropdown-item">Checkout</a>
-                                </div>
-                            </div>
-        <a href="contact.html" class="nav-item nav-link">Contact</a>
-                        </div>
-                        <div class="navbar-nav ml-auto py-0">
-                            <% if (user) { %>
-                                <div class="dropdown">
-                                    <a href="#" class="signup-container">
-                                        <i class="fa fa-user" style="font-size: 16px; margin-right: 5px;"></i> <!-- User Icon -->
-                                        <%= user.name || "User" %> <!-- Fallback for name -->
-                                    </a>
-                                    <div class="dropdown-content">
-                                        <a href="/userProfile">Profile</a>
-                                        <a href="/logout">Logout</a>
-                                    </div>
-                                </div>
-                            <% } else { %>
-                                <a href="/login" class="nav-item nav-link">Login</a>
-                                <a href="/signup" class="nav-item nav-link">Register</a>
-                            <% } %>
-                        </div>
-                        
-                        
-                        </div>
-                        
-                     
-                </nav>
-                <!-- <div id="header-carousel" class="carousel slide" data-ride="carousel">
-                    <div class="carousel-inner">
-                        <div class="carousel-item active" style="
-                        height: 50vh;
-                        object-fit: cover">
-                            <img class="img-fluid" src="/images/home/statement-butterfly-necklace-image-1_00908070-ea6c-4c6a-a553-c411952df24a.webp" alt="Image">
-                            <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
-                                <div class="p-3" style="max-width: 700px;">
-                                    <h4 class="text-light text-uppercase font-weight-medium mb-3">10% Off Your First Order</h4>
-                                    <h3 class="display-4 text-white font-weight-semi-bold mb-4">Fashionable Jewelleries</h3>
-                                    <a href="" class="btn btn-light py-2 px-3">Shop Now</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item"  style="
-                        height: 50vh;
-                        object-fit: cover">
-                            <img class="img-fluid" src="/images/home/502119FAZAA02_1.webp" alt="Image">
-                            <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
-                                <div class="p-3" style="max-width: 700px;">
-                                    <h4 class="text-light text-uppercase font-weight-medium mb-3">10% Off Your First Order</h4>
-                                    <h3 class="display-4 text-white font-weight-semi-bold mb-4">Reasonable Price</h3>
-                                    <a href="" class="btn btn-light py-2 px-3">Shop Now</a>
-                                </div>
-                            </div>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light py-3 px-xl-5">
+            <!-- Logo -->
+            <a href="/" class="navbar-brand text-decoration-none">
+                <img src="/img/[removal.ai]_f9e2b53c-dc7e-488a-a0da-fa14f2059a6a_Flora%20Gems.png" alt="Flora Gems" class="img-fluid" style="max-height: 50px;">
+            </a>
+            
+    
+            <!-- Navbar Toggler (For Mobile View) -->
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+    
+            <!-- Navbar Links -->
+            <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                <!-- Centered Navigation Links -->
+                <div class="navbar-nav mx-auto">
+                    <a href="/" class="nav-item nav-link active">Home</a>
+                    <a href="/shop" class="nav-item nav-link">Shop</a>
+    
+                    <!-- Dropdown Menu -->
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Cart
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a href="/cart" class="dropdown-item">Shopping Cart</a>
+                            <a href="/checkout" class="dropdown-item">Checkout</a>
                         </div>
                     </div>
-                    <a class="carousel-control-prev" href="#header-carousel" data-slide="prev">
-                        <div class="btn btn-dark" style="width: 45px; height: 45px;">
-                            <span class="carousel-control-prev-icon mb-n2"></span>
-                        </div>
+    
+                    <a href="/contact" class="nav-item nav-link">Contact</a>
+                </div>
+    
+                <!-- Right Side: Cart, Wishlist, and User Links -->
+                <div class="navbar-nav align-items-center">
+                    <!-- Wishlist -->
+                    <a href="/wishlist" class="btn border mx-2">
+                        <i class="fas fa-heart text-primary"></i>
                     </a>
-                    <a class="carousel-control-next" href="#header-carousel" data-slide="next">
-                        <div class="btn btn-dark" style="width: 45px; height: 45px;">
-                            <span class="carousel-control-next-icon mb-n2"></span>
-                        </div>
+    
+                    <!-- Cart -->
+                    <a href="/cart" class="btn border mx-2">
+                        <i class="fas fa-shopping-cart text-primary"></i>
+                        <span class="badge" id="cart-count">0</span>
                     </a>
+    
+                    <!-- User Account -->
+                    <% if (user) { %>
+                        <div class="dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-user" style="font-size: 16px; margin-right: 5px;"></i>
+                                <%= user.name || "User" %>
+                            </a>
+                            <div class="dropdown-menu rounded-0 m-0">
+                                <a href="/userProfile" class="dropdown-item">Profile</a>
+                                <a href="/logout" class="dropdown-item">Logout</a>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <a href="/login" class="nav-item nav-link">Login</a>
+                        <a href="/signup" class="nav-item nav-link">Register</a>
+                    <% } %>
                 </div>
             </div>
-        </div>
-    </div> -->
-    <div id="header-carousel" class="carousel slide" data-ride="carousel">
-        <div class="carousel-inner">
-            <% banners.forEach((banner, index) => { %>
-                <div class="carousel-item <%= index === 0 ? 'active' : '' %>" style="height: 50vh; object-fit: cover">
-                    <img class="img-fluid" src="<%= banner.imageUrl %>" alt="Image">
-                    <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
-                        <div class="p-3" style="max-width: 700px;">
-                            <h4 class="text-light text-uppercase font-weight-medium mb-3"><%= banner.subtitle %></h4>
-                            <h3 class="display-4 text-white font-weight-semi-bold mb-4"><%= banner.title %></h3>
-                            <a href="<%= banner.link %>" class="btn btn-light py-2 px-3">Shop Now</a>
-                        </div>
-                    </div>
-                </div>
-            <% }) %>
-        </div>
-        <a class="carousel-control-prev" href="#header-carousel" data-slide="prev">
-            <div class="btn btn-dark" style="width: 45px; height: 45px;">
-                <span class="carousel-control-prev-icon mb-n2"></span>
-            </div>
-        </a>
-        <a class="carousel-control-next" href="#header-carousel" data-slide="next">
-            <div class="btn btn-dark" style="width: 45px; height: 45px;">
-                <span class="carousel-control-next-icon mb-n2"></span>
-            </div>
-        </a>
+        </nav>
     </div>
     
+    
+    <div id="header-carousel" class="carousel slide" data-ride="carousel">
+    <div class="carousel-inner">
+        <% banners.forEach((banner, index) => { %>
+            <div class="carousel-item <%= index === 0 ? 'active' : '' %>" style="height: 50vh;">
+                <img class="img-fluid w-100" src="<%= banner.imageUrl %>" alt="Image" style="object-fit: cover; height: 100%;">
+                <div class="carousel-caption d-flex flex-column align-items-center justify-content-center bg-transparent">
+                    <div class="p-3" style="max-width: 700px;">
+                        <h4 class="text-light text-uppercase font-weight-medium mb-3"><%= banner.subtitle %></h4>
+                        <h3 class="display-4 text-white font-weight-semi-bold mb-4"><%= banner.title %></h3>
+                        <a href="<%= banner.link %>" class="btn btn-light py-2 px-3">Shop Now</a>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+    <a class="carousel-control-prev" href="#header-carousel" data-slide="prev">
+        <div class="btn btn-dark" style="width: 45px; height: 45px;">
+            <span class="carousel-control-prev-icon mb-n2"></span>
+        </div>
+    </a>
+    <a class="carousel-control-next" href="#header-carousel" data-slide="next">
+        <div class="btn btn-dark" style="width: 45px; height: 45px;">
+            <span class="carousel-control-next-icon mb-n2"></span>
+        </div>
+    </a>
+</div>
     <!-- Navbar End -->
 
 
@@ -671,252 +1273,98 @@
             </div>
             <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
                 <div class="d-flex align-items-center border mb-4" style="padding: 30px;">
-                    <h1 class="fas fa-exchange-alt text-primary m-0 mr-3"></h1>
-                    <h5 class="font-weight-semi-bold m-0">14-Day Return</h5>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
-                <div class="d-flex align-items-center border mb-4" style="padding: 30px;">
                     <h1 class="fa fa-phone-volume text-primary m-0 mr-3"></h1>
                     <h5 class="font-weight-semi-bold m-0">24/7 Support</h5>
                 </div>
             </div>
         </div>
     </div>
+    </div>
     <!-- Featured End -->
 
 
     <!-- Categories Start -->
-    <div class="container-fluid pt-5">
-        <div class="row px-xl-5 pb-3">
-            <div class="col-lg-4 col-md-6 pb-1">
-                <div class="cat-item d-flex flex-column border mb-4" style="padding: 30px;">
-                    <p class="text-right">15 Products</p>
-                    <a href="" class="cat-img position-relative overflow-hidden mb-3">
-                        <img class="img-fluid" src="/images/home/gold.webp" alt="">
+    <div class="container-fluid pt-5 position-relative">
+        <div class="text-center mb-4">
+            <h2 class="section-title px-5"><span class="px-2">Search With Category</span></h2>
+        </div>
+        <div class="owl-carousel category-carousel">
+            <% categories.forEach(category => { %>
+                <div class="category-item">
+                    <a href="/filtered?category=<%= category._id %>" class="cat-img position-relative overflow-hidden mb-3">
+                        <img class="img-fluid" src="/uploads/re-image/<%= category.categoryImage[0] %>" alt="<%= category.name %>">
                     </a>
-                    <h5 class="font-weight-semi-bold m-0">Gold</h5>
+                    <h5 class="font-weight-semi-bold m-0"><%= category.name %></h5>
                 </div>
-            </div>
-            <div class="col-lg-4 col-md-6 pb-1">
-                <div class="cat-item d-flex flex-column border mb-4" style="padding: 30px;">
-                    <p class="text-right">15 Products</p>
-                    <a href="" class="cat-img position-relative overflow-hidden mb-3">
-                        <img class="img-fluid" src="/images/home/diamond2.webp" alt="">
-                    </a>
-                    <h5 class="font-weight-semi-bold m-0">Diamond</h5>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 pb-1">
-                <div class="cat-item d-flex flex-column border mb-4" style="padding: 30px;">
-                    <p class="text-right">15 Products</p>
-                    <a href="" class="cat-img position-relative overflow-hidden mb-3">
-                        <img class="img-fluid" src="/images/home/platinum 2.jpg" alt="">
-                    </a>
-                    <h5 class="font-weight-semi-bold m-0">platinum</h5>
-                </div>
-            </div>
-           
+            <% }) %>
         </div>
     </div>
+
+    
     <!-- Categories End -->
 
 
-    <div id="mycarousel" class="carousel slide" data-ride="carousel">
-        <div class="carousel-inner">
-          <div class="carousel-item active">
-            <img class="carousel__img" src="/images/home/HD-wallpaper-rings-jewelry-gold-aesthetics.jpg" alt="First slide">
-            <div class="carousel__caption carousel-caption">
-              <h1>20% off to the all order</h1>
-              <a href="" class="btn btn-outline-primary py-md-2 px-md-3">Shop Now</a>
-            </div>
-          </div>
-          
-          <div class="carousel-item">
-            <img class="carousel__img" src="/images/home/statement-butterfly-necklace-image-1_00908070-ea6c-4c6a-a553-c411952df24a.webp" alt="Second slide">
-            <div class="carousel__caption carousel-caption">
-              <h1>Season of Style</h1>
-              <a href="" class="btn btn-outline-primary py-md-2 px-md-3">Stay Tuned</a>
-            </div>
-          </div>
-        </div>
-        
-        <a class="carousel-control-prev" href="#mycarousel" role="button" data-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="sr-only">Previous</span>
-        </a>
-        <a class="carousel-control-next" href="#mycarousel" role="button" data-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="sr-only">Next</span>
-        </a>
-      </div>
-    <!-- Offer End -->
 
-<!-- product start -->
-  <div class="container-fluid pt-5">
+    <!-- Products End -->
+   
+
+    <div class="container-fluid pt-5">
         <div class="text-center mb-4">
             <h2 class="section-title px-5"><span class="px-2">Top Sellers</span></h2>
         </div> 
         <div class="row px-xl-5 pb-3">
-            <% for (let i = 0; i < products.length; i++) { %>
-            <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
-                <div class="card product-item border-0 mb-4">
-                    <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
-                        <a href="/productDetails?id=<%= products[i]._id %>">
-                            <% if (products[i].productImages && products[i].productImages.length > 0) { %>
-                                <img class="img-fluid w-100" src="/uploads/re-image/<%= products[i].productImages[0] %>" alt="<%= products[i].productName %>">
-                              <% } else { %>
-                                <img class="img-fluid w-100" src="/uploads/product-images/default.jpg" alt="Default Product Image">
-                              <% } %>
-                              
-                        </a>
-                    </div>
-                    <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
-                        <h6 class="text-truncate mb-3"><%= products[i].productName %></h6>
-                        <div class="d-flex justify-content-center">
-                            <h6>$<%= products[i].salePrice %></h6>
-                            <h6 class="text-muted ml-2"><del>$<%= products[i].regularPrice %></del></h6>
+            <% for (let i = 0; i < Math.min(products.length, 6); i++) { %>
+                <div class="col-lg-2 col-md-3 col-sm-6 pb-1">
+                    <div class="card product-item border-0 mb-4">
+                        <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
+                            <a href="/productDetails?id=<%= products[i]._id %>">
+                                <% if (products[i].productImages && products[i].productImages.length > 0) { %>
+                                    <img class="img-fluid w-100" src="/uploads/re-image/<%= products[i].productImages[0] %>" alt="<%= products[i].productName %>">
+                                <% } else { %>
+                                    <img class="img-fluid w-100" src="/uploads/product-images/default.jpg" alt="Default Product Image">
+                                <% } %>
+                            </a>
+                        </div>
+                        <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
+                            <h6 class="text-truncate mb-3"><%= products[i].productName %></h6>
+                            <div class="d-flex justify-content-center">
+                                <h6>$<%= products[i].salePrice %></h6>
+                                <h6 class="text-muted ml-2"><del>$<%= products[i].regularPrice %></del></h6>
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex justify-content-center bg-light border">
+                            <a href="/productDetails?id=<%= products[i]._id %>" class="btn btn-sm text-dark p-0"><i class="fas fa-eye text-primary mr-1"></i>View Detail</a>
                         </div>
                     </div>
-                    <div class="card-footer d-flex justify-content-between bg-light border">
-                        <a href="/productDetails?id=<%= products[i]._id %>" class="btn btn-sm text-dark p-0"><i class="fas fa-eye text-primary mr-1"></i>View Detail</a>
-                        <a href="/cart?id=<%=products[i]._id%>" class="btn btn-sm text-dark p-0"><i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart</a>
-                    </div>
                 </div>
-            </div>
             <% } %>
         </div>
     </div>
-    <!-- Products End -->
-
-
-    <!-- Subscribe Start -->
-    <!-- <div class="container-fluid bg-secondary my-5">
-        <div class="row justify-content-md-center py-5 px-xl-5">
-            <div class="col-md-6 col-12 py-5">
-                <div class="text-center mb-2 pb-2">
-                    <h2 class="section-title px-5 mb-3"><span class="bg-secondary px-2">Stay Updated</span></h2>
-                    <p>Amet lorem at rebum amet dolores. Elitr lorem dolor sed amet diam labore at justo ipsum eirmod duo labore labore.</p>
-                </div>
-                <form action="">
-                    <div class="input-group">
-                        <input type="text" class="form-control border-white p-4" placeholder="Email Goes Here">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary px-4">Subscribe</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div> -->
-    <div id="mycarousel" class="carousel slide" data-ride="carousel">
-        <div class="carousel-inner">
-          <div class="carousel-item active">
-            <img class="carousel__img" src="/images/home/slanted-jewelry-photography-collage-on-260nw-1486862900.webp" alt="First slide">
-            <div class="carousel__caption carousel-caption">
-              <h1>Adorn The sparkle of new begining</h1>
-              <a href="" class="btn btn-outline-primary py-md-2 px-md-3">Shop Now</a>
-            </div>
-          </div>
-          
-          <!-- <div class="carousel-item">
-            <img class="carousel__img" src="/images/home/statement-butterfly-necklace-image-1_00908070-ea6c-4c6a-a553-c411952df24a.webp" alt="Second slide">
-            <div class="carousel__caption carousel-caption">
-              <h1>Season of Style</h1>
-              <a href="" class="btn btn-outline-primary py-md-2 px-md-3">Stay Tuned</a>
-            </div>
-          </div> -->
-        </div>
-<!--         
-        <a class="carousel-control-prev" href="#mycarousel" role="button" data-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="sr-only">Previous</span>
-        </a>
-        <a class="carousel-control-next" href="#mycarousel" role="button" data-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="sr-only">Next</span>
-        </a> -->
-      </div>
-    <!-- Subscribe End -->
-
-
-    <!-- Products Start -->
-
-      
-                 
-            <div class="container-fluid pt-5">
-                <div class="text-center mb-4">
-                    <h2 class="section-title px-5"><span class="px-2">New Arrivals</span></h2>
-                </div>
-                <div class="row px-xl-5 pb-3">
-                    <% for (let i = 0; i < products.length; i++) { %>
-                    <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
-                        <div class="card product-item border-0 mb-4">
-                            <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
-                                <a href="/productDetails?id=<%= products[i]._id %>">
-                                    <% if (products[i].productImages && products[i].productImages.length > 0) { %>
-                                        <img class="img-fluid w-100" src="/uploads/re-image/<%= products[i].productImages[0] %>" alt="<%= products[i].productName %>">
-                                      <% } else { %>
-                                        <img class="img-fluid w-100" src="/uploads/product-images/default.jpg" alt="Default Product Image">
-                                      <% } %>
-                                      
-                                </a>
-                            </div>
-                            <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
-                                <h6 class="text-truncate mb-3"><%= products[i].productName %></h6>
-                                <div class="d-flex justify-content-center">
-                                    <h6>$<%= products[i].salePrice %></h6>
-                                    <h6 class="text-muted ml-2"><del>$<%= products[i].regularPrice %></del></h6>
-                                </div>
-                            </div>
-                            <div class="card-footer d-flex justify-content-between bg-light border">
-                                <a href="/productDetails?id=<%= products[i]._id %>" class="btn btn-sm text-dark p-0"><i class="fas fa-eye text-primary mr-1"></i>View Detail</a>
-                                <a href="/cart?id=<%=products[i]._id%>" class="btn btn-sm text-dark p-0"><i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart</a>
-                            </div>
-                        </div>
-                    </div>
-                    <% } %>
-                </div>
-            </div>
+    
     
     <!-- Products End -->
-
-
-    <!-- Vendor Start -->
-    <div class="container-fluid py-5">
-        <div class="row px-xl-5">
-            <div class="col">
-                <div class="owl-carousel vendor-carousel">
-                    <div class="vendor-item border p-4">
-                        <img src="/images/brand/A.JAFFE.png" alt="">
-                    </div>
-                    <div class="vendor-item border p-4">
-                        <img src="/images/brand/ALTR.png" alt="">
-                    </div>
-                    <div class="vendor-item border p-4">
-                        <img src="/images/brand/ArtCarved.png" alt="">
-                    </div>
-                    <div class="vendor-item border p-4">
-                        <img src="/images/brand/borsheims.svg" alt="">
-                    </div>
-                    <div class="vendor-item border p-4">
-                        <img src="/images/brand/olio_logoblack_100x.webp" alt="">
-                    </div>
-                    <div class="vendor-item border p-4">
-                        <img src="/images/brand/madhia jaipur.jpg" alt="">
-                    </div>
-                    <div class="vendor-item border p-4">
-                        <img src="/images/brand/LUNE_LOGO-04_130x.avif" alt="">
-                    </div>
-                    <div class="vendor-item border p-4">
-                        <img src="/images/brand/Deakin&Francis.jpeg" alt="">
-                    </div>
-                </div>
-            </div>
+    <div class="vendor-carousel-container">
+        <div class="owl-carousel vendor-carousel">
+          <!-- Loop through brands and images for the carousel -->
+          <% brands.forEach(brand => { %>
+            <% brand.brandImage.forEach(image => { %>
+              <div class="vendor-item">
+                <img src="/uploads/re-image/<%= image %>" alt="<%= brand.brandName %>">
+              </div>
+            <% }); %>
+          <% }); %>
+          <!-- Duplicate the items for infinite scrolling effect -->
+          <% brands.forEach(brand => { %>
+            <% brand.brandImage.forEach(image => { %>
+              <div class="vendor-item">
+                <img src="/uploads/re-image/<%= image %>" alt="<%= brand.brandName %>">
+              </div>
+            <% }); %>
+          <% }); %>
         </div>
-    </div>
-    <!-- Vendor End -->
-
+      </div>
+      
+      
 
     <!-- Footer Start -->
     <div class="container-fluid bg-secondary text-dark mt-5 pt-5">
@@ -1000,7 +1448,73 @@
     <!-- Contact Javascript File -->
     <script src="mail/jqBootstrapValidation.min.js"></script>
     <script src="mail/contact.js"></script>
+    <!-- Owl Carousel JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/2.3.4/owl.carousel.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+   
 
+<script>
+  $(document).ready(function(){
+    // Brand Carousel
+    $('.brand-carousel').owlCarousel({
+        loop: true,
+        margin: 20,
+        nav: true,
+        dots: false,
+        responsive:{
+            0: { items: 1 },
+            600: { items: 2 },
+            1000: { items: 3 }
+        }
+    });
+
+    // Category Carousel
+    $(document).ready(function(){
+    $('.category-carousel').owlCarousel({
+        loop: true,
+        margin: 20,
+        nav: true,
+        dots: false,
+        autoplay: true,
+        autoplayTimeout: 3000,  // Auto slide every 3 seconds
+        autoplayHoverPause: true,  // Pause on hover
+        responsive: {
+            0: {
+                items: 1,  // 1 item on mobile
+            },
+            600: {
+                items: 2,  // 2 items on tablets
+            },
+            1000: {
+                items: 3,  // 3 items on desktop
+            },
+            1200: {
+                items: 4,  // 4 items on large desktop screens
+            }
+        }
+    });
+});
+
+
+    // Common Owl Carousel Initialization (for other carousels if needed)
+    $(".owl-carousel").owlCarousel({
+        items: 4, // Number of items to show
+        loop: true, // Loop through items
+        margin: 10, // Margin between items
+        nav: true, // Show next/prev buttons
+        autoplay: true, // Enable autoplay
+        autoplayTimeout: 3000, // Autoplay time interval
+        responsive: {
+            0: { items: 1 }, // Show 1 item on small screens
+            600: { items: 2 }, // Show 2 items on medium screens
+            1000: { items: 4 } // Show 4 items on large screens
+        }
+    });
+});
+
+</script>
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
     <script>

@@ -31,7 +31,10 @@
             <% for (let i = data.length - 1; i >= 0; i--) { %>
             <tr>
                 <td><%= data[i].productName %></td>
-                <td><%= data[i].category.name %></td>
+                <td>
+                    <%= data[i].category ? data[i].category.name : 'No Category' %>
+                  </td>
+                  
                 <td><%= data[i].salePrice %></td>
                 <td>
                     <% if(locals.data[i].productOffer) { %>

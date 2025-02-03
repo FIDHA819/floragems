@@ -30,16 +30,29 @@ const categoryInfo = async (req, res) => {
 const addCategory = async (req, res) => {
   const { name, description } = req.body;
   try {
+    // Check if the category already exists
     const existingCategory = await Category.findOne({ name });
     if (existingCategory) {
       return res.status(400).json({ error: "Category already exists" });
     }
+
+    // Check if an image file was uploaded
+    if (!req.file) {
+      return res.status(400).json({ error: "Category image is required" });
+    }
+
+    const image = req.file.filename;  // Get the filename of the uploaded image
+
+    // Create and save the new category
     const newCategory = new Category({
       name,
       description,
+      categoryImage: image,  // Store the image filename in the categoryImage field
     });
+
     await newCategory.save();
-    return res.json({ message: "Category added successfully" });
+    console.log("Category saved:", newCategory);
+    return res.json({ status: true, message: "Category added successfully" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
@@ -154,52 +167,49 @@ const unlistCategory = async (req, res) => {
 };
 
 const getEditCategory = async (req, res) => {
-    try {
-        const id = req.params.id;  // Extract the category ID
-        console.log("Editing category with ID:", id);  // Log the category ID for debugging
-        const category = await Category.findById(id);
-
-        if (!category) {
-            console.log("Category not found");  // Log if the category is not found
-            return res.status(404).redirect("/admin/pageerror");
-        }
-
-        res.render("admin/edit-category", { category: category });
-    } catch (error) {
-        console.error("Error fetching category:", error);
-        res.redirect("/admin/pageerror");
-    }
-};
-
-
-const editCategory = async (req, res) => {
   try {
-    const id = req.params.id;
-    const { categoryName, description } = req.body;
-
-    const existingCategory = await Category.findOne({ name: categoryName, _id: { $ne: id } });
-    if (existingCategory) {
-      return res.status(400).json({ error: "Category exists, please choose another name" });
-    }
-
-    // Update the category
-    const updatedCategory = await Category.findByIdAndUpdate(
-      id,
-      { name: categoryName, description: description },
-      { new: true }
-    );
-
-    if (updatedCategory) {
-      res.redirect("/admin/category");
-    } else {
-      res.status(404).json({ error: "Category not found" });
-    }
+      const id = req.params.id;
+      const category = await Category.findById(id);
+      if (!category) {
+          return res.status(404).redirect("/admin/pageerror");
+      }
+      res.render("admin/edit-category", { category });
   } catch (error) {
-    console.error("Error updating category:", error);
-    res.status(500).json({ error: "Internal server error" });
+      res.redirect("/admin/pageerror");
   }
 };
 
+const editCategory = async (req, res) => {
+
+      try {
+          const id = req.params.id;
+          const { categoryName, description } = req.body;
+          let updatedCategoryData = { name: categoryName, description };
+
+          // Check if a new image is uploaded
+          if (req.file) {
+              updatedCategoryData.categoryImage = req.file.filename;
+          }
+
+          // Check if category with the same name exists
+          const existingCategory = await Category.findOne({ name: categoryName, _id: { $ne: id } });
+          if (existingCategory) {
+              return res.status(400).json({ error: "Category exists, please choose another name" });
+          }
+
+          // Update the category
+          const updatedCategory = await Category.findByIdAndUpdate(id, updatedCategoryData, { new: true });
+          if (!updatedCategory) {
+              return res.status(404).json({ error: "Category not found" });
+          }
+
+          res.json({ status: true });
+      } catch (error) {
+          console.error("Error updating category:", error);
+          res.status(500).json({ error: "Internal server error" });
+      }
+ 
+};
 module.exports = {
   categoryInfo,
   addCategory,

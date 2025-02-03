@@ -13,6 +13,7 @@ const uploads=multer({storage:storage})
 const orderController = require("../controllers/admin/orderController");
 const couponController=require("../controllers/admin/couponController");
 const bannerController=require("../controllers/admin/bannerController")
+const statsController=require("../controllers/admin/statsController")
 
 // Admin Routes
 router.get("/login", adminController.loadLogin);
@@ -51,20 +52,20 @@ router.get("/unblockCustomer",adminAuth,customerController.customerunBlocked)
 
 //category management//
 router.get("/category",adminAuth,categoryController.categoryInfo);
-router.post("/addCategory",adminAuth,categoryController.addCategory);
+router.post("/addCategory",adminAuth, uploads.single("image"),categoryController.addCategory);
 router.post("/addCategoryOffer",adminAuth,categoryController.addCategoryOffer);
 router.post("/removeCategoryOffer", adminAuth,categoryController.removeCategoryOffer);
 router.get("/listCategory",adminAuth,categoryController.listCategory);
 router.get("/unlistCategory",adminAuth,categoryController.unlistCategory);
 router.get("/editCategory/:id",adminAuth,categoryController.getEditCategory);
-router.post("/editCategory/:id",adminAuth,categoryController.editCategory);
+router.post("/editCategory/:id",adminAuth, uploads.single("image"),categoryController.editCategory);
 
 
 
 // Order Management
 router.get("/orderList", adminAuth, orderController.getOrderListPageAdmin)
 router.get("/orderDetailsAdmin", adminAuth, orderController.getOrderDetailsPageAdmin)
-router.get("/changeStatus", adminAuth, orderController.changeOrderStatus);
+// router.get("/changeStatus", adminAuth, orderController.changeOrderStatus);
 
 
 
@@ -76,10 +77,16 @@ router.post("/updateCoupon",adminAuth,couponController.updateCoupon)
 router.get("/deleteCoupon",adminAuth,couponController.deleteCoupon)
 
 //return controller
-router.post("/respondToReturn", adminAuth, orderController.respondReturn);
-router.post("/updateReturnStatus",adminAuth,orderController.updateReturnStatus);
-router.post("/changeOrderStatusToReturnProcessing",adminAuth,orderController.confirmReturnStatus)
-router.post("/completereturn",adminAuth,orderController.completeReturn)
+// router.post("/respondToReturn", adminAuth, orderController.respondReturn);
+// router.post("/updateReturnStatus",adminAuth,orderController.updateReturnStatus);
+// router.post("/changeOrderStatusToReturnProcessing",adminAuth,orderController.confirmReturnStatus)
+router.get("/changeOrderStatus",adminAuth,orderController.changeOrderStatus)
+router.get("/updateItemStatus",adminAuth,orderController.updateItemStatus)
+// router.post("/completereturn",adminAuth,orderController.completeReturn)
+// router.post('/updateItemStatus/:itemId', adminAuth,orderController.updateItemStatus);
+// router.post('/handleItemReturn/:itemId', adminAuth,orderController.handleItemReturn);
+
+// router.post('/processRefund/:itemId',adminAuth,orderController.processRefundToWallet);
 
 
   // Banner routes
@@ -95,8 +102,17 @@ router.get('/salesReport',adminAuth,orderController.getSalesReport);
 router.get('/download-sales-report-pdf',adminAuth,orderController.downloadSalesReportPDF);
 router.get('/download-sales-report-excel',adminAuth,orderController.downloadSalesReportExcel);
 
+//
+router.get('/dashboard-stats', adminAuth,statsController.getDashboardStats);
+router.get('/getTopProducts', adminAuth,statsController.getTopProducts);
+router.get('/customerFulfillment', adminAuth,statsController.getCustomerFulfillment);
+router.get('/earnings', adminAuth,statsController.getEarnings);
+router.get('/insights', adminAuth,statsController.getInsights);
+router.get('/getSalesReport', adminAuth,statsController.getGraphData)
+ 
 
 
+router.get("/dashboard", adminAuth, statsController.customers);
 
 
 module.exports=router

@@ -15,8 +15,13 @@
     body {
       font-family: "Nunito Sans", sans-serif;
       display: flex;
+      flex-direction: column;
       height: 100vh;
-      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
     }
 
     .left {
@@ -32,6 +37,7 @@
     .right {
       flex: 1;
       background: url('/img/_11-cba-1-b-11266-d-8180582-f-0-eefb-5-c-77-f-70.png') center/cover no-repeat;
+      display: block;
     }
 
     .logo {
@@ -51,17 +57,6 @@
       max-width: 350px;
     }
 
-    .form-container h2 {
-      font-size: 1.5rem;
-      margin-bottom: 10px;
-    }
-
-    .form-container p {
-      font-size: 0.9rem;
-      color: #666;
-      margin-bottom: 20px;
-    }
-
     .input-field {
       width: 100%;
       padding: 10px;
@@ -69,13 +64,6 @@
       border-radius: 5px;
       margin-bottom: 10px;
       font-size: 1rem;
-    }
-
-    .timer {
-      font-size: 0.9rem;
-      color: #333;
-      margin-bottom: 20px;
-      cursor: pointer;
     }
 
     .btn {
@@ -87,154 +75,176 @@
       border-radius: 5px;
       cursor: pointer;
       font-size: 1rem;
-      margin-bottom: 10px;
     }
 
     .btn:hover {
       background-color: #218838;
     }
 
-    .expired {
-      color: blue;
+    .timer {
+      font-size: 0.9rem;
+      color: #333;
+      margin-bottom: 20px;
+      cursor: pointer;
     }
 
-    .disabled {
-      cursor: not-allowed;
-      color: #ccc;
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .right {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="left">
-    <div class="logo">Flora Gems</div>
-    <form id="otpForm" action="/verify-otp" method="POST" onsubmit="return validateOTP()">
-      <div class="form-container">
-        <h2>Verify Your Identity</h2>
-        <p>The One-Time Password (OTP) has been sent to the email address (expires in 5 minutes)</p>
-        <input type="text" id="otp" class="input-field" placeholder="Enter OTP" maxlength="6">
-        <div id="timer" class="timer">
-         <% if (resendAllowed) { %>
-            <button id="resend-otp">Resend OTP</button>
-          <% } else { %>
-            <p>Resending OTP is not allowed at this time.</p>
-          <% } %>
-           <span id="timerValue">50s</span>
+  <div class="container">
+    <div class="left">
+      <div class="logo">Flora Gems</div>
+      <form id="otpForm" onsubmit="return validateOTP()">
+        <div class="form-container">
+          <h2>Verify Your Identity</h2>
+          <p>The One-Time Password (OTP) has been sent to your email (expires in 5 minutes).</p>
+          <input type="text" id="otp" class="input-field" placeholder="Enter OTP" maxlength="6">
+          <div id="timer" class="timer">
+            <span id="timerValue">50s</span>
+          </div>
+          <button type="submit" id="verifyBtn" class="btn">Verify</button>
         </div>
-        <button type="submit" id="verifyBtn" class="btn">Verify</button>
-      </div>
-    </form>
+      </form>
+    </div>
+    <div class="right"></div>
   </div>
-  <div class="right"></div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <script>
-  
-   const timerElement = document.getElementById("timerValue");
-const timerLink = document.getElementById("timer");
-let timer = localStorage.getItem('timer') ? parseInt(localStorage.getItem('timer')) : 50; // Get saved timer value or set default to 50
+    const timerElement = document.getElementById("timerValue");
+    const timerLink = document.getElementById("timer");
+    let timer = localStorage.getItem("timer") ? parseInt(localStorage.getItem("timer")) : 50;
+    let resendState = localStorage.getItem("otpResent") === "true"; // Track resend state
 
-function startTimer() {
-    const interval = setInterval(() => {
+    function startTimer() {
+      const interval = setInterval(() => {
         if (timer > 0) {
-            timer--;
-            timerElement.textContent = `${timer}s`;
-            localStorage.setItem('timer', timer); // Save timer value to local storage
+          timer--;
+          timerElement.textContent = `${timer}s`;
+          localStorage.setItem("timer", timer);
         } else {
-            clearInterval(interval);
-            timerElement.innerHTML = `<span style="color: blue; cursor: pointer;" onclick="resendOTP()">Resend</span>`;
-            timerLink.classList.add("expired");
-            timerLink.classList.remove("disabled");
-            localStorage.removeItem('timer'); // Clear timer value when it reaches 0
+          clearInterval(interval);
+          timerElement.innerHTML = `<span style="color: blue; cursor: pointer;" onclick="resendOTP()">Resend</span>`;
+          timerLink.classList.add("expired");
+          timerLink.classList.remove("disabled");
+          localStorage.removeItem("timer");
         }
-    }, 1000);
-}
-
-startTimer();
-
-function validateOTP() {
-    const otpInput = document.getElementById("otp").value;
-
-    if (!otpInput) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Invalid OTP',
-            text: 'Please enter a valid OTP.',
-        });
-        return false;
+      }, 1000);
     }
 
-    $.ajax({
+    startTimer();
+
+    function validateOTP() {
+      const otpInput = document.getElementById("otp").value;
+
+      if (!otpInput) {
+        Swal.fire({
+          icon: "error",
+          title: "Invalid OTP",
+          text: "Please enter a valid OTP.",
+        });
+        return false;
+      }
+
+      $.ajax({
         type: "POST",
         url: "/verify-otp",
         data: { otp: otpInput },
-        success: function(response) {
-            if (response.success) {
-                Swal.fire({
-                    icon: "success",
-                    title: "OTP Verified Successfully",
-                    showConfirmButton: false,
-                    timer: 1500,
-                }).then(() => {
-                    window.location.href = response.redirectUrl;
-                });
-            } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: response.message,
-                });
-            }
-        },
-        error: function() {
+        success: function (response) {
+          if (response.success) {
             Swal.fire({
-                icon: "error",
-                title: "Invalid OTP",
-                text: "Please try again",
+              icon: "success",
+              title: "OTP Verified Successfully",
+              showConfirmButton: false,
+              timer: 1500,
+            }).then(() => {
+              window.location.href = response.redirectUrl;
             });
-        }
-    });
-    return false;
-}
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: response.message,
+            });
+          }
+        },
+        error: function () {
+          Swal.fire({
+            icon: "error",
+            title: "Invalid OTP",
+            text: "Please try again.",
+          });
+        },
+      });
+      return false;
+    }
 
-function resendOTP() {
-    timer = 50;
-    timerElement.textContent = `${timer}s`;
-    timerLink.classList.add("disabled");
-    timerLink.classList.remove("expired");
-    startTimer();
+    function resendOTP() {
+      if (resendState) {
+        Swal.fire({
+          icon: "info",
+          title: "Already Resent",
+          text: "You have already requested a resend. Please wait for the timer to expire.",
+        });
+        return;
+      }
 
-    $.ajax({
+      timer = 50;
+      timerElement.textContent = `${timer}s`;
+      timerLink.classList.add("disabled");
+      timerLink.classList.remove("expired");
+      startTimer();
+
+      $.ajax({
         type: "POST",
         url: "/resend-otp",
-        success: function(response) {
-            if (response.success) {
-                Swal.fire({
-                    icon: "success",
-                    title: "OTP Resent Successfully",
-                    showConfirmButton: false,
-                    timer: 1500,
-                });
-            } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "An error occurred while resending the OTP. Please try again later.",
-                });
-            }
-        },
-        error: function() {
+        success: function (response) {
+          if (response.success) {
             Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "An error occurred while resending the OTP. Please try again later.",
+              icon: "success",
+              title: "OTP Resent Successfully",
+              showConfirmButton: false,
+              timer: 1500,
             });
-        }
-    });
-    return false;
-}
+            resendState = true; // Mark resend state
+            localStorage.setItem("otpResent", "true");
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "An error occurred while resending the OTP. Please try again later.",
+            });
+          }
+        },
+        error: function () {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "An error occurred while resending the OTP. Please try again later.",
+          });
+        },
+      });
+    }
 
+    window.addEventListener("load", () => {
+      // Reset resend state if the timer is over
+      if (!localStorage.getItem("timer")) {
+        resendState = false;
+        localStorage.setItem("otpResent", "false");
+      }
+    });
   </script>
 </body>
 </html>

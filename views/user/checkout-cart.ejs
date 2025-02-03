@@ -466,8 +466,9 @@ button[type="button"].btn:hover {
                           <h5>Available Coupons</h5>
                         </div>
                         <ul>
-                          <% if (Coupon && Coupon.length > 0) { %>
-                          <% Coupon.forEach(coupon => { %>
+                            <% if (coupons && coupons.length > 0) { %>
+                                <% coupons.forEach(coupon => { %>
+                              
                           <li>
                             <div class="coupon-card col-4">
                               <div class="coupon-details">
@@ -485,88 +486,109 @@ button[type="button"].btn:hover {
                           <% } %>
                         </ul>
                       </div>
-                      
                     <!-- Order Details Section -->
-                    <div class="card border-secondary mb-5">
-                        <div class="card-header bg-secondary border-3">
-                            <h4 class="font-weight-semi-bold m-0">Order Details</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive order_table text-center mb-5">
-                                <% if (cartItems && cartItems.length > 0) { %>
-                                <table class="order-details-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Image</th>
-                                            <th>Name</th>
-                                            <th>Price</th>
-                                            <th>Quantity</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% cartItems.forEach(item => { %>
-                                        <tr>
-                                            <td>
-                                                <% if (item.productImages.length > 0) { %>
-                                                <img src="/uploads/product-images/<%= item.productImages[0] %>" alt="<%= item.productName %>" width="50" height="50">
-                                                <% } else { %>
-                                                <img src="/uploads/default-image.jpg" alt="Default Image" width="50" height="50">
-                                                <% } %>
-                                            </td>
-                                            <td><%= item.productName %></td>
-                                            <td>₹<%= item.productPrice %></td>
-                                            <td><%= item.quantity %></td>
-                                            <td>₹<%= item.total %></td>
-                                        </tr>
-                                        <% }); %>
-                                    </tbody>
-                                </table>
-                                <% } else { %>
-                                <p>Your cart is empty. <a href="/cart">Go to Cart</a></p>
-                                <% } %>
-                            </div>
-                            <div class="cart-summary">
-                                <h6 class="font-weight-medium">Subtotal: <span id="subTotalDisplay">₹<%= grandTotal %></span></h6>
-                                <h6 class="font-weight-medium">Shipping: <span id="shipping">₹<%= shippingCost %></span></h6>
-                                <p>Discount: <span id="discount"><%= discount || 0 %></span></p>
+<div class="card border-secondary mb-5">
+    <div class="card-header bg-secondary border-3">
+        <h4 class="font-weight-semi-bold m-0">Order Details</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive order_table text-center mb-5">
+            <% if (cartItems && cartItems.length > 0) { %>
+            <table class="order-details-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% cartItems.forEach(item => { %>
+                    <tr>
+                        <td>
+                            <% if (item.productImages.length > 0) { %>
+                            <img src="/uploads/product-images/<%= item.productImages[0] %>" alt="<%= item.productName %>" width="50" height="50">
+                            <% } else { %>
+                            <img src="/uploads/default-image.jpg" alt="Default Image" width="50" height="50">
+                            <% } %>
+                        </td>
+                        <td><%= item.productName %></td>
+                        <td>₹<%= item.productPrice %></td>
+                        <td><%= item.quantity %></td>
+                        <td>₹<%= item.total %></td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+            <% } else { %>
+            <p>Your cart is empty. <a href="/cart">Go to Cart</a></p>
+            <% } %>
+        </div>
+        <div class="cart-summary">
+            <h6 class="font-weight-medium">Subtotal: <span id="subTotalDisplay">₹<%= grandTotal %></span></h6>
+            <h6 class="font-weight-medium">Shipping: <span id="shipping">₹<%= shippingCost %></span></h6>
+            <p>Discount: <span id="discount">₹<%= typeof discount !== 'undefined' ? discount : "0.00" %></span></p>
 
-                                <h6 class="font-weight-medium">Grand Total: <span class="price" id="total">₹<%= finalGrandTotal %></span></h6>
-                            </div>
-                        </div>
-                    </div>
-                
-                    <!-- Payment Methods Section -->
-                    <div class="card border-secondary mb-5">
-                        <div class="card-header bg-secondary border-0">
-                            <h4 class="font-weight-semi-bold m-0">Payment</h4>
-                        </div>
-                        <div class="card-body">
-                            <h3>Select Payment Method</h3>
-                            <div class="custome-radio ml-150">
-                                <input class="form-check-input payment" type="radio" value="cod" name="payment_option" id="CashOnDelivery" checked>
-                                <label class="form-check-label" for="CashOnDelivery">Cash on Delivery</label>
-                            </div>
-                            <div class="custome-radio ml-150">
-                                <input class="form-check-input payment" type="radio" value="razorpay" name="payment_option" id="Razorpay">
-                                <label class="form-check-label" for="Razorpay">Razorpay</label>
-                            </div>
-                            <div class="custome-radio ml-150">
-                                <input class="form-check-input payment" type="radio" value="wallet" name="payment_option" id="Wallet">
-                                <label class="form-check-label" for="Wallet">Wallet</label>
-                            </div>
-                            
-                        </div>
-                        <div class="card-footer border-secondary bg-transparent">
-                            <button type="button" class="btn btn-primary" onclick="placeOrder('<%= user._id %>', '<%= orderId %>')">Place Order</button>
-                        </div>
-                    </div>
+
+            <h6 class="font-weight-medium">Grand Total: <span class="price" id="total">₹<%= typeof finalGrandTotal !== 'undefined' ? finalGrandTotal : "0.00" %></span></h6>
+
+        </div>
+    </div>
+</div>
+
+<!-- Payment Methods Section -->
+<div class="card border-secondary mb-5">
+    <div class="card-header bg-secondary border-0">
+        <h4 class="font-weight-semi-bold m-0">Payment</h4>
+    </div>
+    <div class="card border-secondary mb-5">
+        <div class="card-header bg-secondary text-white border-0 text-center">
+            <h4 class="font-weight-bold m-0">Select Payment Method</h4>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-column align-items-start p-3">
+                <!-- Cash on Delivery Option -->
+                <% if (typeof finalGrandTotal !== 'undefined' && finalGrandTotal <= 1000) { %>
+
+                <div class="custom-control custom-radio mb-3">
+                    <input class="custom-control-input" type="radio" value="cod" name="payment_option" id="CashOnDelivery" checked>
+                    <label class="custom-control-label" for="CashOnDelivery">
+                        <i class="fas fa-money-bill-wave text-success"></i> Cash on Delivery
+                    </label>
                 </div>
-                
-                        
+                <% } %>
+    
+                <!-- Razorpay Option -->
+                <div class="custom-control custom-radio mb-3">
+                    <input class="custom-control-input" type="radio" value="razorpay" name="payment_option" id="Razorpay">
+                    <label class="custom-control-label" for="Razorpay">
+                        <i class="fas fa-credit-card text-primary"></i> Online Payment (via Razorpay)
+                    </label>
+                </div>
+    
+                <!-- Wallet Option -->
+                <div class="custom-control custom-radio mb-3">
+                    <input class="custom-control-input" type="radio" value="wallet" name="payment_option" id="Wallet">
+                    <label class="custom-control-label" for="Wallet">
+                        <i class="fas fa-wallet text-warning"></i> Wallet
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-light border-secondary text-center">
+            <button type="button" class="btn btn-primary btn-lg px-4" onclick="placeOrder('<%= user._id %>', '<%= orderId %>')">
+                <i class="fas fa-shopping-cart"></i> Place Order
+            </button>
+        </div>
+    </div>
+</div>
+</div>
+       
                         <!-- Footer -->
                         <div class="container-fluid bg-secondary text-center py-4">
-                            <p class="m-0 text-white">&copy; 2025 E-Shopper. All Rights Reserved.</p>
+                            <p class="m-0 text-white">&copy; 2025 FloraGems. All Rights Reserved.</p>
                         </div>
                         </div>
                         
@@ -600,8 +622,7 @@ function updateShipping() {
     document.getElementById('total').textContent = `₹${grandTotal.toFixed(2)}`;
 }
 
-
-    function placeOrder(userId, orderId) {
+function placeOrder(userId, orderId) {
     if (!orderId) {
         Swal.fire({
             title: 'Missing Order ID!',
@@ -655,7 +676,7 @@ function updateShipping() {
         success: function (response) {
             if (paymentMethod === "razorpay") {
                 let options = {
-                    key: "rzp_test_WcjmbBeSCVDL9b",
+                    key: "rzp_test_cKsKSaUt0ELKM9",
                     amount: Math.round(response.razorPayOrder.finalAmount * 100), // Correct amount after discount and shipping
                     currency: "INR",
                     name: "FloraGems",
@@ -763,107 +784,91 @@ function handleSuccessfulOrder(orderId, userId) {
     }
 
     $.ajax({
-        url: "/clearCart",
-        method: "POST",
-        data: { userId: userId },
-        success: function () {
-            Swal.fire({
-                title: 'Order Placed Successfully!',
-                text: 'Thank you for shopping with us!',
-                icon: 'success',
-                html: `
-                    <div style="text-align: center;">
-                        <h3>Thank You for Your Order!</h3>
-                        <p>Your order has been confirmed. We will process it shortly.</p>
-                        <a href="/" class="btn btn-primary" style="margin-top: 10px;">Continue Shopping</a>
-                        <a href="/orderDetails?id=${orderId}" class="btn btn-secondary" style="margin-top: 10px;">View Order Details</a>
-                    </div>
-                `,
-            }).then(() => {
-                window.location.href = `/orderDetails?id=${orderId}`; // Pass the correct orderId
-            });
-        },
-        error: function () {
-            Swal.fire({
-                title: 'Error Clearing Cart!',
-                text: 'There was an issue clearing the cart. Please try again.',
-                icon: 'error',
-                timer: 5000,
-            });
-        },
-    });
+    url: "/clearCart",
+    method: "POST",
+    data: { userId: userId }, // Ensure userId is available and valid
+    success: function () {
+        Swal.fire({
+            title: 'Order Placed Successfully!',
+            text: 'Thank you for shopping with us!',
+            icon: 'success',
+            html: `
+                <div style="text-align: center;">
+                    <h3>Thank You for Your Order!</h3>
+                    <p>Your order has been confirmed. We will process it shortly.</p>
+                    <a href="/" class="btn btn-primary" style="margin-top: 10px;">Continue Shopping</a>
+                    <a href="/orderDetails?id=${orderId}" class="btn btn-secondary" style="margin-top: 10px;">View Order Details</a>
+                </div>
+            `,
+        }).then(() => {
+            // Redirect to the order details page after the alert
+            window.location.href = `/orderDetails?id=${orderId}`;
+        });
+    },
+    error: function () {
+        Swal.fire({
+            title: 'Error Clearing Cart!',
+            text: 'There was an issue clearing the cart. Please try again.',
+            icon: 'error',
+            timer: 5000, // Automatically close the alert after 5 seconds
+        });
+    },
+});
 }
 
 function verifyPayment(order, payment, orderId, userId) {
-    $.ajax({
-        url: '/verifyPayment',  // Ensure this matches your server route
-        method: 'POST',
-        contentType: 'application/json',  // Ensure the content type is set to application/json
-        data: JSON.stringify({ order, payment }),  // Send the data as JSON
-        success: function (response) {
-            console.log("Payment Verification Response:", response);  // Log the response for debugging
-            if (response.status) {
-                // After payment verification is successful, confirm the order
-                $.ajax({
-                    url: '/paymentConfirm',
-                    method: 'POST',
-                    data: {
-                        status: "Pending",  // Set the order status to "Pending" initially
-                        orderId: orderId,   // Pass the orderId to confirm the order
-                    },
-                    success: function (confirmationResponse) {
-                        console.log("Payment Confirmed:", confirmationResponse);
+  console.log("Payment Details to verify:", payment);  // Log the payment object for debugging
 
-                        // Clear the cart after confirming payment
-                        $.ajax({
-                            url: "/clearCart",  // Ensure this matches your server route for clearing the cart
-                            method: "POST",
-                            data: { userId: userId },
-                            success: function () {
-                                console.log("Cart cleared successfully");
-
-                                // Now, handle the successful order
-                                handleSuccessfulOrder(orderId, userId);
-                            },
-                            error: function () {
-                                Swal.fire({
-                                    title: 'Error Clearing Cart!',
-                                    text: 'There was an issue clearing the cart. Please try again.',
-                                    icon: 'error',
-                                    timer: 5000,
-                                });
-                            }
-                        });
-                    },
-                    error: function (error) {
-                        console.error("Error in confirming payment:", error);
-                        Swal.fire({
-                            title: 'Order Confirmation Failed!',
-                            text: 'An error occurred while confirming your order. Please try again.',
-                            icon: 'error',
-                            timer: 5000,
-                        });
-                    }
-                });
-            } else {
-                Swal.fire({
-                    title: 'Payment Verification Failed!',
-                    text: 'The payment could not be verified. Please try again.',
-                    icon: 'error',
-                    timer: 5000,
-                });
-            }
-        },
-        error: function (error) {
-            console.error("Error in payment verification:", error);  // Log the error for debugging
+  $.ajax({
+    url: '/verifyPayment',
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({ order, payment }),
+    success: function (response) {
+      console.log("Payment Verification Response:", response);  // Log the response for debugging
+      if (response.status) {
+        // Proceed with confirming the order
+        $.ajax({
+          url: '/paymentConfirm',
+          method: 'POST',
+          data: {
+            orderId: orderId,
+            status: "Pending",
+          },
+          success: function (confirmationResponse) {
+            console.log("Payment Confirmed:", confirmationResponse);
+            // Clear the cart after confirming payment
+            handleSuccessfulOrder(orderId, userId);
+          },
+          error: function (error) {
+            console.error("Error confirming payment:", error);
             Swal.fire({
-                title: 'Payment Verification Error!',
-                text: 'An error occurred while verifying the payment. Please try again.',
-                icon: 'error',
-                timer: 5000,
+              title: 'Order Confirmation Failed!',
+              text: 'An error occurred while confirming your order. Please try again.',
+              icon: 'error',
+              timer: 5000,
             });
-        },
-    });
+          }
+        });
+      } else {
+        Swal.fire({
+          title: 'Payment Verification Failed!',
+          text: 'The payment could not be verified. Please try again.',
+          icon: 'error',
+          timer: 5000,
+        });
+      }
+    },
+    error: function (error) {
+      console.error("Error in payment verification:", error);
+      Swal.fire({
+        title: 'Payment Verification Error!',
+        text: 'An error occurred while verifying the payment. Please try again.',
+        icon: 'error',
+        timer: 5000,
+      });
+    },
+  });
 }
 
                             function removeProduct(productId) {

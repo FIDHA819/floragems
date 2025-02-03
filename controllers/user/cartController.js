@@ -266,9 +266,9 @@ const getCartCount = async (req, res) => {
 };
 const clearCart = async (req, res) => {
   try {
-    const userId = req.session?.user?._id; 
-    if (!userId || !ObjectId.isValid(userId)) {
-      return res.status(400).json({ success: false, message: "Invalid user ID" });
+    const userId = req.session?.user?._id;
+    if (!ObjectId.isValid(userId)) {
+      return res.redirect("/login");
     }
 
 

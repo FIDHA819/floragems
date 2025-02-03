@@ -9,9 +9,10 @@ const orderController = require("../controllers/user/orderController");
 const cartController = require("../controllers/user/cartController");
 const wishlistController=require("../controllers/user/wishlistController")
 const walletController=require("../controllers/user/walletController")
+const contactController=require("../controllers/user/contactController")
 
 
-router.get("/", userController.loadHomePage);
+router.get("/", userAuth,userController.loadHomePage);
 router.get("/pageNotFound", userController.pageNotFound);
 router.get("/signup", userController.loadSignup);
 router.post("/signup", userController.signup);
@@ -30,28 +31,29 @@ router.get("/shop",userController.loadShoppingPage)
 
 router.get('/filtered',userAuth,userController.getFilteredProducts);
 router.get('/shop/category/:category',userAuth, userController.getFilteredProducts);
+router.get('/shop/brands/:brands',userAuth, userController.getFilteredProducts);
 // Google authentication route
 router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
 // Google callback route
 router.get("/auth/google/callback", passport.authenticate("google", {
-    failureRedirect: "/signup", // Redirect to signup page on failure
+    failureRedirect: "/signup", 
 }),
 (req, res) => {
-    // Successful authentication, log the user in and redirect to home page
+    
     req.login(req.user, (err) => {
         if (err) {
-            return res.redirect("/signup"); // If login fails, redirect to signup
+            return res.redirect("/signup"); 
         }
 
-        // After login, set the user session manually if not already set
+        
         req.session.user = {
             _id: req.user._id,
             name: req.user.name,
             email: req.user.email,
         };
 
-        // Redirect to home page or dashboard
+        
         res.redirect("/");
     });
 });
@@ -91,7 +93,10 @@ router.get("/deleteItems", userAuth, orderController.deleteProduct);
 router.post("/orderPlaced", userAuth, orderController.orderPlaced);
 router.get("/orderDetails",  orderController.getOrderDetailsPage);
 router.get('/orderDetails/:orderId', userAuth,orderController.getOrderDetailsPages);
+router.get('/get-order-details/:orderId', userAuth,orderController.fetchOrderDetail);
 router.post("/cancelOrder", userAuth, orderController.cancelOrder);
+
+router.post("/cancel-item", userAuth, orderController.cancelProductItem);
 router.get("/myOrders",userAuth,orderController.listMyorders)
 router.get("/addNewaddress",userAuth,orderController.addNewaddress)
 router.post("/addNewaddress",userAuth,orderController.postAddNewAddress);
@@ -99,6 +104,7 @@ router.get("/myOrders",userAuth,orderController.listMyorders)
 router.post("/verifyPayment", userAuth, orderController.verify);
 router.post("/applyCoupon",userAuth,orderController.applyCoupon);
 router.post('/paymentConfirm',userAuth,orderController.paymentConfirm);
+
 
 
 // Cart Management
@@ -121,7 +127,11 @@ router.get("/removeWishlist",userAuth,wishlistController.removeProduct)
 
 
 //return 
-router.post("/requestReturn",userAuth,orderController.returnRequest)
+// router.post("/returnRequest",userAuth,orderController.returnRequest)
+router.post("/return-item",userAuth,(req, res) => {
+    console.log("single return");
+    orderController.singlereturnRequest(req, res);
+})
 router.post("/checkWalletBalance",userAuth,orderController.checkBalance)
 
 
@@ -133,6 +143,26 @@ router.get("/wallet", userAuth,walletController.getWalletPage);
 
 router.get('/referral',userAuth,userController.getReferralPage);
 
+// router.post("/continuePayment", userAuth, orderController.continuePendingPayment);
 
+// router.post("/verify-Payment", userAuth, orderController.verifyPayment);
+router.post("/createRazorpayOrder", userAuth, (req, res) => {
+    console.log("Payment verification request received");
+    orderController.createRazorpayOrder(req, res);
+});
+// router.post("/verify-Payment", userAuth, orderController.verifyPayment);
+router.post("/payment", userAuth, (req, res) => {
+    console.log("Payment verification request received");
+    orderController.verifyPayment(req, res);
+});
+
+
+router.get('/downloadInvoice/:orderId',userAuth,orderController.downloadInvoice);
+
+
+router.get('/contact',userAuth, contactController.getContactPage);
+
+// Route for handling form submissions
+router.post('/contact',userAuth, contactController.handleContactForm);
 // Correct export statement
 module.exports = router;

@@ -160,7 +160,7 @@
                                 <tbody>
                                     <% if (wishlist.length > 0) { %>
                                         <% for (let product of wishlist) { %>
-                                            <tr>
+                                            <tr id="product-<%= product._id %>">
                                                 <td>
                                                     <img src="/uploads/re-image/<%= product.productImages[0] %>" alt="Product Image" />
                                                 </td>
@@ -176,6 +176,7 @@
                                                     <i class="ri-delete-bin-line" onclick="removeItem('<%= product._id %>')"></i>
                                                 </td>
                                             </tr>
+                                            
                                         <% } %>
                                     <% } else { %>
                                         <tr>
@@ -194,7 +195,7 @@
     </main>
 
     <script>
-   function addToCart(productId, quantity = 1) {
+  function addToCart(productId, quantity = 1) {
     $.ajax({
         url: '/addToCart',
         method: 'POST',
@@ -203,16 +204,13 @@
             quantity: quantity 
         },
         success: function(response) {
-            console.log(response);  // Log the full response for debugging
+            console.log(response); // Log the full response for debugging
 
-            // Check if the response contains the necessary data
             if (response.status === true) {
-                // Check if the cartItems array exists
                 if (Array.isArray(response.cartItems)) {
                     let cart = response.cartItems;
-                    let productInCart = cart.find(item => item.productId === productId);  // Check if the product is already in the cart
+                    let productInCart = cart.find(item => item.productId === productId);
 
-                    // If the product is already in the cart, check the quantity
                     if (productInCart && productInCart.quantity + quantity > 3) {
                         Swal.fire({
                             title: 'Maximum Quantity Reached!',
@@ -220,11 +218,10 @@
                             icon: 'warning',
                             confirmButtonText: 'Okay'
                         });
-                        return;  // Prevent adding the product to the cart
+                        return;
                     }
 
-                    // Check the total cart length, and prevent adding if the cart already has 3 or more items
-                    let totalItemsInCart = cart.reduce((total, item) => total + item.quantity, 0);  // Calculate total number of items in the cart
+                    let totalItemsInCart = cart.reduce((total, item) => total + item.quantity, 0);
                     if (totalItemsInCart + quantity > 3) {
                         Swal.fire({
                             title: 'Cart Limit Reached!',
@@ -232,11 +229,10 @@
                             icon: 'warning',
                             confirmButtonText: 'Okay'
                         });
-                        return;  // Prevent adding more products if the cart is full
+                        return;
                     }
                 }
 
-                // If the user needs to login, show the login prompt
                 if (response.redirectToLogin) {
                     Swal.fire({
                         title: 'Please Login!',
@@ -251,26 +247,44 @@
                     // Update cart count badge
                     const cartCountElement = document.getElementById('cart-count');
                     if (cartCountElement) {
-                        cartCountElement.innerHTML = response.cartLength;  // Update cart count
+                        cartCountElement.innerHTML = response.cartLength;
                     }
 
                     // Update subtotal
                     const subtotalElement = document.getElementById('cart-subtotal');
                     if (subtotalElement) {
-                        subtotalElement.innerHTML = `₹${response.subtotal}`;  // Update subtotal
+                        subtotalElement.innerHTML = `₹${response.subtotal}`;
                     }
 
-                    // Show success notification
-                    Swal.fire({
-                        title: 'Added to Cart!',
-                        text: 'The product has been successfully added to your cart.',
-                        icon: 'success',
-                        timer: 3000,
-                        showConfirmButton: false
+                    // Remove product from wishlist
+                    $.ajax({
+                        url: `/removeWishlist?productId=${productId}`,
+                        method: 'GET',
+                        success: function() {
+                            // Remove the product row from the table
+                            $(`#product-${productId}`).remove();
+
+                            // Show success notification
+                            Swal.fire({
+                                title: 'Added to Cart!',
+                                text: 'The product has been successfully added to your cart and removed from your wishlist.',
+                                icon: 'success',
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                        },
+                        error: function() {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Unable to remove the product from the wishlist.',
+                                icon: 'error',
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                        }
                     });
                 }
             } else {
-                // Handle error response from the server
                 Swal.fire({
                     title: 'Error!',
                     text: 'Unable to add the product to the cart. Please try again later.',
@@ -281,7 +295,6 @@
             }
         },
         error: function() {
-            // Handle any AJAX errors
             Swal.fire({
                 title: 'Error!',
                 text: 'Unable to add the product to the cart. Please try again later.',

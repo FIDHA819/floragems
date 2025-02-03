@@ -5,19 +5,21 @@ const userSchema = new Schema({
   name: {
     type: String,
     required: true,
+    trim: true, // Removes extra spaces
   },
   email: {
     type: String,
     required: true,
     unique: true,
-    sparse:true,
+    sparse: true,
+    match: [/^\S+@\S+\.\S+$/, "Invalid email format"], // Email validation
   },
   phone: {
     type: String,
-    required: false,
     unique: false,
     sparse: true,
     default: null,
+    match: [/^\d{10}$/, "Invalid phone number format"], // 10-digit phone number
   },
   googleId: {
     type: String,
@@ -53,17 +55,20 @@ const userSchema = new Schema({
   wallet: {
     type: Number,
     default: 0,
+    min: [0, "Wallet balance cannot be negative"], // Ensure non-negative balance
   },
   wishlist: [
     {
       type: Schema.Types.ObjectId,
       ref: "wishlist",
+      default: [],
     },
   ],
   orderHistory: [
     {
       type: Schema.Types.ObjectId,
       ref: "Order",
+      default: [],
     },
   ],
   createdOn: {
@@ -73,13 +78,15 @@ const userSchema = new Schema({
   referralCode: {
     type: String,
     unique: true,
-    required: true,  // Ensure that referralCode is always required
+    sparse: true,
   },
-  redeemedUsers: [{
-    userName: String,
-    signupDate: { type: Date, default: Date.now },
-    reward: Number,
-  }],
+  redeemedUsers: [
+    {
+      userName: String,
+      signupDate: { type: Date, default: Date.now },
+      reward: Number,
+    },
+  ],
   searchHistory: [
     {
       category: {
@@ -101,17 +108,25 @@ const userSchema = new Schema({
 userSchema.pre("save", async function (next) {
   if (!this.referralCode) {
     try {
-      // Generate referral code from the last 6 characters of the user _id
-      this.referralCode = this._id.toString().slice(-6).toUpperCase();
+      let unique = false;
+      let attempt = 0;
 
-      // Check if the referral code already exists
-      const existingUser = await mongoose.model("User").findOne({ referralCode: this.referralCode });
-      if (existingUser) {
-        // If referral code exists, generate a new one using a different slice
-        this.referralCode = this._id.toString().slice(-8, -2).toUpperCase();
+      while (!unique && attempt < 5) { // Retry mechanism for uniqueness
+        this.referralCode = this._id.toString().slice(-6).toUpperCase();
+        const existingUser = await mongoose.model("User").findOne({ referralCode: this.referralCode });
+        if (!existingUser) {
+          unique = true;
+        } else {
+          attempt++;
+        }
+      }
+
+      if (!unique) {
+        throw new Error("Failed to generate unique referral code after multiple attempts.");
       }
     } catch (error) {
       console.error("Error generating referral code:", error);
+      return next(error); // Pass error to the next middleware
     }
   }
   next();

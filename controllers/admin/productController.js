@@ -24,6 +24,7 @@ const addProducts = async (req, res) => {
     try {
         console.log(req.files);
         const products = req.body;
+        console.log("reqbody",req.body)
         const productExists = await Product.findOne({ productName: products.productName });
   
         // Ensure description is a string
