@@ -1457,7 +1457,7 @@ body {
 
 <script>
   $(document).ready(function(){
-    // Brand Carousel
+   
     $('.brand-carousel').owlCarousel({
         loop: true,
         margin: 20,
@@ -1470,7 +1470,7 @@ body {
         }
     });
 
-    // Category Carousel
+ 
     $(document).ready(function(){
     $('.category-carousel').owlCarousel({
         loop: true,
@@ -1478,20 +1478,20 @@ body {
         nav: true,
         dots: false,
         autoplay: true,
-        autoplayTimeout: 3000,  // Auto slide every 3 seconds
-        autoplayHoverPause: true,  // Pause on hover
+        autoplayTimeout: 3000,  
+        autoplayHoverPause: true,  
         responsive: {
             0: {
-                items: 1,  // 1 item on mobile
+                items: 1,  
             },
             600: {
-                items: 2,  // 2 items on tablets
+                items: 2,  
             },
             1000: {
-                items: 3,  // 3 items on desktop
+                items: 3,  
             },
             1200: {
-                items: 4,  // 4 items on large desktop screens
+                items: 4,  
             }
         }
     });
@@ -1515,7 +1515,7 @@ body {
 });
 
 </script>
-    <!-- Template Javascript -->
+
     <script src="js/main.js"></script>
     <script>
    function addToCart(productId) {
@@ -1524,9 +1524,9 @@ body {
         method: 'POST',
         data: { productId: productId },
         success: (response) => {
-            // Update the cart count badge
+           
             const cartCountElement = document.getElementById('cart-count');
-            cartCountElement.innerHTML = response.cartLength; // Use response.cartLength
+            cartCountElement.innerHTML = response.cartLength; 
 
             Swal.fire({
                 title: 'Added to Cart!',

@@ -153,9 +153,10 @@
                     <button class="btn btn-sm btn-success" onclick="updateItemStatus('<%= item._id %>', 'Returned', '<%= orders.orderId %>', '<%= item.price %>', '<%= orders.userId._id %>')">
                       Accept Return
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="updateItemStatus('<%= item._id %>', 'Rejected', '<%= orders.orderId %>')">
+                    <button class="btn btn-sm btn-danger" onclick="openRejectReturnModal('<%= item._id %>', '<%= orders.orderId %>')">
                       Reject Return
-                    </button>
+                  </button>
+                  
                   <% } else { %>
                     <span>No Actions Available</span>
                   <% } %>
@@ -180,7 +181,32 @@
       </table>
       
     </div>
-    
+    <!-- Modal for entering rejection reason -->
+<div class="modal fade" id="rejectReturnModal" tabindex="-1" role="dialog" aria-labelledby="rejectReturnModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="rejectReturnModalLabel">Reject Return Request</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <form id="rejectReturnForm">
+                  <div class="form-group">
+                      <label for="returnReason">Enter Reason for Rejection</label>
+                      <textarea class="form-control" id="returnReason" rows="4" required></textarea>
+                  </div>
+              </form>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-danger" id="rejectReturnBtn">Reject Return</button>
+          </div>
+      </div>
+  </div>
+</div>
+
     <!-- Order Action Buttons -->
     <div class="card card-custom mt-3">
       <div class="card-header">
@@ -281,6 +307,48 @@ function changeOrderStatus(orderId, newStatus) {
     }
   });
 }
+// Function to open the reject return modal and pass necessary data
+function openRejectReturnModal(itemId, orderId) {
+    // Store the item ID and order ID in hidden fields or as data attributes
+    $('#rejectReturnBtn').data('itemId', itemId);
+    $('#rejectReturnBtn').data('orderId', orderId);
+    $('#rejectReturnModal').modal('show');
+}
+
+// Function to handle the rejection when the button is clicked
+$('#rejectReturnBtn').click(function() {
+    var returnReason = $('#returnReason').val();
+    var itemId = $(this).data('itemId');
+    var orderId = $(this).data('orderId');
+    
+    if (returnReason.trim() === '') {
+        Swal.fire('Error', 'Please provide a rejection reason.', 'error');
+        return;
+    }
+
+    // Send the reason to the server
+    $.ajax({
+        url: '/admin/rejectReturn',  // Adjust the URL to your API endpoint
+        method: 'POST',
+        data: {
+            itemId: itemId,
+            orderId: orderId,
+            reason: returnReason
+        },
+        success: function(response) {
+            if (response.status) {
+                Swal.fire('Success', 'Return request rejected and reason sent.', 'success');
+                $('#rejectReturnModal').modal('hide');
+                location.reload(); // Reload the page to update the order details
+            } else {
+                Swal.fire('Error', response.message || 'Failed to reject return request.', 'error');
+            }
+        },
+        error: function(error) {
+            Swal.fire('Error', 'An error occurred while rejecting the return request.', 'error');
+        }
+    });
+});
 
 
 </script>

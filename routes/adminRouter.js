@@ -77,16 +77,11 @@ router.post("/updateCoupon",adminAuth,couponController.updateCoupon)
 router.get("/deleteCoupon",adminAuth,couponController.deleteCoupon)
 
 //return controller
-// router.post("/respondToReturn", adminAuth, orderController.respondReturn);
-// router.post("/updateReturnStatus",adminAuth,orderController.updateReturnStatus);
-// router.post("/changeOrderStatusToReturnProcessing",adminAuth,orderController.confirmReturnStatus)
+
 router.get("/changeOrderStatus",adminAuth,orderController.changeOrderStatus)
 router.get("/updateItemStatus",adminAuth,orderController.updateItemStatus)
-// router.post("/completereturn",adminAuth,orderController.completeReturn)
-// router.post('/updateItemStatus/:itemId', adminAuth,orderController.updateItemStatus);
-// router.post('/handleItemReturn/:itemId', adminAuth,orderController.handleItemReturn);
+router.post('/rejectReturn',adminAuth,orderController.rejectReturnRequest);
 
-// router.post('/processRefund/:itemId',adminAuth,orderController.processRefundToWallet);
 
 
   // Banner routes

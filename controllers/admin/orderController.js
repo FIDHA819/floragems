@@ -524,6 +524,32 @@ const updateItemStatus=async (req, res) => {
   }
 }
 
+const rejectReturnRequest = async (req, res) => {
+  const { itemId, orderId, reason } = req.body;
+
+  try {
+   
+    const order = await Order.findOne({ orderId });
+
+      if (!order) return res.status(404).json({ message: 'Order not found' });
+
+      const item = order.orderedItems.find(item => item._id.toString() === itemId);
+      if (!item) return res.status(404).json({ message: 'Item not found' });
+
+
+      item.status = 'Rejected';
+      item.returnReason = reason;
+
+      await order.save();
+
+     
+
+      return res.status(200).json({ status: true, message: 'Return request rejected' });
+  } catch (err) {
+      console.error(err);
+      return res.status(500).json({ status: false, message: 'Error rejecting return request' });
+  }
+};
 
 module.exports = {
   getOrderListPageAdmin,
@@ -533,7 +559,8 @@ getSalesReport,
 downloadSalesReportPDF,
   downloadSalesReportExcel,
   changeOrderStatus,
-  updateItemStatus
+  updateItemStatus,
+  rejectReturnRequest
 
   
 }

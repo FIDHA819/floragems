@@ -407,7 +407,7 @@
         </div>
     </div>
 
-  <!-- Products Grid -->
+<!-- Products Grid -->
 <div class="products-grid">
   <% if (orders.orderedItems && orders.orderedItems.length > 0) { %>
       <% orders.orderedItems.forEach((item, index) => { %>
@@ -429,19 +429,29 @@
                                Cancel Item
                           </button>
                       <% } %>
-                      <% if (orders.orderStatus === 'Delivered' && item.status !== 'Return Requested' && item.status == 'Delivered') { %>
+                      
+                      <% if (orders.orderStatus === 'Delivered' && item.status !== 'Return Requested' && item.status === 'Delivered') { %>
                           <button class="btn btn-return" 
                                   onclick="showReturnReasonPrompt('<%= orders.orderId %>', '<%= item.product._id %>', '<%= index %>')">
                               Return Item
                           </button>
                       <% } %>
+                
+                      <% if (item.status === 'Rejected') { %>
+                          <div class="alert alert-danger mt-4">
+                              <h4>Return Request Rejected</h4>
+                              <p><strong>Reason for Rejection:</strong> <%= item.returnReason ? item.returnReason : 'No reason provided' %></p>
+                          </div>
+                      <% } %>
+
                   </div>
               </div>
           </div>
       <% }); %>
   <% } %>
 </div>
-<% if(orders.orderStatus === "Delivered"){ %>
+
+<% if (orders.orderStatus === "Delivered") { %>
   <a href="/downloadInvoice/<%= orders._id %>" class="btn btn-sm">Download Invoice</a>
 <% } %>
 
