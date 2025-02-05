@@ -1,15 +1,16 @@
-const mongoose=require("mongoose")
-const env=require("dotenv").config();
+const mongoose = require("mongoose");
+require("dotenv").config();
 
-
-const connectDB=async()=>{
-    try{
-        await mongoose.connect(process.env.MONGODB_URI,{
-            family: 4,})
-        console.log("DB connected");
-        
-    }catch(error){
-        console.log("DB Connection error",error.message)
+const connectDB = async () => {
+    try {
+        await mongoose.connect(process.env.MONGODB_URI, {
+            family: 4,  // Keeps the IPv4 option
+        });
+        console.log("✅ MongoDB Connected Successfully!");
+    } catch (error) {
+        console.error("❌ MongoDB Connection Error:", error.message);
+        process.exit(1);
     }
-}
-module.exports=connectDB
+};
+
+module.exports = connectDB;

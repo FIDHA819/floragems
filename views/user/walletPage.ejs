@@ -1,299 +1,393 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wallet Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Account Dashboard - FloraGems</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* General Styles */
+        :root {
+            --primary-color: #b46e59;
+            --secondary-color: #ff7f50;
+            --light-bg: #f8f9fa;
+            --text-dark: #333;
+            --text-muted: #555;
+        }
+
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f4f7f6;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            padding-bottom: 80px;
-        }
-
-        header, footer {
-            background-color: #343a40;
-            color: white;
-            padding: 15px 0;
-        }
-
-        .breadcrumb {
-            background-color: transparent;
+            color: var(--text-dark);
+            background-color: #f5f5f5;
+            margin: 0;
             padding: 0;
-            font-size: 14px;
         }
 
-        .breadcrumb a {
-            color: #6c757d;
-            text-decoration: none;
+        /* Header Improvements */
+        .topbar {
+            background-color: var(--light-bg);
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
         }
 
-        .breadcrumb a:hover {
-            color: #28a745;
-        }
-
-        .dashboard-menu {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .dashboard-menu ul {
-            padding-left: 0;
-            list-style: none;
-        }
-
-        .dashboard-menu .nav-item {
-            margin-bottom: 15px;
-        }
-
-        .dashboard-menu .nav-link {
-            color: #343a40;
-            font-weight: bold;
-            text-transform: uppercase;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-
-        .dashboard-menu .nav-link:hover,
-        .dashboard-menu .nav-link.active {
-            background-color: #cf876ba8;
+        .moving-banner {
+            background-color: var(--primary-color);
             color: white;
+            padding: 0.5rem;
+            font-size: 0.9rem;
         }
 
-        .main-content {
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand h1 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        /* Dashboard Content */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            border-radius: 0.5rem;
         }
 
         .card-header {
-            background-color: #cf876ba8;
+            background-color: var(--primary-color);
             color: white;
-            text-align: center;
-            font-weight: bold;
-            border-radius: 8px 8px 0 0;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+            padding: 1rem;
         }
 
         .card-body {
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
         }
 
+        /* Buttons */
         .btn-primary {
-            background-color: #28a745;
-            color: white;
-            border-radius: 5px;
-            padding: 8px 15px;
-            font-weight: bold;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
         }
 
         .btn-primary:hover {
-            background-color: #218838;
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
         }
 
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 12px;
+        /* Sidebar and Responsive Layout */
+        .dashboard-menu {
+            background-color: #f1f1f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 1rem;
         }
 
-        .transaction-table th,
-        .transaction-table td {
-            text-align: center;
+        .dashboard-menu .nav-link {
+            font-size: 1.1rem;
+            padding: 10px 0;
+            color: #333;
         }
 
+        .dashboard-menu .nav-link.active {
+            color: #b46e59;
+            font-weight: bold;
+        }
+
+        /* Adjustments for Mobile View */
+        @media (max-width: 768px) {
+            .navbar-brand h1 {
+                font-size: 1.5rem;
+            }
+
+            .card-header h5 {
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .dashboard-container {
+                padding: 0 0.5rem;
+            }
+
+            .col-md-4, .col-md-8 {
+                padding: 0;
+            }
+
+            .dashboard-menu {
+                margin-top: 0;
+            }
+
+            .dashboard-menu .nav-link {
+                font-size: 1rem;
+                padding: 8px 0;
+            }
+
+            .card-body h5 {
+                font-size: 1.1rem;
+            }
+
+            footer {
+                padding: 1rem 0;
+            }
+
+            /* Make the table scrollable */
+            .transaction-table {
+                overflow-x: auto;
+                display: block;
+                width: 100%;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .topbar {
+                padding: 0.3rem;
+            }
+
+            .moving-banner {
+                font-size: 0.8rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .navbar-nav .nav-item .nav-link {
+                font-size: 1rem;
+            }
+
+            .navbar-nav .nav-item .nav-link.active {
+                font-size: 1rem;
+            }
+        }
+
+        /* Modal Improvements */
+        .modal-content {
+            border-radius: 0.5rem;
+        }
+
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        /* Form Controls */
+        .form-control {
+            border-radius: 0.25rem;
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(180, 110, 89, 0.25);
+        }
+
+        /* Footer */
         footer {
-            margin-top: auto;
-            padding: 15px 0;
-            text-align: center;
+            background-color: var(--light-bg);
+            padding: 1rem 0;
+            margin-top: 3rem;
         }
-        /* General styles for the main container */
-.main {
-    font-family: 'Arial', sans-serif;
-    background-color: #f9f9f9;
-    padding: 20px 0;
-}
 
-/* Styles for the breadcrumb wrap */
-.page-header.breadcrumb-wrap {
-    background-color: #fff;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 20px 0;
-    border-radius: 8px;
-}
-
-/* Breadcrumb container */
-.breadcrumb-wrap .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 15px;
-}
-
-/* Breadcrumb text styling */
-.breadcrumb {
-    font-size: 16px;
-    color: #6c757d;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-/* Breadcrumb links */
-.breadcrumb a {
-    text-decoration: none;
-    color: #007bff;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-.breadcrumb a:hover {
-    color: #0056b3;
-}
-
-/* Separator between links */
-.breadcrumb span {
-    color: #6c757d;
-    font-size: 14px;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .breadcrumb {
-        font-size: 14px;
-    }
-}
-
+        footer p {
+            font-size: 1rem;
+            color: #555;
+        }
     </style>
 </head>
+
 <body>
     <header>
-        <div class="container text-center">
-            <h2>Wallet Dashboard</h2>
-        </div>
-    </header>
-
-    <main class="main">
-        <div class="page-header breadcrumb-wrap mb-3">
-            <div class="container">
-                <div class="breadcrumb">
-                    <a href="/" rel="nofollow">Home</a>
-                    <span></span> Profile <span></span> Wallet
+        <!-- Topbar Start -->
+        <div class="container-fluid">
+            <div class="row bg-secondary py-2 px-xl-5">
+                <div class="col-lg-4 d-none d-lg-block">
+                    <div class="d-inline-flex align-items-center">
+                        <a class="text-dark" href="">FAQs</a>
+                        <span class="text-muted px-2">|</span>
+                        <a class="text-dark" href="">Help</a>
+                        <span class="text-muted px-2">|</span>
+                        <a class="text-dark" href="">Support</a>
+                    </div>
+                </div>
+               
+                <div class="col-lg-4 text-center text-lg-right">
+                    <div class="d-inline-flex align-items-center">
+                        <a class="text-dark px-2" href="">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a class="text-dark px-2" href="">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a class="text-dark px-2" href="">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a class="text-dark px-2" href="">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a class="text-dark pl-2" href="">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
+        <!-- Topbar End -->
 
-        <section class="pt-10 pb-10">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-10 m-auto">
-                        <div class="row">
-                            <!-- Sidebar -->
-                            <div class="col-md-4">
-                                <div class="dashboard-menu">
-                                    <ul class="nav flex-column" role="tablist">
-                                        <li class="nav-item">
-                                            <a class="nav-link active" href="#dashboard" role="tab">Dashboard</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" data-bs-toggle="pill" href="#address" role="tab">My Address</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="/myOrders" role="tab">Orders</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="/wallet" role="tab">wallet</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="/Referral" role="tab">Referral</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="/logout">Logout</a>
-                                        </li>
-                                    </ul>
+        <div class="container-fluid mb-5">
+            <nav class="navbar navbar-expand-lg bg-light navbar-light py-3 px-xl-5">
+                <a href="index.html" class="navbar-brand d-flex align-items-center">
+                    <h1 class="m-0">FloraGems</h1>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="/" class="nav-link active">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/userProfile" class="nav-link">My Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/myOrders" class="nav-link">My Orders</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/wallet" class="nav-link">My Wallet</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/referral" class="nav-link">My Referral</a>
+                        </li>
+                        <li class="nav-item">
+                            <button class="btn btn-outline-secondary">Logout</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="navbar-nav align-items-center">
+                    <!-- Wishlist -->
+                    <a href="/wishlist" class="btn border mx-2">
+                        <i class="fas fa-heart text-primary"></i>
+                    </a>
+    
+                    <!-- Cart -->
+                    <a href="/cart" class="btn border mx-2">
+                        <i class="fas fa-shopping-cart text-primary"></i>
+                        <span class="badge" id="cart-count">0</span>
+                    </a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="pt-10 pb-10">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 m-auto">
+                    <div class="row">
+                        <!-- Sidebar -->
+                        <div class="col-md-4">
+                            <div class="dashboard-menu">
+                                <ul class="nav flex-column" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" href="/userProfile" role="tab">Dashboard</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-bs-toggle="pill" href="#address" role="tab">My Address</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/myOrders" role="tab">Orders</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/wallet" role="tab">Wallet</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/Referral" role="tab">Referral</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/logout">Logout</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">Wallet Overview</div>
+                                <div class="card-body">
+                                    <h5>Wallet Balance: ₹<%= walletBalance %></h5>
                                 </div>
                             </div>
 
-                            <!-- Wallet Content -->
-                            <div class="col-md-8">
-                                <div class="tab-content dashboard-content">
-                                    <!-- Wallet Overview -->
-                                    <div class="tab-pane fade show active" id="wallet" role="tabpanel">
-                                        <div class="card">
-                                            <div class="card-header">Wallet Overview</div>
-                                            <div class="card-body">
-                                                <h5>Wallet Balance: ₹<%= walletBalance %></h5>
-                                                <div class="mt-3">
-                                                
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Transaction History -->
-                                        <div class="card mt-4">
-                                            <div class="card-header">Transaction History</div>
-                                            <div class="card-body">
-                                                <table class="table transaction-table">
-                                                    <thead>
-                                                        <tr>
-                                                          <th>Date</th>
-                                                          <th>Description</th>
-                                                          <th>Type</th>
-                                                          <th>Amount</th>
-                                                          <th>Status</th>
-                                                        </tr>
-                                                      </thead>
-                                                      <tbody>
-                                                        <% if (transactions.length > 0) { %>
-                                                          <% transactions.forEach((transaction) => { %>
-                                                            <tr>
-                                                              <td><%= transaction.createdAt.toLocaleDateString() %></td> <!-- Format the date -->
-                                                              <td><%= transaction.description %></td>
-                                                              <td><%= transaction.type %></td>
-                                                              <td>
-                                                                <% if (transaction.type === 'Credit') { %>
-                                                                  ₹<%= transaction.amount %> <!-- Display credited amount -->
-                                                                <% } else if (transaction.type === 'Debit') { %>
-                                                                  -₹<%= transaction.amount %> <!-- Display debited amount -->
-                                                                <% } %>
-                                                              </td>
-                                                              <td><%= transaction.status %></td>
-                                                            </tr>
-                                                          <% }); %>
-                                                        <% } else { %>
-                                                          <tr>
-                                                            <td colspan="4">No transactions found.</td>
-                                                          </tr>
-                                                        <% } %>
-                                                      </tbody>
-                                                      
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- End Wallet Overview -->
+                            <div class="card mt-4">
+                                <div class="card-header">Transaction History</div>
+                                <div class="card-body">
+                                    <table class="table transaction-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Description</th>
+                                                <th>Type</th>
+                                                <th>Amount</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% if (transactions.length > 0) { %>
+                                                <% transactions.forEach(transaction => { %>
+                                                    <tr>
+                                                        <td><%= transaction.createdAt.toLocaleDateString() %></td>
+                                                        <td><%= transaction.description %></td>
+                                                        <td><%= transaction.type %></td>
+                                                        <td>
+                                                            <% if (transaction.type === 'Credit') { %>
+                                                                ₹<%= transaction.amount %>
+                                                            <% } else { %>
+                                                                -₹<%= transaction.amount %>
+                                                            <% } %>
+                                                        </td>
+                                                        <td><%= transaction.status %></td>
+                                                    </tr>
+                                                <% }); %>
+                                            <% } else { %>
+                                                <tr><td colspan="5">No transactions found.</td></tr>
+                                            <% } %>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                            <!-- End Content Area -->
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
 
     <footer>
-        <p>&copy; 2025 Your Company. All Rights Reserved.</p>
+        <p>&copy; FloraGems. All Rights Reserved.</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
