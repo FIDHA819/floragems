@@ -33,7 +33,7 @@ router.get('/filtered',userAuth,userController.getFilteredProducts);
 router.get('/shop/category/:category',userAuth, userController.getFilteredProducts);
 router.get('/shop/brands/:brands',userAuth, userController.getFilteredProducts);
 // Google authentication route
-router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"], redirectUri: 'https://floragems.shop/auth/google/callback' }));
 
 // Google callback route
 router.get("/auth/google/callback", passport.authenticate("google", {
