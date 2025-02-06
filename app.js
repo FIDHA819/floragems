@@ -63,7 +63,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 // Start the server
-const PORT = process.env.PORT || 3022;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log("============");
     console.log(`Server started on port ${PORT}`);
