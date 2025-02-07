@@ -27,7 +27,7 @@ const addProducts = async (req, res) => {
         console.log("reqbody",req.body)
         const productExists = await Product.findOne({ productName: products.productName });
   
-        // Ensure description is a string
+     
         const description = Array.isArray(products.description) ? products.description.join('\n') : products.description;
        
         if (!productExists) {
@@ -174,7 +174,7 @@ const blockProduct = async (req, res) => {
     try {
         const { id } = req.query;
 
-        // Validate the ID format
+
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ status: false, message: "Invalid product ID" });
         }
@@ -197,7 +197,7 @@ const unblockProduct = async (req, res) => {
     try {
         const { id } = req.query;
 
-        // Validate the ID format
+
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ status: false, message: "Invalid product ID" });
         }

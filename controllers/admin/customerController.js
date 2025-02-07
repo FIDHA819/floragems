@@ -4,13 +4,12 @@ const customerInfo = async (req, res) => {
     try {
         let search = "";
         if (req.query.search) {
-            search = req.query.search.trim(); // Trim extra spaces
+            search = req.query.search.trim();
         }
 
-        let page = parseInt(req.query.page) || 1; // Convert page to an integer or default to 1
+        let page = parseInt(req.query.page) || 1;
         const limit = 3;
 
-        // Fetch filtered user data
         const userData = await User.find({
             isAdmin: false,
             $or: [
@@ -22,7 +21,7 @@ const customerInfo = async (req, res) => {
             .skip((page - 1) * limit)
             .exec();
 
-        // Fetch total count for pagination
+
         const count = await User.find({
             isAdmin: false,
             $or: [
@@ -31,7 +30,7 @@ const customerInfo = async (req, res) => {
             ],
         }).countDocuments();
 
-        // Render the customers view with data
+
         res.render("admin/customers", {
             users: userData,
             currentPage: page,

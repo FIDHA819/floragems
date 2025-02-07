@@ -1,5 +1,5 @@
 const Brand = require("../../models/brandSchema");
-const Product=require("../../models/productSchema")
+const Product = require("../../models/productSchema")
 
 // Controller to fetch and render the brand page
 const getBrandPage = async (req, res) => {
@@ -8,27 +8,23 @@ const getBrandPage = async (req, res) => {
     const limit = 4;
     const skip = (page - 1) * limit;
 
-    // Fetch paginated brand data
     const brandData = await Brand.find({})
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    // Count total number of brands
     const totalBrands = await Brand.countDocuments();
 
-    // Calculate total number of pages
     const totalPages = Math.ceil(totalBrands / limit);
 
-    // Reverse brandData without mutating original array
+
     const reverseBrand = [...brandData].reverse();
 
-    // Render the page with fetched data
     res.render("admin/brands", {
       data: reverseBrand,
       currentPage: page,
-      totalPages:totalPages,
-      totalBrands:totalBrands,
+      totalPages: totalPages,
+      totalBrands: totalBrands,
       successMessage: "",
       errorMessage: "",
     });
@@ -40,9 +36,9 @@ const getBrandPage = async (req, res) => {
 
 const addBrand = async (req, res) => {
   try {
-    const brand=req.body.name;
+    const brand = req.body.name;
 
-    const findBrand = await Brand.findOne({ brand});
+    const findBrand = await Brand.findOne({ brand });
     if (findBrand) {
       console.log("Brand already exists");
 
@@ -60,7 +56,7 @@ const addBrand = async (req, res) => {
       });
     }
 
-    // Check if an image file was uploaded
+ 
     if (!req.file) {
       console.log("Brand image is missing");
 
@@ -80,7 +76,7 @@ const addBrand = async (req, res) => {
 
     const image = req.file.filename;
 
-    // Create and save the new brand
+  
     const newBrand = new Brand({
       brandName: brand,
       brandImage: image,
@@ -89,7 +85,7 @@ const addBrand = async (req, res) => {
     await newBrand.save();
     console.log("Brand saved successfully");
 
-    // Fetch updated brand data
+
     const totalBrands = await Brand.countDocuments();
     const brandData = await Brand.find({});
     const totalPages = Math.ceil(totalBrands / 4);
