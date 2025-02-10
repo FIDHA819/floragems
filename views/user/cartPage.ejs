@@ -538,7 +538,7 @@ input[type="number"]:focus {
                     
                     <script>
       
-      function changeQuantity(productId, count, productPrice, index, maxStock) {
+      function changeQuantity(productId, count, productPrice, index, maxStock) { 
   const currentQuantityInput = document.getElementById(`cartProductQuantity${index}`);
   let currentQuantity = parseInt(currentQuantityInput.value, 10);
 
@@ -578,7 +578,6 @@ input[type="number"]:focus {
     }),
     success: (response) => {
       if (response.error === "Stock has been changed") {
-        // Show Swal only when stock has changed
         Swal.fire({
           icon: 'warning',
           title: 'Stock Changed',
@@ -592,15 +591,17 @@ input[type="number"]:focus {
         // Update subtotal dynamically
         document.getElementById(`subTotal${index}`).textContent = `₹${response.newSubtotal.toFixed(2)}`;
 
+        // Update global subtotal display
+        document.getElementById('subTotalDisplay').textContent = `₹${response.newTotalSubtotal.toFixed(2)}`;
+
         // Update grand total
         document.getElementById('total').textContent = `₹${response.newGrandTotal.toFixed(2)}`;
 
         // Update shipping details
-        updateShipping(); 
+        updateShipping(response.newTotalSubtotal); 
       }
     },
     error: () => {
-      // Show Swal and reload the page if there's an error
       Swal.fire('Error!', 'Failed to update quantity.', 'error').then(() => {
         window.location.reload();  
       });
