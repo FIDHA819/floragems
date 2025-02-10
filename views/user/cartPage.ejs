@@ -587,8 +587,8 @@ input[type="number"]:focus {
         currentQuantityInput.value = newQuantity;
 
         // Ensure subtotal updates first
-        document.getElementById(`subTotal${index}`).textContent = `₹${response.newSubtotal.toFixed(2)}`;
-        document.getElementById('subTotalDisplay').textContent = `₹${response.newTotalSubtotal.toFixed(2)}`;
+             document.getElementById(`subTotal${index}`).innerHTML = `₹${response.newSubtotal.toFixed(2)}`;
+    document.getElementById('subTotalDisplay').innerHTML = `₹${response.newTotalSubtotal.toFixed(2)}`;
 
         // **Force a slight delay to ensure DOM updates before recalculating**
         setTimeout(() => {
