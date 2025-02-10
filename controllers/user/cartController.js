@@ -203,46 +203,55 @@ const changeQuantity = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
 
-    const parsedQuantity = parseInt(quantity, 10);
-    if (isNaN(parsedQuantity) || parsedQuantity < 1) {
-      return res.status(400).json({ error: 'Invalid quantity' });
+    if (!productId || isNaN(quantity) || quantity < 1) {
+      return res.status(400).json({ success: false, message: 'Invalid quantity' });
     }
 
     const user = await User.findById(req.session.user._id);
-    const product = await Product.findById(productId);
-
-    const cart = await Cart.findOne({ userId: user._id });
-    const cartItem = cart.items.find(item => item.productId.toString() === productId);
-
-    if (!cartItem) {
-      return res.status(404).json({ error: 'Product not found in cart' });
+    if (!user) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
     }
 
-    // Check if the  quantity is available or not in the  in stock
-    if (parsedQuantity > product.quantity) {
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    const cart = await Cart.findOne({ userId: user._id });
+    if (!cart) {
+      return res.status(404).json({ success: false, message: "Cart not found" });
+    }
+
+    const cartItem = cart.items.find(item => item.productId.toString() === productId);
+    if (!cartItem) {
+      return res.status(404).json({ success: false, message: 'Product not found in cart' });
+    }
+
+    if (quantity > product.quantity) {
       return res.status(400).json({ 
-        error: 'Stock has been changed', 
-        message: `We only have ${product.quantity} items in stock. Please adjust your quantity.`
+        success: false,
+        message: `Only ${product.quantity} items in stock. Please adjust your quantity.`
       });
     }
 
-    cartItem.quantity = parsedQuantity;
-    cartItem.totalPrice = cartItem.price * cartItem.quantity;
-
+    cartItem.quantity = quantity;
+    cartItem.totalPrice = cartItem.price * quantity;
     await cart.save();
 
     const grandTotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
 
     res.status(200).json({
+      success: true,
       message: 'Quantity updated successfully',
       newSubtotal: cartItem.totalPrice,
       newGrandTotal: grandTotal
     });
   } catch (error) {
     console.error('Error updating quantity:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
 
 
 const getCartCount = async (req, res) => {
