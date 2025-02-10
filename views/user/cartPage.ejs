@@ -538,7 +538,12 @@ input[type="number"]:focus {
                     
                     <script>
       
-      function changeQuantity(productId, count, productPrice, index, maxStock) { 
+    
+
+    
+   
+                    
+                       function changeQuantity(productId, count, productPrice, index, maxStock) { 
   const currentQuantityInput = document.getElementById(`cartProductQuantity${index}`);
   let currentQuantity = parseInt(currentQuantityInput.value, 10);
 
@@ -549,25 +554,21 @@ input[type="number"]:focus {
 
   let newQuantity = currentQuantity + count;
 
-  // Restrict quantity to a maximum of 3
   if (newQuantity > 3) {
-    Swal.fire('Limit Reached!', 'You can only add a maximum of 3 of this product to your cart.', 'error');
+    Swal.fire('Limit Reached!', 'You can only add a maximum of 3 of this product.', 'error');
     return;
   }
 
-  // Prevent quantity from going below 1
   if (newQuantity < 1) {
     Swal.fire('Invalid Quantity!', 'Quantity must be at least 1.', 'error');
     return;
   }
 
-  // Prevent exceeding available stock
   if (newQuantity > maxStock) {
-    Swal.fire('Stock Limit Reached!', `Only ${maxStock} units are available in stock.`, 'error');
+    Swal.fire('Stock Limit Reached!', `Only ${maxStock} units are available.`, 'error');
     return;
   }
 
-  // AJAX request to update quantity
   $.ajax({
     url: '/changeQuantity',
     method: 'POST',
@@ -585,20 +586,14 @@ input[type="number"]:focus {
           confirmButtonText: 'Okay'
         });
       } else {
-        // Update input field with new quantity
         currentQuantityInput.value = newQuantity;
 
-        // Update subtotal dynamically
         document.getElementById(`subTotal${index}`).textContent = `₹${response.newSubtotal.toFixed(2)}`;
-
-        // Update global subtotal display
         document.getElementById('subTotalDisplay').textContent = `₹${response.newTotalSubtotal.toFixed(2)}`;
-
-        // Update grand total
         document.getElementById('total').textContent = `₹${response.newGrandTotal.toFixed(2)}`;
 
-        // Update shipping details
-        updateShipping(response.newTotalSubtotal); 
+        // Ensure shipping is updated when subtotal changes
+        updateShipping();
       }
     },
     error: () => {
@@ -609,21 +604,30 @@ input[type="number"]:focus {
   });
 }
 
+
                     
-                    function updateShipping() {
-                        // Example: if total price is more than ₹5000, shipping is free, else it's ₹100
-                        let total = parseFloat(document.getElementById('subTotalDisplay').textContent.replace('₹', ''));
-                        let shippingCost = total > 1000 ? 0 : 100;
-                    
-                        // Update the shipping cost
-                        document.getElementById('shipping').textContent = `₹${shippingCost.toFixed(2)}`;
-                    
-                        // Update the total (subtotal + shipping)
-                        let grandTotal = total + shippingCost;
-                        document.getElementById('total').textContent = `₹${grandTotal.toFixed(2)}`;
-                    }
-                    
-                    // Function to fetch the cart count when the page loads
+function updateShipping() {
+    // Get the latest subtotal from the UI
+    let subtotalText = document.getElementById('subTotalDisplay').textContent.replace('₹', '').trim();
+    let total = parseFloat(subtotalText);
+
+    // Ensure valid total value
+    if (isNaN(total)) {
+        console.error("Invalid subtotal detected.");
+        return;
+    }
+
+    // Calculate shipping cost (free if total > ₹1000, else ₹100)
+    let shippingCost = total > 1000 ? 0 : 100;
+
+    // Update shipping cost in the UI
+    document.getElementById('shipping').textContent = `₹${shippingCost.toFixed(2)}`;
+
+    // Update grand total (subtotal + shipping)
+    let grandTotal = total + shippingCost;
+    document.getElementById('total').textContent = `₹${grandTotal.toFixed(2)}`;
+}
+
                     function updateCartCount() {
                         $.ajax({
                             url: '/getCartCount',  // The backend route you created
