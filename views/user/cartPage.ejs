@@ -503,7 +503,7 @@ input[type="number"]:focus {
                         <div class="row table-row">
                             <div class="col-6">Subtotal</div>
                             <div class="col-6" id="subTotalDisplay">
-                                ₹<%= cartItems.length > 0 ? subtotal : "0.00" %>
+                                ₹<%= cartItems.length > 0 ? subtotal.toFixed(2) : "0.00" %>
                             </div>
                         </div>
                         <div class="row table-row">
@@ -514,12 +514,14 @@ input[type="number"]:focus {
                         </div>
                         <div class="row table-row total-row">
                             <div class="col-6">Total</div>
-                            <div class="col-6" id="total">₹<%= grandTotal %></div>
+                            <div class="col-6" id="total">₹<%= grandTotal.toFixed(2) %></div>
                         </div>
                     </div>
+                    
                     <a href="/checkout?userId=<%= user._id %>" class="btn btn-primary btn-block mt-3">
                         <i class="fi-rs-box-alt mr-2"></i> Proceed To Checkout
                     </a>
+                    
                 </div>
             </div>
         </div>
@@ -535,108 +537,111 @@ input[type="number"]:focus {
                     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
                     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                    
                     <script>
-      
-    
-
-     function changeQuantity(productId, count, productPrice, index, maxStock) { 
-  const currentQuantityInput = document.getElementById(`cartProductQuantity${index}`);
-  let currentQuantity = parseInt(currentQuantityInput.value, 10);
-
-  if (isNaN(currentQuantity)) {
-    Swal.fire('Invalid Quantity!', 'Please enter a valid number.', 'error');
-    return;
-  }
-
-  let newQuantity = currentQuantity + count;
-
-  if (newQuantity > 3) {
-    Swal.fire('Limit Reached!', 'You can only add a maximum of 3 of this product.', 'error');
-    return;
-  }
-
-  if (newQuantity < 1) {
-    Swal.fire('Invalid Quantity!', 'Quantity must be at least 1.', 'error');
-    return;
-  }
-
-  if (newQuantity > maxStock) {
-    Swal.fire('Stock Limit Reached!', `Only ${maxStock} units are available.`, 'error');
-    return;
-  }
-
-  $.ajax({
-    url: '/changeQuantity',
-    method: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify({
-      productId: productId,
-      quantity: newQuantity
-    }),
-    success: (response) => {
-      if (response.error === "Stock has been changed") {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Stock Changed',
-          text: response.message,
-          confirmButtonText: 'Okay'
-        });
-      } else {
-        // Update quantity in input field
-        currentQuantityInput.value = newQuantity;
-
-        // Ensure subtotal updates first
-             document.getElementById(`subTotal${index}`).innerHTML = `₹${response.newSubtotal.toFixed(2)}`;
-    document.getElementById('subTotalDisplay').innerHTML = `₹${response.newTotalSubtotal.toFixed(2)}`;
-
-        // **Force a slight delay to ensure DOM updates before recalculating**
-        setTimeout(() => {
-          updateShipping(); // Call after subtotal updates
-        }, 100);
-      }
-    },
-    error: () => {
-      Swal.fire('Error!', 'Failed to update quantity.', 'error').then(() => {
-        window.location.reload();  
-      });
-    }
-  });
-}
-
-function updateShipping() {
-    let subtotalElement = document.getElementById('subTotalDisplay');
-    if (!subtotalElement) {
-        console.error("Subtotal element not found.");
-        return;
-    }
-
-    let subtotalText = subtotalElement.textContent.replace('₹', '').trim();
-    let total = parseFloat(subtotalText);
-
-    if (isNaN(total)) {
-        console.error("Invalid subtotal detected.");
-        return;
-    }
-
-    let shippingCost = total > 1000 ? 0 : 100;
-
-    document.getElementById('shipping').textContent = `₹${shippingCost.toFixed(2)}`;
-
-    // Force update of the total in the DOM
-    let grandTotal = total + shippingCost;
-    document.getElementById('total').textContent = `₹${grandTotal.toFixed(2)}`;
-
-    console.log("Updated Total:", grandTotal); // Debugging log
-}  
-
+                    
+                    function changeQuantity(productId, count, productPrice, index, maxStock) { 
+                        const currentQuantityInput = document.getElementById(`cartProductQuantity${index}`);
+                        let currentQuantity = parseInt(currentQuantityInput.value, 10);
+                    
+                        if (isNaN(currentQuantity)) {
+                            Swal.fire('Invalid Quantity!', 'Please enter a valid number.', 'error');
+                            return;
+                        }
+                    
+                        let newQuantity = currentQuantity + count;
+                    
+                        if (newQuantity > 3) {
+                            Swal.fire('Limit Reached!', 'You can only add a maximum of 3 of this product.', 'error');
+                            return;
+                        }
+                    
+                        if (newQuantity < 1) {
+                            Swal.fire('Invalid Quantity!', 'Quantity must be at least 1.', 'error');
+                            return;
+                        }
+                    
+                        if (newQuantity > maxStock) {
+                            Swal.fire('Stock Limit Reached!', `Only ${maxStock} units are available.`, 'error');
+                            return;
+                        }
+                    
+                        $.ajax({
+                            url: '/changeQuantity',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                productId: productId,
+                                quantity: newQuantity
+                            }),
+                            success: (response) => {
+                                if (response.error === "Stock has been changed") {
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: 'Stock Changed',
+                                        text: response.message,
+                                        confirmButtonText: 'Okay'
+                                    });
+                                } else {
+                                    // ✅ Update Quantity Input Field
+                                    currentQuantityInput.value = newQuantity;
+                    
+                                    // ✅ Update Subtotal for the Product
+                                    document.getElementById(`subTotal${index}`).innerHTML = `₹${response.newSubtotal.toFixed(2)}`;
+                    
+                                    // ✅ Update Overall Subtotal
+                                    document.getElementById('subTotalDisplay').innerHTML = `₹${response.newTotalSubtotal.toFixed(2)}`;
+                    
+                                    // ✅ Ensure UI updates before calculating shipping
+                                    setTimeout(updateShipping, 150);
+                                }
+                            },
+                            error: () => {
+                                Swal.fire('Error!', 'Failed to update quantity.', 'error').then(() => {
+                                    window.location.reload();  
+                                });
+                            }
+                        });
+                    }
+                    
+                    function updateShipping() {
+                        let subtotalElement = document.getElementById('subTotalDisplay');
+                        if (!subtotalElement) {
+                            console.error("Subtotal element not found.");
+                            return;
+                        }
+                    
+                        let subtotalText = subtotalElement.innerHTML.replace('₹', '').trim();
+                        let total = parseFloat(subtotalText);
+                    
+                        if (isNaN(total)) {
+                            console.error("Invalid subtotal detected.");
+                            return;
+                        }
+                    
+                        // ✅ Shipping Cost Calculation
+                        let shippingCost = total > 1000 ? 0 : 100;
+                    
+                        // ✅ Update Shipping Cost
+                        document.getElementById('shipping').innerHTML = `₹${shippingCost.toFixed(2)}`;
+                    
+                        // ✅ Update Grand Total
+                        let grandTotal = total + shippingCost;
+                        document.getElementById('total').innerHTML = `₹${grandTotal.toFixed(2)}`;
+                    
+                        // ✅ Debugging Logs
+                        console.log("🚀 Updating Cart Summary:");
+                        console.log("✅ Subtotal:", total);
+                        console.log("✅ Shipping Cost:", shippingCost);
+                        console.log("✅ Grand Total:", grandTotal);
+                    }
+                    
                     function updateCartCount() {
                         $.ajax({
-                            url: '/getCartCount',  // The backend route you created
+                            url: '/getCartCount',  
                             method: 'GET',
                             success: function(response) {
                                 const cartCountElement = document.getElementById('cart-count');
-                                cartCountElement.innerHTML = response.cartLength; // Update the cart count badge with the fetched value
+                                cartCountElement.innerHTML = response.cartLength; 
                             },
                             error: function() {
                                 console.error('Failed to fetch cart count');
