@@ -538,7 +538,7 @@ input[type="number"]:focus {
                     
                     <script>
       
-        function changeQuantity(productId, count, productPrice, index, maxStock) {
+      function changeQuantity(productId, count, productPrice, index, maxStock) {
   const currentQuantityInput = document.getElementById(`cartProductQuantity${index}`);
   let currentQuantity = parseInt(currentQuantityInput.value, 10);
 
@@ -549,38 +549,36 @@ input[type="number"]:focus {
 
   let newQuantity = currentQuantity + count;
 
-  // Limit the quantity to 3
+  // Restrict quantity to a maximum of 3
   if (newQuantity > 3) {
     Swal.fire('Limit Reached!', 'You can only add a maximum of 3 of this product to your cart.', 'error');
     return;
   }
 
-  // Check if the quantity is below 1
+  // Prevent quantity from going below 1
   if (newQuantity < 1) {
     Swal.fire('Invalid Quantity!', 'Quantity must be at least 1.', 'error');
     return;
   }
 
-  // Check if the quantity exceeds available stock
+  // Prevent exceeding available stock
   if (newQuantity > maxStock) {
     Swal.fire('Stock Limit Reached!', `Only ${maxStock} units are available in stock.`, 'error');
     return;
   }
 
-  // Update the input field with the new quantity
-  currentQuantityInput.value = newQuantity;
-
-  // AJAX request to update the server with the new quantity
+  // AJAX request to update quantity
   $.ajax({
     url: '/changeQuantity',
     method: 'POST',
-    data: {
-      userId: '<%= user._id %>',  // Assuming you have user._id available
+    contentType: 'application/json',
+    data: JSON.stringify({
       productId: productId,
       quantity: newQuantity
-    },
+    }),
     success: (response) => {
       if (response.error === "Stock has been changed") {
+        // Show Swal only when stock has changed
         Swal.fire({
           icon: 'warning',
           title: 'Stock Changed',
@@ -588,31 +586,25 @@ input[type="number"]:focus {
           confirmButtonText: 'Okay'
         });
       } else {
-        console.log(response); // Log the response from the server
+        // Update input field with new quantity
+        currentQuantityInput.value = newQuantity;
 
-        // Update the subtotal dynamically
-        const subTotalElement = document.getElementById(`subTotal${index}`);
-        subTotalElement.textContent = `₹${response.newSubtotal.toFixed(2)}`;
+        // Update subtotal dynamically
+        document.getElementById(`subTotal${index}`).textContent = `₹${response.newSubtotal.toFixed(2)}`;
 
         // Update grand total
-        const totalElement = document.getElementById('total');
-        totalElement.textContent = `₹${response.newGrandTotal.toFixed(2)}`;
+        document.getElementById('total').textContent = `₹${response.newGrandTotal.toFixed(2)}`;
 
-        // Update shipping cost and grand total after quantity change
-        updateShipping(); // Recalculate and update shipping cost
-
-        // Success message
-        Swal.fire('Success!', 'Quantity updated successfully.', 'success');
-        window.location.reload(); // Reload to update the page with new totals
+        // Update shipping details
+        updateShipping(); 
       }
     },
-  
     error: () => {
-  Swal.fire('Error!', 'Failed to update quantity.', 'error').then(() => {
-    window.location.reload();  // This will reload the current page
-  });
-}
-
+      // Show Swal and reload the page if there's an error
+      Swal.fire('Error!', 'Failed to update quantity.', 'error').then(() => {
+        window.location.reload();  
+      });
+    }
   });
 }
 
