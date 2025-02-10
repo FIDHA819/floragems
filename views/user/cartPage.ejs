@@ -538,50 +538,82 @@ input[type="number"]:focus {
                     
                     <script>
       
-     
-      function changeQuantity(productId, change, productPrice, index) {
-    let quantityInput = document.getElementById(`cartProductQuantity${index}`);
-    let newQuantity = parseInt(quantityInput.value) + change;
+        function changeQuantity(productId, count, productPrice, index, maxStock) {
+  const currentQuantityInput = document.getElementById(`cartProductQuantity${index}`);
+  let currentQuantity = parseInt(currentQuantityInput.value, 10);
 
-    if (newQuantity <= 0) {
+  if (isNaN(currentQuantity)) {
+    Swal.fire('Invalid Quantity!', 'Please enter a valid number.', 'error');
+    return;
+  }
+
+  let newQuantity = currentQuantity + count;
+
+  // Limit the quantity to 3
+  if (newQuantity > 3) {
+    Swal.fire('Limit Reached!', 'You can only add a maximum of 3 of this product to your cart.', 'error');
+    return;
+  }
+
+  // Check if the quantity is below 1
+  if (newQuantity < 1) {
+    Swal.fire('Invalid Quantity!', 'Quantity must be at least 1.', 'error');
+    return;
+  }
+
+  // Check if the quantity exceeds available stock
+  if (newQuantity > maxStock) {
+    Swal.fire('Stock Limit Reached!', `Only ${maxStock} units are available in stock.`, 'error');
+    return;
+  }
+
+  // Update the input field with the new quantity
+  currentQuantityInput.value = newQuantity;
+
+  // AJAX request to update the server with the new quantity
+  $.ajax({
+    url: '/changeQuantity',
+    method: 'POST',
+    data: {
+      userId: '<%= user._id %>',  // Assuming you have user._id available
+      productId: productId,
+      quantity: newQuantity
+    },
+    success: (response) => {
+      if (response.error === "Stock has been changed") {
         Swal.fire({
-            icon: "warning",
-            title: "Invalid Quantity",
-            text: "Quantity cannot be less than 1.",
+          icon: 'warning',
+          title: 'Stock Changed',
+          text: response.message,
+          confirmButtonText: 'Okay'
         });
-        return;
-    }
+      } else {
+        console.log(response); // Log the response from the server
 
-    $.ajax({
-        url: "/changeQuantity",
-        method: "POST",
-        contentType: "application/json",
-        dataType: "json",
-        data: JSON.stringify({
-            productId: productId,
-            quantity: newQuantity  // Fixed key to match backend
-        }),
-        success: function(response) {
-            if (response.success) {
-                quantityInput.value = newQuantity;
-                document.getElementById(`cartProductTotal${index}`).innerText = "₹" + response.newSubtotal.toFixed(2);
-                document.getElementById("cart-total").innerText = "₹" + response.newGrandTotal.toFixed(2);
-            } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Stock Limit Reached",
-                    text: response.message
-                });
-            }
-        },
-        error: function(xhr) {
-            Swal.fire({
-                icon: "error",
-                title: "Update Failed",
-                text: xhr.responseJSON?.message || "Something went wrong. Please try again."
-            });
-        }
-    });
+        // Update the subtotal dynamically
+        const subTotalElement = document.getElementById(`subTotal${index}`);
+        subTotalElement.textContent = `₹${response.newSubtotal.toFixed(2)}`;
+
+        // Update grand total
+        const totalElement = document.getElementById('total');
+        totalElement.textContent = `₹${response.newGrandTotal.toFixed(2)}`;
+
+        // Update shipping cost and grand total after quantity change
+        updateShipping(); // Recalculate and update shipping cost
+
+        // Success message
+        Swal.fire('Success!', 'Quantity updated successfully.', 'success');
+        window.location.reload(); // Reload to update the page with new totals
+      }
+    },
+  
+    error: () => {
+  Swal.fire('Error!', 'Failed to update quantity.', 'error').then(() => {
+    window.location.reload();  // This will reload the current page
+  });
+}
+
+  });
 }
 
                     
