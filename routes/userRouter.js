@@ -35,28 +35,29 @@ router.get('/shop/brands/:brands',userAuth, userController.getFilteredProducts);
 // Google authentication route
 router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"], redirectUri: 'https://floragems.shop/auth/google/callback' }));
 
-// Google callback route
-router.get("/auth/google/callback", passport.authenticate("google", {
-    failureRedirect: "/signup", 
-}),
-(req, res) => {
-    
-    req.login(req.user, (err) => {
-        if (err) {
-            return res.redirect("/signup"); 
+
+router.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/signup" }),
+    async (req, res) => {
+        if (!req.user) {
+            return res.redirect("/signup");
         }
 
-        
         req.session.user = {
             _id: req.user._id,
             name: req.user.name,
             email: req.user.email,
         };
 
-        
-        res.redirect("/");
-    });
-});
+        req.session.save((err) => {
+            if (err) {
+                console.error("Session save error:", err);
+                return res.redirect("/signup");
+            }
+            res.redirect("/");
+        });
+    }
+);
+
 
 // profile-management//
 router.get("/forgot-password",profileController.getForgotPassPage)
@@ -67,7 +68,7 @@ router.get('/blocked', userController.loadBlockedPage);
 router.get("/reset-password",profileController.getResetPassPage);
 router.post("/resend-forgot-otp",profileController.resendOtp);
 router.post("/reset-password",profileController.postNewPassword);
-router.get("/userProfile",profileController.userProfile);
+router.get("/userProfile",userAuth,profileController.userProfile);
 router.post("/userprofileName",userAuth,userController.profilename)
 
 router.get("/change-email",userAuth,profileController.changeEmail);
@@ -91,7 +92,7 @@ router.get("/deleteAddress",userAuth,profileController.deleteAddress)
 router.get("/checkout",userAuth, orderController.getCheckoutPage);
 router.get("/deleteItems", userAuth, orderController.deleteProduct);
 router.post("/orderPlaced", userAuth, orderController.orderPlaced);
-router.get("/orderDetails",  orderController.getOrderDetailsPage);
+router.get("/orderDetails",  userAuth,orderController.getOrderDetailsPage);
 router.get('/orderDetails/:orderId', userAuth,orderController.getOrderDetailsPages);
 router.get('/get-order-details/:orderId', userAuth,orderController.fetchOrderDetail);
 router.post("/cancelOrder", userAuth, orderController.cancelOrder);

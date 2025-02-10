@@ -8,7 +8,7 @@ const pageerror = async (req, res) => {
   res.render("admin/page-404")
 }
 
-// Load Admin Login Page
+
 const loadLogin = (req, res) => {
   if (req.session.admin) {
     return res.redirect("/admin/dashboard");

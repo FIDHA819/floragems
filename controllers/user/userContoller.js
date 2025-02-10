@@ -655,6 +655,7 @@ const getReferralPage = async (req, res) => {
 module.exports = {
   loadHomePage,
   pageNotFound,
+  generateAndSendOtp,
   loadSignup,
   signup,
   verifyOtp,
