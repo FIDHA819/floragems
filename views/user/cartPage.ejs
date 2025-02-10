@@ -540,10 +540,7 @@ input[type="number"]:focus {
       
     
 
-    
-   
-                    
-                       function changeQuantity(productId, count, productPrice, index, maxStock) { 
+     function changeQuantity(productId, count, productPrice, index, maxStock) { 
   const currentQuantityInput = document.getElementById(`cartProductQuantity${index}`);
   let currentQuantity = parseInt(currentQuantityInput.value, 10);
 
@@ -586,14 +583,17 @@ input[type="number"]:focus {
           confirmButtonText: 'Okay'
         });
       } else {
+        // Update quantity in input field
         currentQuantityInput.value = newQuantity;
 
+        // Ensure subtotal updates first
         document.getElementById(`subTotal${index}`).textContent = `₹${response.newSubtotal.toFixed(2)}`;
         document.getElementById('subTotalDisplay').textContent = `₹${response.newTotalSubtotal.toFixed(2)}`;
-        document.getElementById('total').textContent = `₹${response.newGrandTotal.toFixed(2)}`;
 
-        // Ensure shipping is updated when subtotal changes
-        updateShipping();
+        // **Force a slight delay to ensure DOM updates before recalculating**
+        setTimeout(() => {
+          updateShipping(); // Call after subtotal updates
+        }, 100);
       }
     },
     error: () => {
@@ -604,29 +604,31 @@ input[type="number"]:focus {
   });
 }
 
-
-                    
 function updateShipping() {
-    // Get the latest subtotal from the UI
-    let subtotalText = document.getElementById('subTotalDisplay').textContent.replace('₹', '').trim();
+    let subtotalElement = document.getElementById('subTotalDisplay');
+    if (!subtotalElement) {
+        console.error("Subtotal element not found.");
+        return;
+    }
+
+    let subtotalText = subtotalElement.textContent.replace('₹', '').trim();
     let total = parseFloat(subtotalText);
 
-    // Ensure valid total value
     if (isNaN(total)) {
         console.error("Invalid subtotal detected.");
         return;
     }
 
-    // Calculate shipping cost (free if total > ₹1000, else ₹100)
     let shippingCost = total > 1000 ? 0 : 100;
 
-    // Update shipping cost in the UI
     document.getElementById('shipping').textContent = `₹${shippingCost.toFixed(2)}`;
 
-    // Update grand total (subtotal + shipping)
+    // Force update of the total in the DOM
     let grandTotal = total + shippingCost;
     document.getElementById('total').textContent = `₹${grandTotal.toFixed(2)}`;
-}
+
+    console.log("Updated Total:", grandTotal); // Debugging log
+}  
 
                     function updateCartCount() {
                         $.ajax({
