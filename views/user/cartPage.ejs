@@ -538,48 +538,51 @@ input[type="number"]:focus {
                     
                     <script>
       
-    function changeQuantity(productId, change, productPrice, index, currentQuantity) {
-        let newQuantity = parseInt(document.getElementById(`cartProductQuantity${index}`).value) + change;
-        
-        if (newQuantity <= 0) {
-            Swal.fire({
-                icon: "warning",
-                title: "Invalid Quantity",
-                text: "Quantity cannot be less than 1.",
-            });
-            return;
-        }
+     
+      function changeQuantity(productId, change, productPrice, index) {
+    let quantityInput = document.getElementById(`cartProductQuantity${index}`);
+    let newQuantity = parseInt(quantityInput.value) + change;
 
-        $.ajax({
-            url: "/changeQuantity",
-            method: "POST",
-            data: {
-                productId: productId,
-                newQuantity: newQuantity
-            },
-            success: function(response) {
-                if (response.success) {
-                    document.getElementById(`cartProductQuantity${index}`).value = newQuantity;
-                    document.getElementById(`cartProductTotal${index}`).innerText = "₹" + (newQuantity * productPrice).toFixed(2);
-                    document.getElementById("cart-total").innerText = "₹" + response.newTotal.toFixed(2);
-                } else {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Stock Limit Reached",
-                        text: response.message
-                    });
-                }
-            },
-            error: function() {
-                Swal.fire({
-                    icon: "error",
-                    title: "Update Failed",
-                    text: "Something went wrong. Please try again."
-                });
-            }
+    if (newQuantity <= 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Invalid Quantity",
+            text: "Quantity cannot be less than 1.",
         });
+        return;
     }
 
+    $.ajax({
+        url: "/changeQuantity",
+        method: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        data: JSON.stringify({
+            productId: productId,
+            quantity: newQuantity  // Fixed key to match backend
+        }),
+        success: function(response) {
+            if (response.success) {
+                quantityInput.value = newQuantity;
+                document.getElementById(`cartProductTotal${index}`).innerText = "₹" + response.newSubtotal.toFixed(2);
+                document.getElementById("cart-total").innerText = "₹" + response.newGrandTotal.toFixed(2);
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Stock Limit Reached",
+                    text: response.message
+                });
+            }
+        },
+        error: function(xhr) {
+            Swal.fire({
+                icon: "error",
+                title: "Update Failed",
+                text: xhr.responseJSON?.message || "Something went wrong. Please try again."
+            });
+        }
+    });
+}
 
                     
                     function updateShipping() {
