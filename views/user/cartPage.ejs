@@ -537,47 +537,50 @@ input[type="number"]:focus {
                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                     
                     <script>
-          function changeQuantity(productId, count, productPrice, index, maxStock) {
-  const currentQuantityInput = document.getElementById(`cartProductQuantity${index}`);
-  let currentQuantity = parseInt(currentQuantityInput.value, 10);
+      
+    function changeQuantity(productId, change, productPrice, index, currentQuantity) {
+        let newQuantity = parseInt(document.getElementById(`cartProductQuantity${index}`).value) + change;
+        
+        if (newQuantity <= 0) {
+            Swal.fire({
+                icon: "warning",
+                title: "Invalid Quantity",
+                text: "Quantity cannot be less than 1.",
+            });
+            return;
+        }
 
-  if (isNaN(currentQuantity)) {
-    return; 
-  }
-
-  let newQuantity = currentQuantity + count;
-
-  if (newQuantity > 3 || newQuantity < 1 || newQuantity > maxStock) {
-    return; 
-  }
-
-  currentQuantityInput.value = newQuantity;
-
-  $.ajax({
-    url: '/changeQuantity',
-    method: 'POST',
-    data: {
-      userId: '<%= user._id %>',
-      productId: productId,
-      quantity: newQuantity
-    },
-    success: (response) => {
-      if (response.error === "Stock has been changed") {
-        return; 
-      } else {
-       
-        document.getElementById(`subTotal${index}`).textContent = `₹${response.newSubtotal.toFixed(2)}`;
-
-        document.getElementById('total').textContent = `₹${response.newGrandTotal.toFixed(2)}`;
-
-        updateShipping();
-      }
-    },
-    error: () => {
-      console.error("Failed to update quantity.");
+        $.ajax({
+            url: "/cart/change-quantity",
+            method: "POST",
+            data: {
+                productId: productId,
+                newQuantity: newQuantity
+            },
+            success: function(response) {
+                if (response.success) {
+                    document.getElementById(`cartProductQuantity${index}`).value = newQuantity;
+                    document.getElementById(`cartProductTotal${index}`).innerText = "₹" + (newQuantity * productPrice).toFixed(2);
+                    document.getElementById("cart-total").innerText = "₹" + response.newTotal.toFixed(2);
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Stock Limit Reached",
+                        text: response.message
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: "error",
+                    title: "Update Failed",
+                    text: "Something went wrong. Please try again."
+                });
+            }
+        });
     }
-  });
-}
+
+
                     
                     function updateShipping() {
                         // Example: if total price is more than ₹5000, shipping is free, else it's ₹100
