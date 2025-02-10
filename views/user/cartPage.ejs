@@ -542,79 +542,42 @@ input[type="number"]:focus {
   let currentQuantity = parseInt(currentQuantityInput.value, 10);
 
   if (isNaN(currentQuantity)) {
-    Swal.fire('Invalid Quantity!', 'Please enter a valid number.', 'error');
-    return;
+    return; 
   }
 
   let newQuantity = currentQuantity + count;
 
-  // Limit the quantity to 3
-  if (newQuantity > 3) {
-    Swal.fire('Limit Reached!', 'You can only add a maximum of 3 of this product to your cart.', 'error');
-    return;
+  if (newQuantity > 3 || newQuantity < 1 || newQuantity > maxStock) {
+    return; 
   }
 
-  // Check if the quantity is below 1
-  if (newQuantity < 1) {
-    Swal.fire('Invalid Quantity!', 'Quantity must be at least 1.', 'error');
-    return;
-  }
-
-  // Check if the quantity exceeds available stock
-  if (newQuantity > maxStock) {
-    Swal.fire('Stock Limit Reached!', `Only ${maxStock} units are available in stock.`, 'error');
-    return;
-  }
-
-  // Update the input field with the new quantity
   currentQuantityInput.value = newQuantity;
 
-  // AJAX request to update the server with the new quantity
   $.ajax({
     url: '/changeQuantity',
     method: 'POST',
     data: {
-      userId: '<%= user._id %>',  // Assuming you have user._id available
+      userId: '<%= user._id %>',
       productId: productId,
       quantity: newQuantity
     },
     success: (response) => {
       if (response.error === "Stock has been changed") {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Stock Changed',
-          text: response.message,
-          confirmButtonText: 'Okay'
-        });
+        return; 
       } else {
-        console.log(response); // Log the response from the server
+       
+        document.getElementById(`subTotal${index}`).textContent = `₹${response.newSubtotal.toFixed(2)}`;
 
-        // Update the subtotal dynamically
-        const subTotalElement = document.getElementById(`subTotal${index}`);
-        subTotalElement.textContent = `₹${response.newSubtotal.toFixed(2)}`;
+        document.getElementById('total').textContent = `₹${response.newGrandTotal.toFixed(2)}`;
 
-        // Update grand total
-        const totalElement = document.getElementById('total');
-        totalElement.textContent = `₹${response.newGrandTotal.toFixed(2)}`;
-
-        // Update shipping cost and grand total after quantity change
-        updateShipping(); // Recalculate and update shipping cost
-
-        // Success message
-        Swal.fire('Success!', 'Quantity updated successfully.', 'success');
-        window.location.reload(); // Reload to update the page with new totals
+        updateShipping();
       }
     },
-  
     error: () => {
-  Swal.fire('Error!', 'Failed to update quantity.', 'error').then(() => {
-    window.location.reload();  // This will reload the current page
+      console.error("Failed to update quantity.");
+    }
   });
 }
-
-  });
-}
-
                     
                     function updateShipping() {
                         // Example: if total price is more than ₹5000, shipping is free, else it's ₹100
