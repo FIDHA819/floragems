@@ -110,9 +110,5 @@ router.get('/getSalesReport', adminAuth,statsController.getGraphData)
 router.get("/dashboard", adminAuth, statsController.customers);
 
 
-const handleUndefinedRoutes = (req, res) => {
-  res.status(404).render('user/page-404', { message: 'Page Not Found' });
-};
-router.use(handleUndefinedRoutes);
 
 module.exports=router
