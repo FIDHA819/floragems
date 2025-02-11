@@ -110,312 +110,344 @@ const getOrderDetailsPageAdmin = async (req, res) => {
 
 const getSalesReport = async (req, res) => {
   try {
-    const { filter, startDate, endDate, format } = req.query;
-    let matchCondition = {};
-    let selectedFilter = filter || 'daily';
+      let { filter, startDate, endDate, page = 1 } = req.query;
+      let query = {};
+      let now = new Date();
 
-    if (filter === 'daily') {
-      matchCondition.createdAt = { $gte: moment().startOf('day').toDate() };
-    } else if (filter === 'weekly') {
-      matchCondition.createdAt = { $gte: moment().startOf('week').toDate() };
-    } else if (filter === 'monthly') {
-      matchCondition.createdAt = { $gte: moment().startOf('month').toDate() };
-    } else if (filter === 'yearly') {
-      matchCondition.createdAt = { $gte: moment().startOf('year').toDate() };
-    } else if (filter === 'custom') {
-      matchCondition.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
-    }
-
-    // MongoDB aggregation to fetch sales data
-    const salesReport = await Order.aggregate([
-      { $match: matchCondition },
-      {
-        $group: {
-          _id: null,
-          totalSales: { $sum: '$totalPrice' },
-          totalDiscount: { $sum: '$discount' },
-          totalFinalAmount: { $sum: '$finalAmount' },
-          totalOrders: { $sum: 1 },
-          totalCouponDiscount: { $sum: { $cond: [{ $eq: ['$couponApplied', true] }, '$discount', 0] } },
-        },
-      },
-    ]);
-
-    const reportData = salesReport[0];
-
-    if (!reportData) {
-      if (format === 'pdf' || format === 'excel') {
-        return res.status(404).send('No sales data found for the selected period.');
+      if (filter === "daily") {
+          query.createdAt = {
+              $gte: new Date(now.setHours(0, 0, 0, 0)),
+              $lt: new Date(now.setHours(23, 59, 59, 999))
+          };
+      } else if (filter === "weekly") {
+          let weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
+          let weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+          query.createdAt = { $gte: weekStart, $lt: weekEnd };
+      } else if (filter === "monthly") {
+          query.createdAt = {
+              $gte: new Date(now.getFullYear(), now.getMonth(), 1),
+              $lt: new Date(now.getFullYear(), now.getMonth() + 1, 0)
+          };
+      } else if (filter === "yearly") {
+          query.createdAt = {
+              $gte: new Date(now.getFullYear(), 0, 1),
+              $lt: new Date(now.getFullYear(), 11, 31)
+          };
+      } else if (filter === "custom" && startDate && endDate) {
+          query.createdAt = {
+              $gte: new Date(startDate),
+              $lte: new Date(endDate)
+          };
       }
-      return res.render('admin/salesreport', {
-        totalSales: 0,
-        totalOrders: 0,
-        totalDiscount: 0,
-        totalCouponDiscount: 0,
-        totalFinalAmount: 0,
-        error: 'No sales data found for the selected period.',
-        selectedFilter: selectedFilter,
-        startDate: startDate || '',
-        endDate: endDate || ''
+
+      let perPage = 10;
+      let orders = await Order.find(query)
+          .populate("userId")
+          .skip((page - 1) * perPage)
+          .limit(perPage)
+          .lean();
+
+      let totalOrders = await Order.countDocuments(query);
+      let totalPages = Math.ceil(totalOrders / perPage);
+
+      let totalSales = orders.reduce((acc, order) => acc + order.totalPrice, 0);
+      let totalFinalAmount = orders.reduce((acc, order) => acc + order.finalAmount, 0);
+      let totalDiscount = totalSales - totalFinalAmount;
+      let totalCouponDiscount = orders.reduce((acc, order) => acc + (order.couponDiscount || 0), 0);
+
+      res.render("admin/salesReport", {
+          orders,
+          totalOrders,
+          totalPages,
+          currentPage: page,
+          totalSales,
+          totalFinalAmount,
+          totalDiscount,
+          totalCouponDiscount,
+          filter,
+          startDate,
+          endDate
       });
-    }
-
-    if (format === 'pdf') {
-      // Generate and send PDF
-      const doc = new PDFDocument();
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'attachment; filename=Sales_Report.pdf');
-
-      doc.pipe(res);
-
-      doc.fontSize(18).text('Sales Report', { align: 'center' }).moveDown();
-      doc.fontSize(12).text(`Filter: ${selectedFilter}`).moveDown();
-
-      // Table headers
-      const headers = ['Total Sales', 'Total Orders', 'Total Discount', 'Coupon Discount', 'Final Amount'];
-      const values = [
-        `Rs.${reportData.totalSales}`,
-        `Rs.${reportData.totalOrders}`,
-        `Rs.${reportData.totalDiscount}`,
-        `Rs.${reportData.totalCouponDiscount}`,
-        `Rs.${reportData.totalFinalAmount}`,
-      ];
-
-      // Table formatting
-      const tableWidth = 500;
-      const rowHeight = 20;
-      const columnWidths = [tableWidth * 0.3, tableWidth * 0.2, tableWidth * 0.2, tableWidth * 0.2, tableWidth * 0.2];
-
-
-      let yPosition = doc.y;
-
-
-      doc.fontSize(12).font('Helvetica-Bold');
-      doc.text(headers[0], 50, yPosition, { width: columnWidths[0], align: 'center' });
-      doc.text(headers[1], 50 + columnWidths[0], yPosition, { width: columnWidths[1], align: 'center' });
-      doc.text(headers[2], 50 + columnWidths[0] + columnWidths[1], yPosition, { width: columnWidths[2], align: 'center' });
-      doc.text(headers[3], 50 + columnWidths[0] + columnWidths[1] + columnWidths[2], yPosition, { width: columnWidths[3], align: 'center' });
-      doc.text(headers[4], 50 + columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3], yPosition, { width: columnWidths[4], align: 'center' });
-
-
-      yPosition += rowHeight;
-
-      // Draw table row
-      doc.fontSize(12).font('Helvetica');
-      doc.text(values[0], 50, yPosition, { width: columnWidths[0], align: 'center' });
-      doc.text(values[1], 50 + columnWidths[0], yPosition, { width: columnWidths[1], align: 'center' });
-      doc.text(values[2], 50 + columnWidths[0] + columnWidths[1], yPosition, { width: columnWidths[2], align: 'center' });
-      doc.text(values[3], 50 + columnWidths[0] + columnWidths[1] + columnWidths[2], yPosition, { width: columnWidths[3], align: 'center' });
-      doc.text(values[4], 50 + columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3], yPosition, { width: columnWidths[4], align: 'center' });
-
-
-      yPosition += rowHeight;
-
-      // Footer
-      doc.moveDown();
-
-      const pageWidth = doc.page.width;
-
-      const footerText = `Generated on: ${moment().format('YYYY-MM-DD HH:mm:ss')}\n\nThank you for choosing Floragems! Don't forget to check out your latest company reports.`;
-
-      const textWidth = doc.widthOfString(footerText);
-      const xPosition = (pageWidth - textWidth) / 2;
-
-      doc.text(footerText, xPosition, doc.y, { align: 'center' });
-
-      doc.end();
-
-
-
-    } else if (format === 'excel') {
-      // Generate and send Excel
-      const workbook = new ExcelJS.Workbook();
-      const sheet = workbook.addWorksheet('Sales Report');
-
-      sheet.columns = [
-        { header: 'Field', key: 'field', width: 25 },
-        { header: 'Value', key: 'value', width: 25 },
-      ];
-
-      sheet.addRow({ field: 'Total Sales', value: `₹${reportData.totalSales}` });
-      sheet.addRow({ field: 'Total Orders', value: reportData.totalOrders });
-      sheet.addRow({ field: 'Total Discount', value: `₹${reportData.totalDiscount}` });
-      sheet.addRow({ field: 'Coupon Discount', value: `₹${reportData.totalCouponDiscount}` });
-      sheet.addRow({ field: 'Final Amount', value: `₹${reportData.totalFinalAmount}` });
-
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', 'attachment; filename=Sales_Report.xlsx');
-
-      await workbook.xlsx.write(res);
-      res.end();
-    } else {
-
-      res.render('admin/salesreport', {
-        totalSales: reportData.totalSales,
-        totalOrders: reportData.totalOrders,
-        totalDiscount: reportData.totalDiscount,
-        totalCouponDiscount: reportData.totalCouponDiscount,
-        totalFinalAmount: reportData.totalFinalAmount,
-        error: null,
-        selectedFilter: selectedFilter,
-        startDate: startDate || '',
-        endDate: endDate || ''
-      });
-    }
   } catch (error) {
-    console.error('Error fetching sales report:', error);
-    res.status(500).send('Internal Server Error');
+      console.log(error);
+      res.status(500).send("Server Error");
   }
 };
-
-
 
 
 const downloadSalesReportPDF = async (req, res) => {
-  try {
-    const { filter, startDate, endDate } = req.query;
-    let matchCondition = {};
+    try {
+        const { filter, startDate, endDate } = req.query;
+        let query = {};
+console.log(req.query)
+        // Filter Logic
+        if (filter) {
+            const today = new Date();
+            switch (filter) {
+                case "daily":
+                    query.createdAt = {
+                        $gte: new Date(today.setHours(0, 0, 0, 0)),
+                        $lt: new Date(today.setHours(23, 59, 59, 999)),
+                    };
+                    break;
+                case "weekly":
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    query.createdAt = { $gte: weekAgo };
+                    break;
+                case "monthly":
+                    const monthAgo = new Date();
+                    monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    query.createdAt = { $gte: monthAgo };
+                    break;
+                case "custom":
+                    if (startDate && endDate) {
+                        query.createdAt = {
+                            $gte: new Date(startDate),
+                            $lte: new Date(endDate),
+                        };
+                    }
+                    break;
+            }
+        }
 
+        const orders = await Order.find(query).populate("userId").lean();
 
-    if (filter === 'daily') {
-      matchCondition.createdAt = { $gte: moment().startOf('day').toDate() };
-    } else if (filter === 'weekly') {
-      matchCondition.createdAt = { $gte: moment().startOf('week').toDate() };
-    } else if (filter === 'monthly') {
-      matchCondition.createdAt = { $gte: moment().startOf('month').toDate() };
-    } else if (filter === 'yearly') {
-      matchCondition.createdAt = { $gte: moment().startOf('year').toDate() };
-    } else if (filter === 'custom') {
-      matchCondition.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+        // Create PDF Document
+        const doc = new PDFDocument({
+            margin: 40,
+            size: "A4",
+            bufferPages: true,
+        });
+
+        const filePath = path.join(__dirname, "../../public/reports/salesReport.pdf");
+        const stream = fs.createWriteStream(filePath);
+        doc.pipe(stream);
+
+        // Styling Configuration
+        const styles = {
+            header: { fontSize: 20, color: "#b46e59" },
+            tableHeader: { fontSize: 10, font: "Helvetica-Bold" },
+            tableCell: { fontSize: 9, font: "Helvetica" },
+            footer: { fontSize: 8, font: "Helvetica" },
+        };
+
+        const generationTime = new Date().toLocaleString("en-US", {
+            dateStyle: "full",
+            timeStyle: "long",
+        });
+
+        // Header Section
+        doc.fontSize(styles.header.fontSize)
+            .fillColor(styles.header.color)
+            .text("Floragems Sales Report", { align: "center", underline: true })
+            .moveDown(0.5);
+
+        // Generation Time and Report Info
+        doc.fontSize(styles.tableCell.fontSize)
+            .fillColor("black")
+            .text(`Generated on: ${generationTime}`, { align: "center" })
+            .text(`Report Period: ${filter || "All Time"}`, { align: "center" });
+
+        if (startDate && endDate) {
+            doc.text(
+                `Date Range: ${new Date(startDate).toLocaleDateString()} - ${new Date(
+                    endDate
+                ).toLocaleDateString()}`,
+                { align: "center" }
+            );
+        }
+
+        doc.moveDown(1);
+
+        // Table Headers
+        const headers = [
+            "Order ID",
+            "User",
+            "Email",
+            "Total Price",
+            "Final Amount",
+            "Payment",
+            "Status",
+            "Date",
+        ];
+        const columnWidths = [70, 65, 110, 65, 65, 65, 65, 65];
+        const tableWidth = columnWidths.reduce((sum, width) => sum + width, 0);
+        const startX = (doc.page.width - tableWidth) / 2;
+        let y = doc.y;
+
+        // Add Footer Function
+        const addFooter = (doc) => {
+          const footerTop = doc.y + 20;
+          if (footerTop > doc.page.height - 40) {
+            doc.addPage();
+        }
+    
+        doc.text(`Page ${doc.bufferedPageRange().start + 1} of ${doc.bufferedPageRange().count}`, 40, footerTop + 12, {
+          align: "center",
+      });
+            doc.fontSize(styles.footer.fontSize)
+                .fillColor("#666666")
+                .text("Floragems | www.floragems.com | contact@floragems.com", 40, footerTop, {
+                    width: doc.page.width - 80,
+                    align: "center",
+                });
+
+            const pageNumber = doc.bufferedPageRange().start + 1;
+            doc.text(`Page ${pageNumber} of ${doc.bufferedPageRange().count}`, 40, footerTop + 12, {
+                align: "center",
+            });
+        };
+
+        // Draw Table Headers
+        doc.font(styles.tableHeader.font).fontSize(styles.tableHeader.fontSize);
+        let x = startX;
+        headers.forEach((header, i) => {
+            doc.text(header, x, y, {
+                width: columnWidths[i],
+                align: "center",
+            });
+            x += columnWidths[i];
+        });
+
+        // Header Separator
+        y += 12;
+        doc.moveTo(startX, y)
+            .lineTo(startX + tableWidth, y)
+            .strokeColor("#dddddd")
+            .stroke();
+        y += 5;
+
+        // Table Rows
+        doc.font(styles.tableCell.font).fontSize(styles.tableCell.fontSize);
+        orders.forEach((order) => {
+            if (y > doc.page.height - 90) {
+                addFooter(doc);
+                doc.addPage();
+                y = 40;
+            }
+
+            const row = [
+                order._id.toString().slice(-8),
+                order.userId?.name || "Guest",
+                order.userId?.email || "N/A",
+                `Rs${order.totalPrice.toFixed(2)}`,
+                `Rs${order.finalAmount.toFixed(2)}`,
+                order.paymentMethod,
+                order.orderStatus,
+                new Date(order.createdAt).toLocaleDateString(),
+            ];
+
+            x = startX;
+            row.forEach((text, i) => {
+                doc.text(text, x, y, {
+                    width: columnWidths[i],
+                    align: "center",
+                    lineBreak: false,
+                });
+                x += columnWidths[i];
+            });
+
+            y += 10; // Reduced spacing
+            doc.moveTo(startX, y)
+                .lineTo(startX + tableWidth, y)
+                .strokeColor("#dddddd")
+                .stroke();
+            y += 5;
+        });
+
+        // Summary Section
+        const totalAmount = orders.reduce((sum, order) => sum + order.finalAmount, 0);
+        const summaryBoxWidth = 200;
+        const summaryBoxX = (doc.page.width - summaryBoxWidth) / 2;
+
+        if (y > doc.page.height - 100) {
+            addFooter(doc);
+            doc.addPage();
+            y = 40;
+        }
+
+        doc.rect(summaryBoxX, y + 10, summaryBoxWidth, 50).stroke();
+        doc.fontSize(styles.tableHeader.fontSize)
+            .text("Summary", summaryBoxX, y + 20, { width: summaryBoxWidth, align: "center" })
+            .fontSize(styles.tableCell.fontSize)
+            .text(`Total Orders: ${orders.length}`, {
+                width: summaryBoxWidth,
+                align: "center",
+            })
+            .text(`Total Revenue: Rs${totalAmount.toFixed(2)}`, {
+                width: summaryBoxWidth,
+                align: "center",
+            });
+
+        // Final Footer
+        addFooter(doc);
+        doc.end();
+
+        stream.on("finish", () => {
+            const fileName = `Floragems_Sales_Report_${filter || "all"}_${new Date()
+                .toISOString()
+                .split("T")[0]}.pdf`;
+            res.download(filePath, fileName, (err) => {
+                if (err) console.error(err);
+                fs.unlinkSync(filePath);
+            });
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Error generating PDF");
     }
-
-
-    const salesReport = await Order.aggregate([
-      { $match: matchCondition },
-      {
-        $group: {
-          _id: null,
-          totalSales: { $sum: '$totalPrice' },
-          totalDiscount: { $sum: '$discount' },
-          totalFinalAmount: { $sum: '$finalAmount' },
-          totalOrders: { $sum: 1 },
-          totalCouponDiscount: { $sum: { $cond: [{ $eq: ['$couponApplied', true] }, '$discount', 0] } },
-        },
-      },
-    ]);
-
-    const reportData = salesReport[0];
-
-    if (!reportData) {
-      return res.status(404).send('No sales data found for the selected period.');
-    }
-
-    // Create PDF document definition
-    const docDefinition = {
-      content: [
-        { text: 'Sales Report', style: 'header' },
-        { text: `Period: ${filter}`, style: 'subheader' },
-        {
-          table: {
-            body: [
-              ['Total Sales', `₹${reportData.totalSales.toFixed(2)}`],
-              ['Total Orders', reportData.totalOrders],
-              ['Total Discount', `₹${reportData.totalDiscount.toFixed(2)}`],
-              ['Total Coupon Discount', `₹${reportData.totalCouponDiscount.toFixed(2)}`],
-              ['Total Final Amount', `₹${reportData.totalFinalAmount.toFixed(2)}`],
-            ],
-          },
-        },
-      ],
-      styles: {
-        header: { fontSize: 18, bold: true },
-        subheader: { fontSize: 14, italics: true },
-      },
-    };
-
-    // Create PDF document
-    const pdfDoc = pdfMake.createPdf(docDefinition);
-
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=sales_report.pdf');
-    pdfDoc.pipe(res);
-    pdfDoc.end();
-
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    res.status(500).send('Error generating PDF report.');
-  }
 };
 
+// Generate Excel Report
 const downloadSalesReportExcel = async (req, res) => {
   try {
-    const { filter, startDate, endDate } = req.query;
-    let matchCondition = {};
+      const { startDate, endDate, paymentMethod, orderStatus } = req.query;
+      let query = {};
+      if (startDate && endDate) {
+          query.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+      }
+      if (paymentMethod) query.paymentMethod = paymentMethod;
+      if (orderStatus) query.orderStatus = orderStatus;
 
+      const orders = await Order.find(query).populate("userId", "name email").sort({ createdAt: -1 });
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Sales Report");
 
-    if (filter === 'daily') {
-      matchCondition.createdAt = { $gte: moment().startOf('day').toDate() };
-    } else if (filter === 'weekly') {
-      matchCondition.createdAt = { $gte: moment().startOf('week').toDate() };
-    } else if (filter === 'monthly') {
-      matchCondition.createdAt = { $gte: moment().startOf('month').toDate() };
-    } else if (filter === 'yearly') {
-      matchCondition.createdAt = { $gte: moment().startOf('year').toDate() };
-    } else if (filter === 'custom') {
-      matchCondition.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
-    }
+      worksheet.columns = [
+          { header: "Order ID", key: "orderId", width: 20 },
+          { header: "User", key: "user", width: 25 },
+          { header: "Email", key: "email", width: 30 },
+          { header: "Total Price", key: "totalPrice", width: 15 },
+          { header: "Final Amount", key: "finalAmount", width: 15 },
+          { header: "Payment Method", key: "paymentMethod", width: 15 },
+          { header: "Order Status", key: "orderStatus", width: 15 },
+          { header: "Date", key: "date", width: 15 }
+      ];
 
+      orders.forEach(order => {
+          worksheet.addRow({
+              orderId: order._id,
+              user: order.userId?.name || "Guest",
+              email: order.userId?.email || "N/A",
+              totalPrice: `₹${order.totalPrice || 0}`,
+              finalAmount: `₹${order.finalAmount || 0}`,
+              paymentMethod: order.paymentMethod,
+              orderStatus: order.orderStatus,
+              date: new Date(order.createdAt).toLocaleDateString()
+          });
+      });
 
-    const salesReport = await Order.aggregate([
-      { $match: matchCondition },
-      {
-        $group: {
-          _id: null,
-          totalSales: { $sum: '$totalPrice' },
-          totalDiscount: { $sum: '$discount' },
-          totalFinalAmount: { $sum: '$finalAmount' },
-          totalOrders: { $sum: 1 },
-          totalCouponDiscount: { $sum: { $cond: [{ $eq: ['$couponApplied', true] }, '$discount', 0] } },
-        },
-      },
-    ]);
-
-    const reportData = salesReport[0];
-
-    if (!reportData) {
-      return res.status(404).send('No sales data found for the selected period.');
-    }
-
-    // Create Excel workbook
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Sales Report');
-
-
-    worksheet.addRow(['Total Sales', 'Total Orders', 'Total Discount', 'Total Coupon Discount', 'Total Final Amount']);
-
-
-    worksheet.addRow([
-      `₹${reportData.totalSales.toFixed(2)}`,
-      reportData.totalOrders,
-      `₹${reportData.totalDiscount.toFixed(2)}`,
-      `₹${reportData.totalCouponDiscount.toFixed(2)}`,
-      `₹${reportData.totalFinalAmount.toFixed(2)}`
-    ]);
-
-
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=sales_report.xlsx');
-
-    await workbook.xlsx.write(res);
-    res.end();
-
+      const timestamp = new Date().getTime();
+      const filePath = path.join(__dirname, `../public/reports/sales_report_${timestamp}.xlsx`);
+      await workbook.xlsx.writeFile(filePath);
+      res.download(filePath);
   } catch (error) {
-    console.error('Error generating Excel:', error);
-    res.status(500).send('Error generating Excel report.');
+      console.error("Error generating Excel:", error);
+      res.status(500).json({ success: false, message: "Error generating Excel" });
   }
 };
-
 const changeOrderStatus = async (req, res) => {
   try {
     const { orderId, status, itemId } = req.query;
