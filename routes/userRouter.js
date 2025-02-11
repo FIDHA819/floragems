@@ -13,7 +13,7 @@ const contactController=require("../controllers/user/contactController")
 const handleUndefinedRoutes = (req, res) => {
   res.status(404).render('user/page-404', { message: 'Page Not Found' });
 };
-userRouter.use(handleUndefinedRoutes);
+router.use(handleUndefinedRoutes);
 
 
 router.get("/", userAuth,userController.loadHomePage);
