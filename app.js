@@ -62,6 +62,11 @@ app.use((req, res, next) => {
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
+const handleUndefinedRoutes = (req, res) => {
+    res.status(404).render('user/page-404', { message: 'Page Not Found' });
+};
+userRouter.use(handleUndefinedRoutes);
+adminRouterRouter.use(handleUndefinedRoutes);
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
