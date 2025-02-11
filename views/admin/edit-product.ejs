@@ -1,8 +1,195 @@
 <%- include("../../views/partials/admin/header") %>
 <head>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+</head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+    }
 
-   <style>
+    .content-main {
+        padding: 10px;
+        max-width: 100%;
+    }
+
+    .content-header h2 {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    /* Adjust main container widths */
+    .col-9 {
+        width: 100%;
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+
+    .col-lg-6 {
+        width: 100%;
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+
+    /* Preserve your existing styles */
+    .card {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    /* Adjust form layout */
+    .row {
+        margin: 0;
+        width: 100%;
+    }
+
+    .col-lg-4 {
+        padding: 0 10px;
+    }
+
+   .form-label {
+       font-weight: bold;
+       color: #555;
+   }
+
+   .form-control {
+       border-radius: 8px;
+       padding: 10px;
+       font-size: 14px;
+       font-size: 14px;
+       border: 1px solid #ccc;
+       transition: border-color 0.3s;
+   }
+
+   .form-control:focus {
+       border-color: #007bff;
+       box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+   }
+
+   .form-select {
+       border-radius: 8px;
+       padding: 10px;
+       font-size: 14px;
+       border: 1px solid #ccc;
+       transition: border-color 0.3s;
+   }
+
+   .btn {
+       background-color: #007bff;
+       color: #fff;
+       font-size: 16px;
+       font-weight: bold;
+       border-radius: 8px;
+       padding: 10px 20px;
+       transition: background-color 0.3s;
+   }
+
+   .btn:hover {
+       background-color: #0056b3;
+   }
+
+   .error-message {
+       color: red;
+       font-size: 12px;
+       margin-top: 5px;
+   }
+
+   .thumbnails-container {
+       display: flex;
+       flex-wrap: wrap;
+       gap: 10px;
+   }
+
+   .thumbnail {
+       width: 80px;
+       height: 80px;
+       overflow: hidden;
+       border: 1px solid #ccc;
+       border-radius: 8px;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       background-color: #f5f5f5;
+   }
+
+   .thumbnail img {
+       max-width: 100%;
+       max-height: 100%;
+   }
+
+   .image-cropper {
+       border: hidden;
+       border-radius: 8px;
+       padding: 5px;
+       position: relative;
+       margin-top: 10px;
+   }
+
+   #addedImagesContainer img {
+       border: 1px solid #ddd;
+       border-radius: 5px;
+       padding: 5px;
+       width: 100%;
+   }
+
+   #imgView1, #imgView2, #imgView3, #imgView4 {
+       display: block;
+       max-width: 100%;
+       max-height: 200px;
+       margin: 10px auto;
+   }
+
+   #saveButton1, #saveButton2, #saveButton3, #saveButton4 {
+       margin-top: 10px;
+       font-size: 12px;
+   }
+
+   textarea {
+       resize: none;
+   }
+
+   select {
+       cursor: pointer;
+   }
+
+   button[type="submit"], .btn-md {
+       background-color: #28a745;
+       color: white;
+       border: none;
+       padding: 10px 20px;
+       border-radius: 8px;
+       font-size: 16px;
+   }
+
+   button[type="submit"]:hover, .btn-md:hover {
+       background-color: #218838;
+   }
+
+   button[type="button"] {
+       background-color: #6c757d;
+       color: white;
+       border: none;
+       padding: 10px 20px;
+       border-radius: 8px;
+       font-size: 16px;
+   }
+
+   button[type="button"]:hover {
+       background-color: #5a6268;
+   }
+
+   .form-row {
+       margin-bottom: 20px;
+   }
+
        .thumbnails-container {
            display: flex;
            overflow-x: auto;
