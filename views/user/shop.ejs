@@ -264,6 +264,16 @@
     background-color: #ffffff; 
     border-radius: 0; 
 }
+.pink-button {
+    color: #ff6b9b;
+    border-color: #ff6b9b;
+}
+
+.pink-button:hover {
+    background-color: #ff6b9b;
+    color: white;
+}
+
 
 </style>
 </head>         
@@ -446,9 +456,11 @@
             </nav>
       <!-- Sorting Dropdown -->
       <div class="dropdown mb-3">
-        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="sortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button class="btn btn-outline-danger dropdown-toggle w-100" type="button" id="sortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Sort by
         </button>
+        
+        
         <div class="dropdown-menu w-100" aria-labelledby="sortDropdown">
             <a class="dropdown-item" href="/filtered?sort=latest">Latest</a>
             <a class="dropdown-item" href="/filtered?sort=priceAsc">Price: Low to High</a>

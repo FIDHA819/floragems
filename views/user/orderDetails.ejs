@@ -419,7 +419,7 @@
                   <h4 class="product-title"><%= item.product.productName %></h4>
                   <p class="product-description"><%= item.product.description %></p>
                   <p class="product-price">₹<%= (item.price * item.quantity).toFixed(2) %></p>
-                  <p>Payment Status: <%= item.paymentStatus %></p>
+                  <p>Payment Status: <%= orders.paymentStatus %></p>
                   <p>Order Status: <%= item.status %></p>
                   <p>Quantity: <%= item.quantity %></p>
                  <div class="product-actions">

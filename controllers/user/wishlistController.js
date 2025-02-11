@@ -38,7 +38,7 @@ const addToWishlist = async (req, res) => {
           return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      // Fetch the user from the database
+ 
       const user = await User.findById(userId);
 
       // Check if the product is already in the wishlist
@@ -46,7 +46,7 @@ const addToWishlist = async (req, res) => {
           return res.status(200).json({ status: 'already', message: "Product already in wishlist" });
       }
 
-      // Add the product to the wishlist
+  
       user.wishlist.push(productId);
       await user.save();
 

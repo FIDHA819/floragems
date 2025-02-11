@@ -1,252 +1,105 @@
 <%- include("../../views/partials/admin/header") %>
+
 <style>
-  .pagination {
-    display: flex;
-    justify-content: center;
-  }
-
-  .btn {
-    /* Add your button styling here */
-    margin: 0 5px;
-    padding: 5px 10px;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    text-decoration: none;
-    color: #333;
-  }
-
-  .active {
-    /* Add styles for the active page */
-
-    color: #fff;
-  }
-
-  .btn:hover {
-    /* Add styles for button hover state */
-    background-color: #ddd;
-  }
-
-  .table-spacing th,
-  .table-spacing td {
-    padding-left: 80px; /* Adjust the value as needed for the desired spacing */
-  }
-  
-  /* General Styles */
-  .content-header {
-    margin-bottom: 20px;
-  }
-
-  .card-header {
-    background-color: #f7f7f7;
-    padding: 20px;
-  }
-
-  .card-title {
-    font-size: 24px;
-    color: #333;
-  }
-
-  .btn {
-    padding: 8px 15px;
-    background-color: #b46e59cc;
-    border: 1px solid #b46e59cc;
-    color: white;
-    text-decoration: none;
-    margin: 5px;
-    transition: background-color 0.3s;
-  }
-
-  .btn:hover {
-    background-color: #a35c4c;
-  }
-
-  .btn-primary {
-    background-color: #b46e59cc;
-    border: 1px solid #b46e59cc;
-  }
-
-  .btn-primary:hover {
-    background-color: #a35c4c;
-  }
-
-  .table-spacing th,
-  .table-spacing td {
-    padding-left: 80px;
-  }
-
   .pagination {
     display: flex;
     justify-content: center;
     margin-top: 20px;
   }
 
-  .pagination button {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    padding: 5px 10px;
+  .pagination a {
     margin: 0 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-  .pagination button:hover {
-    background-color: #ddd;
+    padding: 8px 15px;
+    text-decoration: none;
+    border: 1px solid #b46e59cc;
+    color: #b46e59cc;
+    border-radius: 5px;
   }
 
   .pagination .active {
     background-color: #b46e59cc;
     color: white;
-    border-color: #b46e59cc;
   }
 
-  .table-hover {
-    width: 100%;
-    border-collapse: collapse;
+  .pagination a:hover {
+    background-color: #a35c4c;
+    color: white;
   }
 
-  .table-hover th,
-  .table-hover td {
-    padding: 10px;
+  .table-spacing th,
+  .table-spacing td {
+    padding: 12px 15px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
   }
 
-  .table-hover th {
+  .card-header {
     background-color: #f7f7f7;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
   }
 
-  .table-hover tr:hover {
-    background-color: #f1f1f1;
+  .btn-primary {
+    background-color: #b46e59cc;
+    border: none;
   }
 
-  .table-hover td {
-    color: #333;
-  }
-
-  .table-hover .text-end {
-    text-align: right;
-  }
-
-  .table-hover .active {
-    background-color: #f7f7f7;
-  }
-
-  .form-select {
-    width: 100%;
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-  }
-
-  .form-select:focus {
-    border-color: #b46e59cc;
+  .btn-primary:hover {
+    background-color: #a35c4c;
   }
 
   .form-control {
-    width: 100%;
-    padding: 8px;
     border-radius: 5px;
-    border: 1px solid #ccc;
   }
 
-  .form-control:focus {
-    border-color: #b46e59cc;
-  }
-
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-
-  .right {
-    margin-top: 30px;
-  }
-
-  .d-flex {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .ms-auto {
-    margin-left: auto;
-  }
-
-  .text-md-end {
-    text-align: right;
-  }
-
-  .card {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-  }
-
-  .mb-4 {
-    margin-bottom: 1.5rem;
-  }
-
-  .mb-2 {
-    margin-bottom: 1rem;
-  }
   .alert-danger {
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
-  color: #721c24;
-  padding: 1.5rem;
-  border-radius: 5px;
-}
-
-.alert-dismissible .close {
-  color: #721c24;
-  font-size: 1.5rem;
-}
-
-
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+    padding: 1.2rem;
+    border-radius: 5px;
+  }
 </style>
+
 <div class="container mt-4">
-  <h2 class="text-center">
-    Sales Report
-    <small class="d-block mt-2">
-      <strong>Filter:</strong> <%= selectedFilter.charAt(0).toUpperCase() + selectedFilter.slice(1) %>
-    </small>
-  </h2>
+    <h2>Sales Report</h2>
 
-  <% if (error) { %>
-    <!-- Display error message -->
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      <strong>Error:</strong> <%= error %>
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
+    <!-- Filters Form -->
+    <form id="salesReportForm" action="/admin/salesReport" method="GET">
+      <div class="row mb-3">
+          <div class="col-md-3">
+              <label>Filter By:</label>
+              <select id="filter" name="filter" class="form-control">
+                  <option value="daily" <%= filter === 'daily' ? 'selected' : '' %>>Daily</option>
+                  <option value="weekly" <%= filter === 'weekly' ? 'selected' : '' %>>Weekly</option>
+                  <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>Monthly</option>
+                  <option value="yearly" <%= filter === 'yearly' ? 'selected' : '' %>>Yearly</option>
+                  <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Date Range</option>
+              </select>
+          </div>
+          <div class="col-md-3 custom-date <%= filter === 'custom' ? '' : 'd-none' %>">
+              <label>Start Date:</label>
+              <input type="date" id="startDate" name="startDate" value="<%= startDate || '' %>" class="form-control">
+          </div>
+          <div class="col-md-3 custom-date <%= filter === 'custom' ? '' : 'd-none' %>">
+              <label>End Date:</label>
+              <input type="date" id="endDate" name="endDate" value="<%= endDate || '' %>" class="form-control">
+          </div>
+          <div class="col-md-3 mt-4">
+              <button type="submit" class="btn btn-primary">Generate Report</button>
+          </div>
+      </div>
+  </form>
+  
+
+    <!-- Download Buttons -->
+    <div class="mb-3">
+      <button id="downloadPdf" class="btn btn-danger" onclick="downloadPDF()">Download PDF</button>
+        <button id="downloadExcel" class="btn btn-success">Download Excel</button>
     </div>
-  <% } %>
 
-  <!-- Filter Options -->
-  <div class="filter-options mb-4">
-    <label for="filterSelect">Select Filter:</label>
-    <select id="filterSelect" class="form-control">
-      <option value="daily" <%= selectedFilter === 'daily' ? 'selected' : '' %>>Daily</option>
-      <option value="weekly" <%= selectedFilter === 'weekly' ? 'selected' : '' %>>Weekly</option>
-      <option value="monthly" <%= selectedFilter === 'monthly' ? 'selected' : '' %>>Monthly</option>
-      <option value="yearly" <%= selectedFilter === 'yearly' ? 'selected' : '' %>>Yearly</option>
-      <option value="custom" <%= selectedFilter === 'custom' ? 'selected' : '' %>>Custom Date Range</option>
-    </select>
-
-    <div id="customDateRange" class="<%= selectedFilter === 'custom' ? '' : 'd-none' %> mt-3">
-      <label>Start Date:</label>
-      <input type="date" id="startDate" class="form-control" value="<%= startDate || '' %>" max="<%= new Date().toISOString().split('T')[0] %>">
-      <label>End Date:</label>
-      <input type="date" id="endDate" class="form-control" value="<%= endDate || '' %>" max="<%= new Date().toISOString().split('T')[0] %>">
-    </div>
-
-    <button id="generateReportBtn" class="btn btn-primary mt-3">Generate Report</button>
-  </div>
-
-  <!-- Report Card -->
-  <% if (!error) { %>
-    <div id="salesReportCard" class="card mt-4">
+    <!-- Report Summary -->
+    <div class="card mt-4">
       <div class="card-body">
         <h5 class="card-title">Report Summary</h5>
         <p>Total Sales: ₹<%= totalSales.toFixed(2) %></p>
@@ -256,52 +109,97 @@
         <p>Total Final Amount: ₹<%= totalFinalAmount.toFixed(2) %></p>
       </div>
     </div>
-  <% } %>
 
-  <!-- Download Options -->
-  <% if (!error) { %>
-    <div class="mt-4">
-      <button id="downloadPdf" class="btn btn-primary">Download PDF</button>
-      <button id="downloadExcel" class="btn btn-secondary">Download Excel</button>
-    </div>
-  <% } %>
+    <!-- Sales Report Table -->
+    <table class="table table-hover mt-3">
+        <thead class="table-light">
+            <tr>
+                <th>Order ID</th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Total Price</th>
+                <th>Final Amount</th>
+                <th>Payment Method</th>
+                <th>Order Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (orders.length > 0) { %>
+                <% orders.forEach(order => { %>
+                    <tr>
+                        <td><%= order._id %></td>
+                        <td><%= order.userId ? order.userId.name : "Guest" %></td>
+                        <td><%= order.userId ? order.userId.email : "N/A" %></td>
+                        <td>₹<%= order.totalPrice.toFixed(2) %></td>
+                        <td>₹<%= order.finalAmount.toFixed(2) %></td>
+                        <td><%= order.paymentMethod %></td>
+                        <td><%= order.orderStatus %></td>
+                        <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="8" class="text-center">No Orders Found</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <% if (currentPage > 1) { %>
+          <a href="?page=<%= currentPage - 1 %>&filter=<%= filter %>&startDate=<%= startDate %>&endDate=<%= endDate %>">Previous</a>
+      <% } %>
+  
+      <% for (let i = 1; i <= totalPages; i++) { %>
+          <a href="?page=<%= i %>&filter=<%= filter %>&startDate=<%= startDate %>&endDate=<%= endDate %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+      <% } %>
+  
+      <% if (currentPage < totalPages) { %>
+          <a href="?page=<%= currentPage + 1 %>&filter=<%= filter %>&startDate=<%= startDate %>&endDate=<%= endDate %>">Next</a>
+      <% } %>
+  </div>
+  
 </div>
 
 <script>
-  document.getElementById('filterSelect').addEventListener('change', function () {
-    if (this.value === 'custom') {
-      document.getElementById('customDateRange').classList.remove('d-none');
-    } else {
-      document.getElementById('customDateRange').classList.add('d-none');
+    document.addEventListener("DOMContentLoaded", function () {
+        // Restrict future dates
+        let today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').max = today;
+        document.getElementById('endDate').min = today;
+
+        // Disable end date before start date
+        document.getElementById('startDate').addEventListener('change', function () {
+            document.getElementById('endDate').min = this.value;
+        });
+
+        // Show custom date fields only if custom filter is selected
+        document.getElementById('filter').addEventListener('change', function () {
+            if (this.value === 'custom') {
+                document.querySelectorAll('.custom-date').forEach(el => el.classList.remove('d-none'));
+            } else {
+                document.querySelectorAll('.custom-date').forEach(el => el.classList.add('d-none'));
+            }
+        });
+
+        // Auto-set "Daily" filter when both dates are the same
+        document.getElementById('endDate').addEventListener('change', function () {
+            if (this.value === document.getElementById('startDate').value) {
+                document.getElementById('filter').value = 'daily';
+            }
+        });
+    });
+    function downloadPDF() {
+        let filter = document.getElementById('filter').value;
+        let startDate = document.getElementById('startDate').value;
+        let endDate = document.getElementById('endDate').value;
+        
+        let url = `/admin//download-sales-report-pdf?filter=${filter}&startDate=${startDate}&endDate=${endDate}`;
+        
+        window.open(url, '_blank');
     }
-  });
-
-  document.getElementById('generateReportBtn').addEventListener('click', function () {
-    const filter = document.getElementById('filterSelect').value;
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-
-    const queryParams = new URLSearchParams({ filter, startDate, endDate }).toString();
-    window.location.href = `/admin/salesReport?${queryParams}`;
-  });
-// Frontend trigger to download the PDF
-document.getElementById('downloadPdf').addEventListener('click', function () {
-  const filter = document.getElementById('filterSelect').value;
-  const startDate = document.getElementById('startDate').value;
-  const endDate = document.getElementById('endDate').value;
-
-  const queryParams = new URLSearchParams({ filter, startDate, endDate, format: 'pdf' }).toString();
-  window.location.href = `/admin/salesReport?${queryParams}`;
-});
-
-  document.getElementById('downloadExcel').addEventListener('click', function () {
-    const filter = document.getElementById('filterSelect').value;
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-
-    const queryParams = new URLSearchParams({ filter, startDate, endDate, format: 'excel' }).toString();
-    window.location.href = `/admin/salesReport?${queryParams}`;
-  });
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

@@ -147,7 +147,7 @@
                 <td><%= item.quantity %></td>
                 <td><%= item.price %></td>
                 <td><%= item.status %></td>
-                <td><%= item.paymentStatus %></td>
+                <td><%= orders.paymentStatus %></td>
                 <td>
                   <% if (item.status === 'Return Requested') { %>
                     <button class="btn btn-sm btn-success" onclick="updateItemStatus('<%= item._id %>', 'Returned', '<%= orders.orderId %>', '<%= item.price %>', '<%= orders.userId._id %>')">
@@ -207,7 +207,9 @@
   </div>
 </div>
 
-    <!-- Order Action Buttons -->
+  <!-- Order Action Buttons -->
+<% if (orders.paymentMethod === "razorpay" || orders.paymentMethod === "wallet") { %>
+  <% if (orders.paymentStatus === "Confirmed") { %> 
     <div class="card card-custom mt-3">
       <div class="card-header">
         <h5 class="card-title">Order Actions</h5>
@@ -229,7 +231,31 @@
         </div>
       </div>
     </div>
-    
+  <% } %>
+<% } else if (orders.paymentMethod === "cod") { %>
+  <div class="card card-custom mt-3">
+    <div class="card-header">
+      <h5 class="card-title">Order Actions</h5>
+    </div>
+    <div class="card-body">
+      <div class="d-flex justify-content-start">
+        <% if (orders.orderStatus === "Pending") { %>
+          <button class="btn btn-primary mr-2" onclick="changeOrderStatus('<%= orders.orderId %>', 'Processing')">Start Processing</button>
+        <% } %>
+        <% if (orders.orderStatus === "Processing") { %>
+          <button class="btn btn-warning mr-2" onclick="changeOrderStatus('<%= orders.orderId %>', 'Shipped')">Mark as Shipped</button>
+        <% } %>
+        <% if (orders.orderStatus === "Shipped") { %>
+          <button class="btn btn-success mr-2" onclick="changeOrderStatus('<%= orders.orderId %>', 'Delivered')">Mark as Delivered</button>
+        <% } %>
+        <% if (orders.orderStatus === "Return Pending") { %>
+          <button class="btn btn-success mr-2" onclick="processReturnAndRefund('<%= orders.orderId %>')">Mark as Returned</button>
+        <% } %>
+      </div>
+    </div>
+  </div>
+<% } %>
+
 
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>

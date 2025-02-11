@@ -93,36 +93,45 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
 <script>
-  function toggleBlock(productId, action) {
-      $.ajax({
-          url: action === 'block' ? "/admin/blockProduct" : "/admin/unblockProduct",
-          method: "GET",
-          data: { id: productId },
-          success: (response) => {
-              if (response.status) {
-                  location.reload();  // Reload to show the updated status
-              } else {
-                  Swal.fire("Error", "Failed to update product status", "error");
-              }
-          },
-          error: (error) => {
-              Swal.fire("Error", "An error occurred", "error");
-          }
-      });
-  }
-
-  async function addOffer(productId) {
+function toggleBlock(productId, action) {
+    $.ajax({
+        url: action === 'block' ? "/admin/blockProduct" : "/admin/unblockProduct",
+        method: "GET",
+        data: { id: productId },
+        success: (response) => {
+            if (response.status) {
+                let button = $(`button[onclick="toggleBlock('${productId}', '${action}')"]`);
+                
+                if (action === 'block') {
+                    button.removeClass('btn-danger').addClass('btn-success');
+                    button.attr("onclick", `toggleBlock('${productId}', 'unblock')`);
+                    button.html('<a href="#" class="text-white" style="text-decoration: none;">Unblock</a>');
+                } else {
+                    button.removeClass('btn-success').addClass('btn-danger');
+                    button.attr("onclick", `toggleBlock('${productId}', 'block')`);
+                    button.html('<a href="#" class="text-white" style="text-decoration: none;">Block</a>');
+                }
+            } else {
+                Swal.fire("Error", "Failed to update product status", "error");
+            }
+        },
+        error: () => {
+            Swal.fire("Error", "An error occurred", "error");
+        }
+    });
+}
+async function addOffer(productId) {
     const { value: percentage } = await Swal.fire({
         title: "Offer Percentage",
         input: "number",
-        inputLabel: "Percentage",
+        inputLabel: "Percentage (1-99)",
         inputPlaceholder: "Enter percentage (%)",
-        inputAttributes: { min: 1, max: 100, step: 1 },
+        inputAttributes: { min: 1, max: 99, step: 1 },
         showCancelButton: true,
     });
 
-    if (!percentage || percentage < 1 || percentage > 100) {
-        Swal.fire("Invalid Input", "Please enter a valid percentage between 1 and 100.", "error");
+    if (!percentage || percentage < 1 || percentage > 99) {
+        Swal.fire("Invalid Input", "Please enter a valid percentage between 1 and 99.", "error");
         return;
     }
 
@@ -142,18 +151,23 @@
         return;
     }
 
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split("T")[0];
+
     const { value: validUntil } = await Swal.fire({
         title: "Offer Validity",
         input: "text",
         inputLabel: "Valid Until (YYYY-MM-DD)",
-        inputPlaceholder: "Enter expiry date",
+        inputPlaceholder: `Enter expiry date (Min: ${today})`,
         showCancelButton: true,
+        inputValidator: (value) => {
+            if (!value) return "Please enter a date!";
+            if (isNaN(new Date(value).getTime())) return "Invalid date format! Use YYYY-MM-DD.";
+            if (value < today) return "You cannot select a past date!";
+        },
     });
 
-    if (!validUntil || isNaN(new Date(validUntil).getTime())) {
-        Swal.fire("Invalid Input", "Please enter a valid date in YYYY-MM-DD format.", "error");
-        return;
-    }
+    if (!validUntil) return;
 
     $.ajax({
         url: "/admin/addProductOffer",
@@ -171,6 +185,7 @@
         },
     });
 }
+
 function removeOffer(productId) {
     Swal.fire({
         title: "Remove Offer",

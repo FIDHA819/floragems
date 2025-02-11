@@ -144,27 +144,25 @@ const removeCategoryOffer = async (req, res) => {
   }
 };
 
-const listCategory = async (req, res) => {
+const listCategory =async (req, res) => {
   try {
-    const id = req.query.id;
-    await Category.updateOne({ _id: id }, { $set: { isListed: true } });
-    res.redirect("/admin/category");
+      const categoryId = req.body.categoryId;
+      await Category.findByIdAndUpdate(categoryId, { isListed: true });
+      res.json({ success: true });
   } catch (error) {
-    console.error("Error listing category:", error);
-    res.redirect("/pageerror");
+      res.json({ success: false, message: "Failed to list category" });
   }
-};
+}
 
-const unlistCategory = async (req, res) => {
+const unlistCategory =  async (req, res) => {
   try {
-    const id = req.query.id;
-    await Category.updateOne({ _id: id }, { $set: { isListed: false } });
-    res.redirect("/admin/category");
+      const categoryId = req.body.categoryId;
+      await Category.findByIdAndUpdate(categoryId, { isListed: false });
+      res.json({ success: true });
   } catch (error) {
-    console.error("Error unlisting category:", error);
-    res.redirect("/pageerror");
+      res.json({ success: false, message: "Failed to unlist category" });
   }
-};
+}
 
 const getEditCategory = async (req, res) => {
   try {

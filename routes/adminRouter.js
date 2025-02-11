@@ -56,8 +56,8 @@ router.get("/category",adminAuth,categoryController.categoryInfo);
 router.post("/addCategory",adminAuth, uploads.single("image"),categoryController.addCategory);
 router.post("/addCategoryOffer",adminAuth,categoryController.addCategoryOffer);
 router.post("/removeCategoryOffer", adminAuth,categoryController.removeCategoryOffer);
-router.get("/listCategory",adminAuth,categoryController.listCategory);
-router.get("/unlistCategory",adminAuth,categoryController.unlistCategory);
+router.post("/listCategory",adminAuth,categoryController.listCategory);
+router.post("/unlistCategory",adminAuth,categoryController.unlistCategory);
 router.get("/editCategory/:id",adminAuth,categoryController.getEditCategory);
 router.post("/editCategory/:id",adminAuth, uploads.single("image"),categoryController.editCategory);
 

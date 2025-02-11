@@ -29,14 +29,13 @@ const login = async (req, res) => {
       return res.render("admin/admin-login", { message: "Invalid credentials" });
     }
 
-    // Check if the password matches
+    
     const passwordMatch = await bcrypt.compare(password, admin.password);
     if (!passwordMatch) {
       console.log("Incorrect password");
       return res.render("admin/admin-login", { message: "Invalid credentials" });
     }
 
-    // Set admin session and redirect to dashboard
     req.session.admin = true;
     console.log("Admin logged in successfully");
     return res.redirect("/admin/dashboard");

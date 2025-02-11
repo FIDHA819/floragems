@@ -10,6 +10,7 @@ const Brand=require("../../models/brandSchema")
 const Banner=require("../../models/bannerSchema")
 
 
+
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -43,7 +44,11 @@ async function sendVerificationEmail(email, otp) {
       return false;
     }
 
+<<<<<<< HEAD
     console.log(`📩 Sending OTP to: ${email}`); // Debugging line
+=======
+    console.log(`📩 Sending OTP to: ${email}`); 
+>>>>>>> c057489 (mess)
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -115,9 +120,9 @@ const loadHomePage = async (req, res) => {
 // Signup Page Controller
 const loadSignup = async (req, res) => {
   try {
-    const message = req.session.message || null; // Retrieve message from session, if available
-    req.session.message = null; // Clear the session message after fetching it
-    return res.render("user/signup", { message }); // Pass message to the view
+    const message = req.session.message || null; 
+    req.session.message = null; 
+    return res.render("user/signup", { message });
   } catch (error) {
     console.error("Signup page not loading:", error);
     res.status(500).send("Server error: Unable to load signup page");
@@ -146,7 +151,6 @@ const signup = async (req, res) => {
     // Generate a referral code for the new user
     const newReferralCode = generateReferralCode();
 
-    // Check if referral code is provided and valid
     let referrer = null;
     if (referralCode) {
       referrer = await User.findOne({ referralCode });
@@ -173,7 +177,7 @@ const signup = async (req, res) => {
     // Save the session data
     req.session.userOtp = otp;
     req.session.userData = { name, email, password, phone, referralCode: newReferralCode };
-    req.session.referrer = referrer; // Save referrer information if available
+    req.session.referrer = referrer; 
     req.session.otpExpiration = otpExpiration;
     console.log("Generated otp:",otp)
 
@@ -185,7 +189,7 @@ const signup = async (req, res) => {
   }
 };
 
-// Function to generate a unique referral code (simple example)
+
 const generateReferralCode = () => {
   return Math.random().toString(36).substr(2, 8).toUpperCase();
 };
@@ -298,10 +302,10 @@ const createWalletTransaction = async (userId, amount, type, description) => {
       amount,
       type,
       description,
-      source: "Referral", // Source is Referral for this case
+      source: "Referral",
     });
 
-    // Save the transaction to the database
+   
     await transaction.save();
     console.log("Wallet transaction saved:", transaction);
   } catch (error) {
@@ -310,7 +314,7 @@ const createWalletTransaction = async (userId, amount, type, description) => {
 };
 
 
-// Password Hashing Function
+
 const securePassword = async (password) => {
   try {
     const passwordHash = await bcrypt.hash(password, 10);
@@ -360,22 +364,22 @@ const securePassword = async (password) => {
     const loadLogin = async (req, res) => {
       try {
         if (!req.session.user) {
-          const message = req.session.message || null; // Retrieve message from session
-          req.session.message = null; // Clear session message after fetching
-          return res.render("user/login", { message }); // Pass message to the view
+          const message = req.session.message || null; 
+          req.session.message = null; 
+          return res.render("user/login", { message });
         } else {
-          return res.redirect("/"); // Redirect to home page if user is already logged in
+          return res.redirect("/"); 
         }
       } catch (error) {
-        console.error("Error loading login page:", error); // Log the error for debugging
-        return res.redirect("/page-404"); // Redirect to a custom 404 page
+        console.error("Error loading login page:", error); 
+        return res.redirect("/page-404"); 
       }
     };
     
 const loadBlockedPage = async (req, res) => {
   try {
-    // Render a page indicating the user is blocked
-    res.render("user/blocked"); // Create this view in your 'views/user' folder
+   
+    res.render("user/blocked"); 
   } catch (error) {
     console.error("Error rendering blocked page:", error);
     res.status(500).send("Error rendering blocked page");
@@ -397,7 +401,7 @@ const login = async (req, res) => {
 
       if (findUser.isBlocked) {
         console.log("User is blocked");
-        return res.redirect("/blocked"); // Redirect to the blocked page
+        return res.redirect("/blocked"); 
       }
       const passwordMatch = await bcrypt.compare(password, findUser.password);
       if (!passwordMatch) {
@@ -405,14 +409,13 @@ const login = async (req, res) => {
           return res.render("user/login", { message: "Incorrect Password" });
       }
 
-      // Store the full user object (or relevant properties) in the session
       req.session.user = {
           _id: findUser._id,
           name: findUser.name,
           email: findUser.email,
       };
 
-      console.log("Session Set for User:", req.session.user); // Log session data
+      console.log("Session Set for User:", req.session.user); 
 
       res.redirect("/");
   } catch (error) {

@@ -3,16 +3,26 @@ const mongoose = require("mongoose")
 
 const loadCoupon = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1; // Get current page, default is 1
+        const limit = 5; // Coupons per page
+        const skip = (page - 1) * limit;
 
+        const totalCoupons = await Coupon.countDocuments(); // Total coupon count
+        const totalPages = Math.ceil(totalCoupons / limit);
 
-        const findCoupons = await Coupon.find({});
-        return res.render("admin/coupon", { coupons: findCoupons })
+        const findCoupons = await Coupon.find({})
+            .skip(skip)
+            .limit(limit);
+
+        return res.render("admin/coupon", {
+            coupons: findCoupons,
+            currentPage: page,
+            totalPages: totalPages,
+        });
     } catch (error) {
-        return res.redirect("/pageerror")
-
-
+        return res.redirect("/pageerror");
     }
-}
+};
 
 
 const createCoupon = async (req, res) => {

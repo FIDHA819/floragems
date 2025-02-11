@@ -425,7 +425,16 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 
-    </script>
-    
+
+  (function () {
+    if (window.history && window.history.pushState) {
+      window.history.pushState(null, null, document.URL);
+      window.addEventListener("popstate", function () {
+        window.history.pushState(null, null, document.URL);
+      });
+    }
+  })();
+</script>
+
 </body>
 </html>

@@ -120,20 +120,19 @@
                     </td>
                     <td>
                       <% if (category.isListed) { %>
-                        <button class="btn btn-danger" style="width: 70px">
-                          <a href="/admin/unlistCategory?id=<%= category._id %>" class="text-white">Unlist</a>
+                        <button class="btn btn-danger list-toggle-btn" style="width: 70px" data-id="<%= category._id %>" data-action="unlist">
+                          Unlist
                         </button>
                       <% } else { %>
-                        <button class="btn btn-success" style="width: 70px">
-                          <a href="/admin/listCategory?id=<%= category._id %>" class="text-white">List</a>
+                        <button class="btn btn-success list-toggle-btn" style="width: 70px" data-id="<%= category._id %>" data-action="list">
+                          List
                         </button>
                       <% } %>
                     </td>
                     <td class="text-start">
                       <a href="/admin/editCategory/<%= category._id %>" class="btn btn-info text-white">Edit</a>
-
                     </td>
-                  </tr>
+                                      </tr>
                   <% }) %>
                 </tbody>
               </table>
@@ -291,6 +290,50 @@ function removeCategoryOffer(categoryId) {
         }
     });
 }
+$(document).ready(function () {
+  $(".list-toggle-btn").click(function () {
+    const categoryId = $(this).data("id");
+    const action = $(this).data("action");
+    
+    Swal.fire({
+      title: action === "list" ? "List Category?" : "Unlist Category?",
+      text: "Are you sure you want to " + action + " this category?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, " + action,
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $.ajax({
+          url: `/admin/${action}Category`,
+          method: "POST",
+          data: { categoryId },
+          success: function (response) {
+            if (response.success) {
+              Swal.fire("Success", `Category ${action}ed successfully!`, "success");
+              
+              // Update the UI without reload
+              const button = $(`button[data-id="${categoryId}"]`);
+              if (action === "list") {
+                button.text("Unlist").removeClass("btn-success").addClass("btn-danger").data("action", "unlist");
+                button.closest("tr").find(".badge").removeClass("alert-danger").addClass("alert-success").text("Listed");
+              } else {
+                button.text("List").removeClass("btn-danger").addClass("btn-success").data("action", "list");
+                button.closest("tr").find(".badge").removeClass("alert-success").addClass("alert-danger").text("Unlisted");
+              }
+            } else {
+              Swal.fire("Error", response.message || "Something went wrong", "error");
+            }
+          },
+          error: function () {
+            Swal.fire("Error", "Failed to update category", "error");
+          },
+        });
+      }
+    });
+  });
+});
+
 function validateForm() {
   let isValid = true;
 

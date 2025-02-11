@@ -20,21 +20,17 @@ const WalletTransaction=require("../../models/walletSchema");
 
 const getDashboardStats = async (req, res) => {
     try {
-      // Total Orders
+    
       const totalOrders = await Order.countDocuments();
-  
-      // Total Deliveries
+ 
       const totalDeliveries = await Order.countDocuments({ orderStatus: "Delivered" });
   
-      // Total Products
       const totalProducts = await Product.countDocuments();
   
-      // New Customers (Registered within the last 30 days)
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const newCustomers = await User.countDocuments({ createdOn: { $gte: thirtyDaysAgo } });
   
-      // Send the stats to the frontend
       res.json({
         totalOrders,
         totalDeliveries,
@@ -48,16 +44,14 @@ const getDashboardStats = async (req, res) => {
   }
   const getTopProducts = async (req, res) => {
     try {
-      // Fetch all orders and populate the orderedItems.product field
+
       const orders = await Order.find().populate("orderedItems.product");
-  
-      // Create an object to store the popularity of each product
+
       const productPopularity = {};
-  
-      // Loop through each order and each ordered item to calculate popularity
+
       orders.forEach(order => {
         order.orderedItems.forEach(item => {
-          // Check if product exists before accessing _id
+ 
           if (item.product && item.product._id) {
             const productId = item.product._id.toString();
             if (productPopularity[productId]) {
@@ -72,10 +66,9 @@ const getDashboardStats = async (req, res) => {
         });
       });
   
-      // Convert the object into an array and sort by popularity in descending order
       const topProducts = Object.values(productPopularity)
         .sort((a, b) => b.popularity - a.popularity)
-        .slice(0, 5); // Top 5 products
+        .slice(0, 5); 
   
       res.json(topProducts);
     } catch (error) {
@@ -86,7 +79,7 @@ const getDashboardStats = async (req, res) => {
   
   const getCustomerFulfillment = async (req, res) => {
     try {
-      // Count the number of orders for each status
+
       const orderStatuses = ["Delivered", "Pending", "Cancelled"];
       const statusCounts = {};
   
@@ -95,7 +88,7 @@ const getDashboardStats = async (req, res) => {
         statusCounts[status] = count;
       }
   
-      res.json(statusCounts); // Send status counts to frontend
+      res.json(statusCounts);
     } catch (error) {
       console.error("Error fetching customer fulfillment data:", error);
       res.status(500).send("Server error");
@@ -109,20 +102,20 @@ const getDashboardStats = async (req, res) => {
         {
           $match: {
             $or: [
-              { orderStatus: "Delivered" }, // Completed orders
-              { paymentStatus: "Confirmed" },    // Paid orders
+              { orderStatus: "Delivered" }, 
+              { paymentStatus: "Confirmed" },    
             ]
           }
         },
         {
           $group: {
             _id: null,
-            totalEarnings: { $sum: "$finalAmount" } // Sum of finalAmount for all qualifying orders
+            totalEarnings: { $sum: "$finalAmount" } 
           }
         }
       ]);
   
-      // If earnings data is found, return it; otherwise, return 0
+
       const totalEarnings = earnings.length > 0 ? earnings[0].totalEarnings : 0;
       res.json({ totalEarnings });
     } catch (error) {
@@ -133,7 +126,7 @@ const getDashboardStats = async (req, res) => {
 
   const getInsights = async (req, res) => {
     try {
-      const { filter } = req.query; // Get the filter from query params
+      const { filter } = req.query; 
   
       // Determine the date range based on the filter
       let startDate;
@@ -141,54 +134,51 @@ const getDashboardStats = async (req, res) => {
   
       switch (filter) {
         case "daily":
-          startDate = new Date(today.setHours(0, 0, 0, 0)); // Reset time to start of the day
+          startDate = new Date(today.setHours(0, 0, 0, 0)); 
           break;
         case "weekly":
-          startDate = new Date(today.setDate(today.getDate() - 7)); // 7 days ago
-          break;
+          startDate = new Date(today.setDate(today.getDate() - 7));
         case "monthly":
-          startDate = new Date(today.setMonth(today.getMonth() - 1)); // 1 month ago
+          startDate = new Date(today.setMonth(today.getMonth() - 1));
           break;
         case "yearly":
-          startDate = new Date(today.setFullYear(today.getFullYear() - 1)); // 1 year ago
+          startDate = new Date(today.setFullYear(today.getFullYear() - 1)); 
           break;
         default:
-          startDate = new Date(today.setHours(0, 0, 0, 0)); // Default to daily
+          startDate = new Date(today.setHours(0, 0, 0, 0)); 
       }
   
-      // Query orders based on the date range and group by orderStatus
       const insights = await Order.aggregate([
-        { $match: { createdAt: { $gte: startDate } } }, // Match orders within the date range
+        { $match: { createdAt: { $gte: startDate } } }, 
         {
           $group: {
-            _id: "$orderStatus", // Group by order status
-            count: { $sum: 1 },  // Count the number of orders for each status
+            _id: "$orderStatus", 
+            count: { $sum: 1 },  
           },
         },
         {
           $project: {
-            _id: 0,    // Remove the _id field
-            status: "$_id", // Rename _id to status
-            count: 1,  // Keep the count field
+            _id: 0,    
+            status: "$_id", 
+            count: 1, 
           },
         },
       ]);
   
-      // Initialize counts for statuses
+  
       const counts = {
         cancelled: 0,
         delivered: 0,
         returned: 0,
       };
   
-      // Populate counts based on the aggregation results
       insights.forEach(item => {
         if (item.status === "Cancelled") counts.cancelled = item.count;
         if (item.status === "Delivered") counts.delivered = item.count;
         if (item.status === "Returned") counts.returned = item.count;
       });
   
-      res.json(counts); // Send the counts back to the client
+      res.json(counts); 
     } catch (error) {
       console.error("Error fetching insights:", error);
       res.status(500).send("Server error");
@@ -196,31 +186,31 @@ const getDashboardStats = async (req, res) => {
   };
  const customers=async function getCustomers(req, res) {
     try {
-      // Get the customers with their order count
+     
       const customers = await User.aggregate([
         {
           $lookup: {
-            from: "orders", // Assuming "orders" is your order collection
+            from: "orders", 
             localField: "_id",
-            foreignField: "userId", // Assuming orders have a userId field
+            foreignField: "userId", 
             as: "orders"
           }
         },
         {
           $addFields: {
-            orderCount: { $size: "$orders" } // Calculate the number of orders for each user
+            orderCount: { $size: "$orders" } 
           }
         },
         {
           $project: {
-            name: 1, // Include name field
-            email: 1, // Include email field
-            orderCount: 1 // Include order count field
+            name: 1, 
+            email: 1, 
+            orderCount: 1 
           }
         }
       ]);
   
-      res.render("admin/admin-dashboard", { customers }); // Pass customers to your view
+      res.render("admin/admin-dashboard", { customers }); 
     } catch (error) {
       console.error(error);
       res.status(500).send("Error fetching customers");
@@ -230,25 +220,25 @@ const getDashboardStats = async (req, res) => {
 
   const getGraphData = async () => {
     try {
-      // Aggregate orders to get the total discount, coupon used, and referral join data
+  
       const data = await Order.aggregate([
         {
           $lookup: {
-            from: 'users', // Join with the 'users' collection
+            from: 'users', 
             localField: 'userId',
             foreignField: '_id',
             as: 'userDetails'
           }
         },
         {
-          $unwind: '$userDetails' // Unwind the userDetails array
+          $unwind: '$userDetails'
         },
         {
           $group: {
-            _id: '$userDetails.referralCode', // Group by referral code
-            totalDiscount: { $sum: '$discount' }, // Sum up all discounts
-            totalCouponUsed: { $sum: { $cond: [{ $gt: ['$discount', 0] }, 1, 0] } }, // Count of coupon usage
-            totalReferralJoins: { $sum: { $cond: [{ $ne: ['$userDetails.referralCode', null] }, 1, 0] } } // Count of referral joins
+            _id: '$userDetails.referralCode', 
+            totalDiscount: { $sum: '$discount' }, 
+            totalCouponUsed: { $sum: { $cond: [{ $gt: ['$discount', 0] }, 1, 0] } }, 
+            totalReferralJoins: { $sum: { $cond: [{ $ne: ['$userDetails.referralCode', null] }, 1, 0] } } 
           }
         },
         {
@@ -272,7 +262,7 @@ const getDashboardStats = async (req, res) => {
     try {
       const { filter, startDate, endDate, format } = req.query;
       let matchCondition = {};
-      let selectedFilter = filter || 'daily'; // Default to 'daily' if no filter is provided
+      let selectedFilter = filter || 'daily'; 
   
       // Apply date filters based on createdAt
       if (filter === 'daily') {

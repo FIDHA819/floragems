@@ -201,10 +201,10 @@
                     </div>
                     <h3 class="font-weight-semi-bold mb-4">
                         <% if (product.salePrice) { %>
-                            <span class="text-danger"><del>₹<%= product.regularPrice %></del></span>
-                            <span class="text-primary">₹<%= product.salePrice %></span>
+                            <span class="text-primary"><del>₹<%= product.regularPrice %></del></span>
+                            <span class="text-danger">₹<%= product.salePrice %></span>
                         <% } else { %>
-                            <span class="text-primary">₹<%= product.regularPrice %></span>
+                            <span class="text-danger">₹<%= product.salePrice %></span>
                         <% } %>
                     </h3>
                     <% if (product.quantity > 0) { %>
@@ -225,6 +225,14 @@
                     <div class="d-flex mb-4">
                         <p class="text-dark font-weight-medium mb-0 mr-3">Metal Type: <%= product.metalType %></p>
                     </div>
+                   
+                    <div class="d-flex mb-4">
+                        <p class="text-dark font-weight-medium mb-0 mr-3">Category: <%= product.category.name %></p>
+                    </div>
+                    <div class="d-flex mb-4">
+                        <p class="text-dark font-weight-medium mb-0 mr-3">Brand: <%= product.brand %></p>
+                    </div>
+                    
     
                     <!-- Quantity and Add to Cart -->
                     <div class="d-flex align-items-center mb-4">
@@ -244,7 +252,56 @@
             </div>
         </div>
         <!-- Shop Detail End -->
+        <div class="row px-xl-5 mt-5">
+            <div class="col">
+                <h4 class="font-weight-semi-bold mb-3">Know more about this product</h4>
+                <p><%= product.description %></p>
+            </div>
+        </div>
     
+        <div class="container-fluid pt-5">
+            <div class="text-center mb-4">
+                <h2 class="section-title px-5"><span class="px-2">Top Sellers</span></h2>
+            </div>
+            <div class="row px-xl-5 pb-3">
+                <% if (topSellingProducts && topSellingProducts.length > 0) { %>
+                    <% for (let i = 0; i < Math.min(topSellingProducts.length, 6); i++) { %>
+                        <div class="col-lg-2 col-md-3 col-sm-6 pb-1">
+                            <div class="card product-item border-0 mb-4">
+                                <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
+                                    <a href="/productDetails?id=<%= topSellingProducts[i]._id %>">
+                                        <% if (topSellingProducts[i].productImages && topSellingProducts[i].productImages.length > 0) { %>
+                                            <img class="img-fluid w-100" src="/uploads/re-image/<%= topSellingProducts[i].productImages[0] %>" alt="<%= topSellingProducts[i].productName %>">
+                                        <% } else { %>
+                                            <img class="img-fluid w-100" src="/uploads/product-images/default.jpg" alt="Default Product Image">
+                                        <% } %>
+                                    </a>
+                                </div>
+                                <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
+                                    <h6 class="text-truncate mb-3"><%= topSellingProducts[i].productName %></h6>
+                                    <div class="d-flex justify-content-center">
+                                        <h6>₹<%= topSellingProducts[i].salePrice %></h6>
+                                        <% if (topSellingProducts[i].salePrice < topSellingProducts[i].regularPrice) { %>
+                                            <h6 class="text-muted ml-2"><del>₹<%= topSellingProducts[i].regularPrice %></del></h6>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <div class="card-footer d-flex justify-content-center bg-light border">
+                                    <a href="/productDetails?id=<%= topSellingProducts[i]._id %>" class="btn btn-sm text-dark p-0">
+                                        <i class="fas fa-eye text-primary mr-1"></i>View Detail
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="col-12 text-center">
+                        <p>No top-selling products available.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+        
      
         <!-- Products End -->
     <div class="container-fluid bg-secondary text-dark mt-5 pt-5">
@@ -393,11 +450,9 @@ function increaseQuantity() {
         quantityInput.value = quantity + 1;
     }
 }function addToCart(productId, quantity = 1) {
-    // Check if the cart already has 3 of this product
     const currentQuantity = parseInt(document.getElementById('quantity').value, 10);
-    const maxQuantity = 3;  // Set maximum quantity per product
+    const maxQuantity = 3;
 
-    // If current quantity exceeds or equals max quantity, show an alert and prevent adding more
     if (currentQuantity > maxQuantity) {
         Swal.fire({
             title: 'Maximum Quantity Reached!',
@@ -408,7 +463,6 @@ function increaseQuantity() {
         return;
     }
 
-    // Proceed to add the product to the cart if quantity is valid
     $.ajax({
         url: '/addToCart',
         method: 'POST',
@@ -422,30 +476,32 @@ function increaseQuantity() {
                     title: 'Please Login!',
                     text: 'You need to log in to add products to your cart.',
                     icon: 'warning',
-                    showConfirmButton: true,
                     confirmButtonText: 'Go to Login'
                 }).then(() => {
                     window.location.href = '/login';
                 });
-            } else {
-                // Update cart count badge
-                const cartCountElement = document.getElementById('cart-count');
-                if (cartCountElement) {
-                    cartCountElement.innerHTML = response.cartLength;
-                }
+                return;
+            }
 
-                // Update subtotal
-                const subtotalElement = document.getElementById('cart-subtotal');
-                if (subtotalElement) {
-                    subtotalElement.innerHTML = `₹${response.subtotal}`;
-                }
+            // Update cart count badge
+            const cartCountElement = document.getElementById('cart-count');
+            if (cartCountElement) {
+                cartCountElement.innerHTML = response.cartLength;
+            }
 
-                // Show success notification
+            // Update subtotal
+            const subtotalElement = document.getElementById('cart-subtotal');
+            if (subtotalElement) {
+                subtotalElement.innerHTML = `₹${response.subtotal}`;
+            }
+
+            // Show success popup only if it's a new item being added
+            if (!response.itemUpdated) { 
                 Swal.fire({
                     title: 'Added to Cart!',
                     text: 'The product has been successfully added to your cart.',
                     icon: 'success',
-                    timer: 3000,
+                    timer: 1500,
                     showConfirmButton: false
                 });
             }
@@ -462,14 +518,15 @@ function increaseQuantity() {
     });
 }
 
-
-    function updateCartCount() {
+function updateCartCount() {
     $.ajax({
-        url: '/getCartCount',  // The backend route you created
+        url: '/getCartCount',
         method: 'GET',
         success: function(response) {
             const cartCountElement = document.getElementById('cart-count');
-            cartCountElement.innerHTML = response.cartLength; // Update the cart count badge with the fetched value
+            if (cartCountElement) {
+                cartCountElement.innerHTML = response.cartLength;
+            }
         },
         error: function() {
             console.error('Failed to fetch cart count');
@@ -477,11 +534,10 @@ function increaseQuantity() {
     });
 }
 
-// Call the updateCartCount function when the page loads
+// Update cart count when the page loads
 $(document).ready(function() {
-    updateCartCount(); // This will automatically update the cart count
+    updateCartCount();
 });
-
 </script>
 
     

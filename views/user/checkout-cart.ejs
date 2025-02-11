@@ -621,7 +621,6 @@ function updateShipping() {
     let grandTotal = total + shippingCost;
     document.getElementById('total').textContent = `₹${grandTotal.toFixed(2)}`;
 }
-
 function placeOrder(userId, orderId) {
     if (!orderId) {
         Swal.fire({
@@ -655,17 +654,13 @@ function placeOrder(userId, orderId) {
         return;
     }
 
-    // Check if a coupon is applied
-    const couponApplied = usedCoupon !== null; // Use the `usedCoupon` variable
-    const couponName = usedCoupon || null; // If no coupon is used, send null
-
     const requestData = {
-        userId: userId,
-        orderId: orderId,
+        userId,
+        orderId,
         addressId: selectedAddressId,
         payment: paymentMethod,
-        couponApplied: couponApplied,
-        couponName: couponName, // Include the coupon name
+        couponApplied: usedCoupon !== null,
+        couponName: usedCoupon || null,
     };
 
     $.ajax({
@@ -677,11 +672,11 @@ function placeOrder(userId, orderId) {
             if (paymentMethod === "razorpay") {
                 let options = {
                     key: "rzp_test_cKsKSaUt0ELKM9",
-                    amount: Math.round(response.razorPayOrder.finalAmount * 100), // Correct amount after discount and shipping
+                    amount: Math.round(response.razorPayOrder.finalAmount * 100),
                     currency: "INR",
                     name: "FloraGems",
                     description: "Order Payment",
-                    image: "https://www.dropbox.com/scl/fi/9zytl7wt67wkgl7p9s0zw/removal.ai-_f9e2b53c-dc7e-488a-a0da-fa14f2059a6a_Flora-Gems.png?rlkey=b8wmnqhmtg26gjyril91u3qkm&st=z9i26gci&dl=0",
+                    image: "https://your-logo-url.com/logo.png",
                     order_id: response.razorPayOrder.orderId,
                     handler: function (payment) {
                         verifyPayment(response.razorPayOrder, payment, response.order._id, userId);
@@ -691,88 +686,68 @@ function placeOrder(userId, orderId) {
                         email: "customer@example.com",
                         contact: "9188339324",
                     },
-                    theme: {
-                        color: "#f8d0d0",
-                    },
+                    theme: { color: "#f8d0d0" },
                 };
+
                 let rzp1 = new Razorpay(options);
-                rzp1.open();
-            } else if (paymentMethod === "wallet") {
-                // Check if wallet balance is less than final amount
-                $.ajax({
-                    url: "/checkWalletBalance",
-                    method: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify({ userId: userId }),
-                    success: function (walletResponse) {
-                        if (walletResponse.success) {
-                            if (walletResponse.walletBalance < response.finalAmount) {
-                                Swal.fire({
-                                    title: 'Insufficient Wallet Balance!',
-                                    text: 'Your wallet balance is insufficient to complete this order. Please add funds to your wallet.',
-                                    icon: 'error',
-                                    timer: 5000,
-                                });
-                            } else {
-                                handleSuccessfulOrder(response.orderId, userId); // Proceed with the order
-                            }
-                        } else {
-                            Swal.fire({
-                                title: 'Error!',
-                                text: 'Unable to check wallet balance. Please try again later.',
-                                icon: 'error',
-                                timer: 5000,
-                            });
-                        }
-                    },
-                    error: function (error) {
-    console.error("AJAX Error:", error);
-    if (error.responseJSON && error.responseJSON.error) {
-        console.log("Error Message:", error.responseJSON.error);
-    }
-    Swal.fire({
-        title: 'Error!',
-        text: error.responseJSON ? error.responseJSON.error : 'An unknown error occurred.',
-        icon: 'error',
-        timer: 5000,
-    });
-}
 
-
+                rzp1.on("payment.failed", function (response) {
+                    Swal.fire({
+                        title: "Payment Failed!",
+                        text: "Your payment was unsuccessful. Please try again.",
+                        icon: "error",
+                        confirmButtonText: "Retry Payment",
+                    }).then(() => {
+                        showPaymentFailureSwal(requestData.orderId);
+                    });
                 });
-            } else if (paymentMethod === "cod") {
-                // Handle Cash on Delivery Order
-                handleSuccessfulOrder(response.orderId, userId); // Ensure response.orderId is used here
+
+                rzp1.open();
+            } else {
+                handleSuccessfulOrder(response.orderId, userId);
             }
         },
         error: function (error) {
-        const errorMessage = error.responseJSON?.error || 'An unknown error occurred.';
-        // Check if the error is due to insufficient balance
-        if (errorMessage === 'Insufficient wallet balance') {
-            Swal.fire({
-                title: 'Insufficient Wallet Balance!',
-                text: 'Your wallet balance is insufficient to complete this order. Please add funds to your wallet.',
-                icon: 'error',
-                timer: 5000,
-            });
-        } else {
             Swal.fire({
                 title: 'Error!',
-                text: errorMessage,
+                text: error.responseJSON?.error || 'An unknown error occurred.',
                 icon: 'error',
                 timer: 5000,
             });
         }
-        }
-
     });
 }
 
-
+function verifyPayment(order, payment, orderId, userId) {
+    $.ajax({
+        url: '/verifyPayment',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ order, payment }),
+        success: function (response) {
+            if (response.status) {
+                handleSuccessfulOrder(orderId, userId);
+            } else {
+                Swal.fire({
+                    title: 'Payment Verification Failed!',
+                    text: 'The payment could not be verified. Please try again.',
+                    icon: 'error',
+                    timer: 5000,
+                });
+            }
+        },
+        error: function () {
+            Swal.fire({
+                title: 'Payment Verification Error!',
+                text: 'An error occurred while verifying the payment. Please try again.',
+                icon: 'error',
+                timer: 5000,
+            });
+        },
+    });
+}
 
 function handleSuccessfulOrder(orderId, userId) {
-    console.log("Order ID from server:", orderId); // Debugging log to check if orderId is correct
-
     if (!orderId) {
         Swal.fire({
             title: 'Error!',
@@ -784,91 +759,40 @@ function handleSuccessfulOrder(orderId, userId) {
     }
 
     $.ajax({
-    url: "/clearCart",
-    method: "POST",
-    data: { userId: userId }, // Ensure userId is available and valid
-    success: function () {
-        Swal.fire({
-            title: 'Order Placed Successfully!',
-            text: 'Thank you for shopping with us!',
-            icon: 'success',
-            html: `
-                <div style="text-align: center;">
-                    <h3>Thank You for Your Order!</h3>
-                    <p>Your order has been confirmed. We will process it shortly.</p>
-                    <a href="/" class="btn btn-primary" style="margin-top: 10px;">Continue Shopping</a>
-                    <a href="/orderDetails?id=${orderId}" class="btn btn-secondary" style="margin-top: 10px;">View Order Details</a>
-                </div>
-            `,
-        }).then(() => {
-            // Redirect to the order details page after the alert
-            window.location.href = `/orderDetails?id=${orderId}`;
-        });
-    },
-    error: function () {
-        Swal.fire({
-            title: 'Error Clearing Cart!',
-            text: 'There was an issue clearing the cart. Please try again.',
-            icon: 'error',
-            timer: 5000, // Automatically close the alert after 5 seconds
-        });
-    },
-});
+        url: "/clearCart",
+        method: "POST",
+        data: { userId: userId },
+        success: function () {
+            Swal.fire({
+                title: 'Order Placed Successfully!',
+                text: 'Thank you for shopping with us!',
+                icon: 'success',
+            }).then(() => {
+                window.location.href = `/myOrders`;
+            });
+        },
+        error: function () {
+            Swal.fire({
+                title: 'Error Clearing Cart!',
+                text: 'There was an issue clearing the cart. Please try again.',
+                icon: 'error',
+                timer: 5000,
+            });
+        },
+    });
 }
 
-function verifyPayment(order, payment, orderId, userId) {
-  console.log("Payment Details to verify:", payment);  // Log the payment object for debugging
-
-  $.ajax({
-    url: '/verifyPayment',
-    method: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify({ order, payment }),
-    success: function (response) {
-      console.log("Payment Verification Response:", response);  // Log the response for debugging
-      if (response.status) {
-        // Proceed with confirming the order
-        $.ajax({
-          url: '/paymentConfirm',
-          method: 'POST',
-          data: {
-            orderId: orderId,
-            status: "Pending",
-          },
-          success: function (confirmationResponse) {
-            console.log("Payment Confirmed:", confirmationResponse);
-            // Clear the cart after confirming payment
-            handleSuccessfulOrder(orderId, userId);
-          },
-          error: function (error) {
-            console.error("Error confirming payment:", error);
-            Swal.fire({
-              title: 'Order Confirmation Failed!',
-              text: 'An error occurred while confirming your order. Please try again.',
-              icon: 'error',
-              timer: 5000,
-            });
-          }
-        });
-      } else {
-        Swal.fire({
-          title: 'Payment Verification Failed!',
-          text: 'The payment could not be verified. Please try again.',
-          icon: 'error',
-          timer: 5000,
-        });
-      }
-    },
-    error: function (error) {
-      console.error("Error in payment verification:", error);
-      Swal.fire({
-        title: 'Payment Verification Error!',
-        text: 'An error occurred while verifying the payment. Please try again.',
-        icon: 'error',
-        timer: 5000,
-      });
-    },
-  });
+function showPaymentFailureSwal(orderId) {
+    Swal.fire({
+        title: "Payment Not Completed!",
+        text: "Your payment was not successful. You can retry or view your order details.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "View Order Details",
+        cancelButtonText: "Continue Shopping",
+    }).then((result) => {
+        window.location.href = result.isConfirmed ? "/myOrders": "/myOrders";
+    });
 }
 
                             function removeProduct(productId) {

@@ -5,29 +5,29 @@ const User = require("../../models/userschema");
 // Get Wallet Page
 const getWalletPage = async (req, res) => {
   try {
-    const user = req.user;  // Access user from the request object
+    const user = req.user;  
     if (!user) {
       return res.status(400).json({ message: 'User not found or not authenticated' });
     }
 
-    // Corrected the query to use user._id instead of userId
+    
     const walletTransactions = await WalletTransaction.find({ userId: user._id })
-      .populate('userId', 'name email') // Populate user information if needed
+      .populate('userId', 'name email') 
       .sort({ createdAt: -1 });
 
-    // Calculate wallet balance (credits increase, debits decrease the balance)
+    
     const walletBalance = walletTransactions.reduce((acc, txn) => {
       if (txn.type === "Credit") {
-        return acc + txn.amount; // Increase balance for Credit
+        return acc + txn.amount; 
       } else if (txn.type === "Debit") {
-        return acc - txn.amount; // Decrease balance for Debit
+        return acc - txn.amount; 
       }
       return acc;
     }, 0);
 
     // Render wallet page with data
     res.render("user/walletPage", {
-      walletBalance: walletBalance.toFixed(2), // Ensure balance is formatted to 2 decimal places
+      walletBalance: walletBalance.toFixed(2), 
       transactions: walletTransactions,
     });
   } catch (error) {

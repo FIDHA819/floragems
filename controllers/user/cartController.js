@@ -15,7 +15,11 @@ const getCartPage = async (req, res) => {
       return res.status(404).send("User not found");
     }
 
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      populate: { path: "category" } // Populate category to check if it's listed
+    });
+
     if (!cart || cart.items.length === 0) {
       return res.render("user/cartPage", {
         user,
@@ -27,12 +31,24 @@ const getCartPage = async (req, res) => {
       });
     }
 
-    const cartItems = cart.items.map((cartItem) => {
+    // Filter out blocked products and those in unlisted categories
+    let filteredCartItems = cart.items.filter((cartItem) => {
       const product = cartItem.productId;
-      if (!product) return null;
+      if (!product) return false;
 
-      const availableStockMessage = product.quantity < cartItem.quantity ? 
-        `Only ${product.quantity} items available` : "";
+      const isBlocked = product.isBlocked;
+      const isCategoryUnlisted = product.category?.isListed === false;
+
+      return !isBlocked && !isCategoryUnlisted;
+    });
+
+    // Map the filtered products
+    const cartItems = filteredCartItems.map((cartItem) => {
+      const product = cartItem.productId;
+
+      const availableStockMessage = product.quantity < cartItem.quantity 
+        ? `Only ${product.quantity} items available` 
+        : "";
 
       return {
         productId: product._id,
@@ -44,7 +60,7 @@ const getCartPage = async (req, res) => {
         brand: product.brand || "N/A",
         availableStockMessage,
       };
-    }).filter(Boolean);
+    });
 
     const subtotal = cartItems.reduce((sum, item) => sum + item.total, 0);
     const shippingCost = subtotal > 1000 ? 0 : 100;
@@ -63,6 +79,7 @@ const getCartPage = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+
 
 //delete product from cart
 

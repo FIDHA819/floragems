@@ -28,11 +28,11 @@ const sendVerificationEmail = async (email, otp) => {
         });
 
         const mailOptions = {
-            from: process.env.NODEMAILER_EMAIL, // Fixed typo
+            from: process.env.NODEMAILER_EMAIL,
             to: email,
             subject: "Your OTP for Password Reset",
             text: `Your OTP is ${otp}`,
-            html: `<b><h4>Your OTP: ${otp}</h4></b>`, // Fixed syntax
+            html: `<b><h4>Your OTP: ${otp}</h4></b>`, 
         };
 
         const info = await transporter.sendMail(mailOptions);
@@ -54,7 +54,7 @@ const securePassword = async (password) => {
 
 const getForgotPassPage = async (req, res) => {
     try {
-        res.render("user/forgot-password"); // Correct path relative to the views folder
+        res.render("user/forgot-password"); 
     } catch (error) {
         res.redirect("/pageNotFound");
     }
@@ -70,7 +70,7 @@ const forgotEmailValid = async (req, res) => {
             if (emailSent) {
                 req.session.userOtp = otp;
                 req.session.email = email;
-                res.render("user/forgotpass-otp"); // Correct path
+                res.render("user/forgotpass-otp"); 
                 console.log("OTP:", otp);
             } else {
                 res.json({ success: false, message: "Failed to send OTP. Please try again." });
@@ -101,7 +101,7 @@ const verifyForgotPassOtp = async (req, res) => {
 
 const getResetPassPage = async (req, res) => {
     try {
-        res.render("user/reset-password", { message: null }); // Pass a default value
+        res.render("user/reset-password", { message: null }); 
     } catch (error) {
         res.redirect("/pageNotFound");
     }
@@ -132,7 +132,6 @@ const postNewPassword = async (req, res) => {
         const { newPass1, newPass2 } = req.body;
         const email = req.session.email;
 
-        // Ensure session is valid before proceeding with password reset
         if (!email || !req.session.userOtp) {
             return res.render("user/reset-password", { 
                 message: "Session expired. Please request a new OTP." 
@@ -160,12 +159,11 @@ const postNewPassword = async (req, res) => {
                 });
             }
 
-            req.session.touch();  // Extend session expiry time
+            req.session.touch();  
 
             // Clear session after successful password update
-            req.session.destroy();  // Clear session data
+            req.session.destroy();  
 
-            // Redirect to login page with a success message
             res.render("user/login", {
                 message: "Your password has been successfully updated. Please log in with your new password."
             });
@@ -187,15 +185,15 @@ const userProfile = async (req, res) => {
         const userId = req.session.user?._id; 
         console.log("Session User:", req.session.user);
         if (!userId) {
-            return res.redirect("/login"); // Redirect to login if session user is missing
+            return res.redirect("/login"); 
         }
 const addressData=await Address.findOne({userId:userId})
         const userData = await User.findById(userId);
         if (!userData) {
-            return res.redirect("/pageNotFound"); // Handle case where user data is not found
+            return res.redirect("/pageNotFound"); 
         }
 
-        res.render("user/profile", { user: userData ,userAddress:addressData}); // Pass user data to template
+        res.render("user/profile", { user: userData ,userAddress:addressData}); 
     } catch (error) {
         console.error("Error retrieving profile data:", error);
         res.redirect("/pageNotFound");
@@ -257,23 +255,23 @@ const verifyEmailOtp = async (req, res) => {
 const updateEmail = async (req, res) => {
     try {
         const newEmail = req.body.newEmail;
-        const userId = req.session.user._id; // Ensure you access the user ID properly
+        const userId = req.session.user._id; 
 
-        // Update the email in the database
+       
         const updatedUser = await User.findByIdAndUpdate(
             userId,
             { email: newEmail },
-            { new: true } // This ensures the updated user document is returned
+            { new: true } 
         );
 
         if (!updatedUser) {
-            return res.redirect("/pageNotFound"); // Handle case where user is not found
+            return res.redirect("/pageNotFound");
         }
 
-        // Update the email in the session
+      
         req.session.user.email = updatedUser.email;
 
-        // Save the session to persist the changes
+        
         req.session.save((err) => {
             if (err) {
                 console.error("Error saving session:", err);
@@ -289,9 +287,9 @@ const updateEmail = async (req, res) => {
 
 const changePassword = async (req, res) => {
     try {
-        // Ensure that the session is valid and contains necessary data
+        
         if (!req.session.userOtp || !req.session.email) {
-            return res.redirect("/forgot-password"); // Redirect to forgot password if session is missing
+            return res.redirect("/forgot-password"); 
         }
 
         res.redirect("/forgot-password");
@@ -313,11 +311,10 @@ const changePasswordValid = async (req, res) => {
                 req.session.userOtp = otp;
                 req.session.userData = req.body;
 
-                // Extend session expiry time
                 req.session.touch();
 
                 console.log("Request Body:", req.body);
-                res.render("user/change-password-otp"); // Ensure this path is correct
+                res.render("user/change-password-otp"); 
                 console.log("OTP:", otp);
             } else {
                 res.render("user/change-password", {
@@ -339,7 +336,7 @@ const verifyChangePassOtp = async (req, res) => {
     try {
         const enteredOtp = req.body.otp;
 
-        // Ensure OTP session data exists
+
         if (!req.session.userOtp) {
             return res.json({
                 success: false,
@@ -347,7 +344,7 @@ const verifyChangePassOtp = async (req, res) => {
             });
         }
 
-        // Compare entered OTP with session OTP
+       
         if (enteredOtp === req.session.userOtp) {
             res.json({ success: true, redirectUrl: "/reset-password" });
         } else {
@@ -373,13 +370,13 @@ const addaddress = async (req, res) => {
 
 const postAddAddress = async (req, res) => {
     try {
-        const userId = req.session.user; // Make sure this is an ObjectId or convert to ObjectId if needed
+        const userId = req.session.user; 
         if (!userId) {
             console.log("User ID not found in session");
             return res.redirect("/pageNotFound");
         }
 
-        const userData = await User.findById(userId); // Directly using findById
+        const userData = await User.findById(userId); 
         if (!userData) {
             console.log("User not found in database with ID:", userId);
             return res.redirect("/pageNotFound");
@@ -387,7 +384,6 @@ const postAddAddress = async (req, res) => {
 
         const { addressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
 
-        // Log the received data for debugging
         console.log("Received address data:", req.body);
 
         const userAddress = await Address.findOne({ userId: userData._id });
@@ -444,29 +440,27 @@ const postEditAddress = async (req, res) => {
         const addressId = req.query.id;
         const user = req.session.user;
 
-        // Find the address document containing the address with the specified ID
         const findAddress = await Address.findOne({
             "address._id": addressId
         });
 
         if (!findAddress) {
-            return res.redirect("/pageNotFound"); // If address is not found
+            return res.redirect("/pageNotFound");
         }
 
-        // Update the address inside the array using the $set operator
         await Address.updateOne(
             {
-                "address._id": addressId // Find the specific address by its ID
+                "address._id": addressId 
             },
             {
                 $set: {
-                    "address.$": { // Update the specific address in the array
+                    "address.$": { 
                         _id: addressId,
                         addressType: data.addressType,
                         name: data.name,
                         city: data.city,
                         landMark: data.landMark,
-                        state: data.state, // Fixed this line, previously was setting city as state
+                        state: data.state, 
                         pincode: data.pincode,
                         phone: data.phone,
                         altPhone: data.altPhone
@@ -475,44 +469,42 @@ const postEditAddress = async (req, res) => {
             }
         );
 
-        res.redirect("/userProfile"); // Redirect to user profile after successful update
+        res.redirect("/userProfile"); 
     } catch (error) {
         console.error("Error in edit address:", error);
-        res.redirect("/pageNotFound"); // Handle errors and redirect
+        res.redirect("/pageNotFound"); 
     }
 };
 const deleteAddress = async (req, res) => {
     try {
       const { addressId } = req.query;
   
-      // Log the addressId received in the query parameters
+      
       console.log("Address ID being passed:", addressId);
-  
-      // Ensure the addressId is valid (check if it's an ObjectId)
+
       if (!addressId) {
         return res.status(400).json({ error: "Address ID is required" });
       }
   
-      // Find and delete the address using the provided addressId
+  
       const address = await Address.findOneAndUpdate(
-        { "address._id": addressId }, // Match the addressId inside the array
-        { $pull: { address: { _id: addressId } } }, // Remove the address from the array
-        { new: true } // Return the updated document
+        { "address._id": addressId }, 
+        { $pull: { address: { _id: addressId } } }, 
+        { new: true }
       );
   
-      // Log the address document after deletion
+   
       console.log("Updated Address Document:", address);
   
-      // If no address is found, return a 404 error
       if (!address) {
         return res.status(404).json({ error: "Address not found" });
       }
   
-      // Redirect to the user profile page after successful deletion
+     
       res.redirect("/userProfile");
     } catch (error) {
       console.error("Error in delete address", error);
-      res.redirect("/pageNotFound"); // Redirect to a custom error page in case of failure
+      res.redirect("/pageNotFound"); 
     }
   };
   
