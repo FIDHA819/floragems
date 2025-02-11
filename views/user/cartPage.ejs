@@ -538,7 +538,7 @@ input[type="number"]:focus {
                     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                     <script>
-function changeQuantity(productId, count, productPrice, index, maxStock) {
+function changeQuantity(productId, count, productPrice, index, maxStock) { 
     const currentQuantityInput = document.getElementById(`cartProductQuantity${index}`);
     let currentQuantity = parseInt(currentQuantityInput.value, 10);
 
@@ -573,9 +573,9 @@ function changeQuantity(productId, count, productPrice, index, maxStock) {
             quantity: newQuantity
         }),
         success: (response) => {
-            console.log("📢 API Response:", response);
+            console.log("📢 API Response:", response); // Debugging log
 
-            if (!response || typeof response.newSubtotal === "undefined" || typeof response.newTotalSubtotal === "undefined") {
+            if (!response || typeof response.newSubtotal === "undefined" || typeof response.newGrandTotal === "undefined") {
                 Swal.fire('Error!', 'Invalid response from server. Please try again.', 'error');
                 return;
             }
@@ -588,19 +588,27 @@ function changeQuantity(productId, count, productPrice, index, maxStock) {
                     confirmButtonText: 'Okay'
                 });
             } else {
+              
                 currentQuantityInput.value = newQuantity;
-                document.getElementById(`subTotal${index}`).innerHTML = `₹${parseFloat(response.newSubtotal).toFixed(2)}`;
-                document.getElementById('subTotalDisplay').innerHTML = `₹${parseFloat(response.newTotalSubtotal).toFixed(2)}`;
+
+          
+                document.getElementById(`subTotal${index}`).innerHTML = `₹${response.newSubtotal.toFixed(2)}`;
+
+              
+                document.getElementById('subTotalDisplay').innerHTML = `₹${response.newGrandTotal.toFixed(2)}`;
+
+               
                 setTimeout(updateShipping, 150);
             }
         },
         error: () => {
             Swal.fire('Error!', 'Failed to update quantity.', 'error').then(() => {
-                window.location.reload();
+                window.location.reload();  
             });
         }
     });
 }
+
 
 function updateShipping() {
     let subtotalElement = document.getElementById('subTotalDisplay');
