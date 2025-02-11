@@ -21,7 +21,7 @@ router.post("/resend-otp",userController.resendOtp)
 router.get("/login",userController.loadLogin)
 router.post("/login",userController.login)
 router.get("/logout",userController.logout)
-
+router.get("*", userController.pageNotFound);
 
 //prduct amnangemnet//
 router.get("/productDetails",productController.productDetails)
