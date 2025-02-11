@@ -1,3 +1,4 @@
+
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
@@ -108,7 +109,6 @@ router.get('/getSalesReport', adminAuth,statsController.getGraphData)
 
 
 router.get("/dashboard", adminAuth, statsController.customers);
-
 
 
 module.exports=router
