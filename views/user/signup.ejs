@@ -414,6 +414,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+  (function () {
+    if (window.history && window.history.pushState) {
+      window.history.pushState(null, null, document.URL);
+      window.addEventListener("popstate", function () {
+        window.history.pushState(null, null, document.URL);
+      });
+    }
+  })();
+</script>
+
 
     </script>
     
