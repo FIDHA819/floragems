@@ -3,32 +3,57 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
 </head>
 <style>
-    
-   body {
-       font-family: Arial, sans-serif;
-       background-color: #f8f9fa;
-   }
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+    }
 
-   .content-main {
-       padding: 20px;
-   }
+    .content-main {
+        padding: 10px;
+        max-width: 100%;
+    }
 
-   .content-header h2 {
-       font-size: 24px;
-       font-weight: bold;
-       color: #333;
-       margin-bottom: 20px;
-   }
+    .content-header h2 {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+    }
 
-   .card {
-       border: none;
-       border-radius: 8px;
-       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-   }
+    /* Adjust main container widths */
+    .col-9 {
+        width: 100%;
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
 
-   .card-body {
-       padding: 20px;
-   }
+    .col-lg-6 {
+        width: 100%;
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+
+    /* Preserve your existing styles */
+    .card {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    /* Adjust form layout */
+    .row {
+        margin: 0;
+        width: 100%;
+    }
+
+    .col-lg-4 {
+        padding: 0 10px;
+    }
 
    .form-label {
        font-weight: bold;
@@ -167,14 +192,14 @@
 </style>
 
 </style>
-   <section class="content-main">
-       <div class="row">
-           <div class="col-9">
-               <div class="content-header">
-                   <h2 class="content-title">Add New Product</h2>
-               </div>
-           </div>
-           <div class="col-lg-6">
+<section class="content-main">
+    <div class="row">
+        <div class="col-9">
+            <div class="content-header">
+                <h2 class="content-title">Add New Product</h2>
+            </div>
+        </div>
+        <div class="col-lg-6">
                <div class="card mb-4">
                    <div class="card-body">
                        <form method="POST" action="/admin/addProducts" enctype="multipart/form-data"
