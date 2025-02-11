@@ -250,7 +250,7 @@ const getSalesReport = async (req, res) => {
       res.end();
     } else {
 
-      res.render('admin/salesReport', {
+      res.render('admin/salesreport', {
         totalSales: reportData.totalSales,
         totalOrders: reportData.totalOrders,
         totalDiscount: reportData.totalDiscount,
