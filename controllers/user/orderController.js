@@ -126,6 +126,7 @@ const getCheckoutPage = async (req, res) => {
 };
 
 
+
 const orderPlaced = async (req, res) => {
   try {
     const user = req.session?.user?._id;
@@ -134,6 +135,7 @@ const orderPlaced = async (req, res) => {
     }
 
     const { userId, addressId, payment, couponApplied, couponName } = req.body;
+
     if (!userId || !addressId || !payment) {
       return res.status(400).json({ error: "Missing required fields." });
     }
@@ -143,7 +145,7 @@ const orderPlaced = async (req, res) => {
       return res.status(400).json({ error: "Cart is empty or not found." });
     }
 
-    // Check stock availability for each product but do not reduce stock yet
+    // Check stock availability for each product in the cart
     for (const item of cart.items) {
       const product = await Product.findById(item.productId);
       if (!product) {
@@ -177,14 +179,14 @@ const orderPlaced = async (req, res) => {
     // Calculate final amount
     const finalAmount = totalPrice + shippingCost - discount;
 
-    // Fetch user address
+    // Fetch the user's address
     const userAddress = await Address.findOne({ userId });
     const specificAddress = userAddress.address.find((addr) => addr._id.toString() === addressId);
     if (!specificAddress) {
       return res.status(404).json({ error: "Address not found" });
     }
 
-    // Create the order without reducing stock
+    // Create the new order
     const newOrder = new Order({
       userId,
       totalPrice,
@@ -205,7 +207,7 @@ const orderPlaced = async (req, res) => {
       couponName: couponApplied ? couponName : null,
     });
 
-    // Handle payment processing
+    // Handle payment processing (Razorpay, COD, Wallet)
     if (payment === "razorpay") {
       const razorPayOrder = await razorpayInstance.orders.create({
         amount: Math.round(finalAmount * 100),
@@ -256,19 +258,11 @@ const orderPlaced = async (req, res) => {
         status: "Confirmed",
         paymentMethod: "wallet",
       };
-
-      // Reduce stock when payment is confirmed (for wallet)
-      for (const item of cart.items) {
-        await Product.updateOne(
-          { _id: item.productId },
-          { $inc: { quantity: -item.quantity } }
-        );
-      }
     }
 
-    // Save order and clear cart
+    // Save the new order and clear the cart
     await newOrder.save();
-    await Cart.updateOne({ userId }, { $set: { items: [] } });
+
 
     res.status(200).json({
       message: "Order placed successfully.",
@@ -281,7 +275,6 @@ const orderPlaced = async (req, res) => {
     res.status(500).json({ error: "Failed to place order. Please try again later." });
   }
 };
-
 
 
 const verify = (req, res) => {
@@ -313,7 +306,6 @@ const verify = (req, res) => {
 };
 
 
-
 const paymentConfirm = async (req, res) => {
   try {
     const userId = req.session?.user?._id;
@@ -322,27 +314,32 @@ const paymentConfirm = async (req, res) => {
     }
 
     const { orderId } = req.body;
+
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
+    }
+
+    if (order.paymentStatus === "Confirmed") {
+      return res.json({ status: true, message: "Payment already confirmed." });
     }
 
     if (order.paymentMethod === "wallet") {
       return res.json({ status: true });
     }
 
-    // Update payment status
+    // Confirm payment
     await Order.updateOne(
       { _id: orderId },
       {
         $set: {
           paymentStatus: "Confirmed",
           "orderedItems.$[].paymentStatus": "Confirmed",
-        },
+        }
       }
     );
 
-    // **Reduce stock after payment is confirmed**
+    // Reduce stock quantity for each product
     for (const item of order.orderedItems) {
       await Product.updateOne(
         { _id: item.product },
@@ -350,7 +347,7 @@ const paymentConfirm = async (req, res) => {
       );
     }
 
-    res.json({ status: true });
+    res.json({ status: true, message: "Payment confirmed and stock updated." });
   } catch (error) {
     console.error("Error confirming payment:", error);
     res.status(500).json({ error: "Failed to confirm payment." });
