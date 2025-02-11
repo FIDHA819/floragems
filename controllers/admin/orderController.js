@@ -147,7 +147,7 @@ const getSalesReport = async (req, res) => {
       if (format === 'pdf' || format === 'excel') {
         return res.status(404).send('No sales data found for the selected period.');
       }
-      return res.render('admin/salesReport', {
+      return res.render('admin/salesreport', {
         totalSales: 0,
         totalOrders: 0,
         totalDiscount: 0,
