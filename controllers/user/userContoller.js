@@ -115,30 +115,16 @@ const loadHomePage = async (req, res) => {
 // Signup Page Controller
 const loadSignup = async (req, res) => {
   try {
-    if (req.session.userId) {
-      return res.redirect("/"); // Redirect to home page if already logged in
-    }
-
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
-    res.setHeader("Pragma", "no-cache");
-    res.setHeader("Expires", "0");
-
-    req.session.userOtp = null;
-    req.session.otpExpiration = null;
-    req.session.userData = null;
-    req.session.referrer = null;
-    req.session.otpVerified = null;
-
-    const message = req.session.message || null;
-    req.session.message = null;
-
-    return res.render("user/signup", { message });
+    const message = req.session.message || null; // Retrieve message from session, if available
+    req.session.message = null; // Clear the session message after fetching it
+    return res.render("user/signup", { message }); // Pass message to the view
   } catch (error) {
     console.error("Signup page not loading:", error);
     res.status(500).send("Server error: Unable to load signup page");
   }
 };
 
+  
 // Handle Signup Submission
 const signup = async (req, res) => {
   try {
