@@ -241,7 +241,30 @@ const verifyOtp = async (req, res) => {
 
       await newUser.save();
 
-      // ✅ Set Session Properly
+      if (req.session.referrer) {
+        const referrer = await User.findOne({ referralCode: req.session.referrer.referralCode });
+
+        if (referrer) {
+          referrer.wallet += 150;
+          await referrer.save();
+          await createWalletTransaction(referrer._id, 150, "Credit", "Referral Bonus");
+
+          newUser.wallet += 50;
+          await newUser.save();
+          await createWalletTransaction(newUser._id, 50, "Credit", "Referral Bonus");
+
+          referrer.redeemedUsers.push({
+            userName: newUser.name,
+            signupDate: newUser.createdOn,
+            reward: 50,
+          });
+          await referrer.save();
+        }
+      }
+      req.session.userOtp = null;
+      req.session.otpExpiration = null;
+      req.session.userData = null;
+      req.session.referrer = null;
       req.session.user = {
         _id: newUser._id,
         name: newUser.name,
@@ -249,8 +272,6 @@ const verifyOtp = async (req, res) => {
       };
 
       req.session.otpVerified = true;
-      req.session.userOtp = null; // Remove OTP from session
-      req.session.userData = null; // Remove temporary user data
 
       return res.json({ success: true, redirectUrl: "/" });
     } else {
