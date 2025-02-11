@@ -17,7 +17,7 @@ const statsController=require("../controllers/admin/statsController")
 const handleUndefinedRoutes = (req, res) => {
   res.status(404).render('user/page-404', { message: 'Page Not Found' });
 };
-adminRouter.use(handleUndefinedRoutes);
+router.use(handleUndefinedRoutes);
 
 // Admin Routes
 router.get("/login", adminController.loadLogin);
