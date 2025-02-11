@@ -11,7 +11,7 @@ const wishlistController=require("../controllers/user/wishlistController")
 const walletController=require("../controllers/user/walletController")
 const contactController=require("../controllers/user/contactController")
 const handleUndefinedRoutes = (req, res) => {
-  res.status(404).render('errorPage', { message: 'Page Not Found' });
+  res.status(404).render('user/page-404', { message: 'Page Not Found' });
 };
 userRouter.use(handleUndefinedRoutes);
 
