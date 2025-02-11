@@ -13,6 +13,7 @@ const uploads=multer({storage:storage})
 const orderController = require("../controllers/admin/orderController");
 const couponController=require("../controllers/admin/couponController");
 const bannerController=require("../controllers/admin/bannerController")
+const statsController=require("../controllers/admin/statsController")
 
 // Admin Routes
 router.get("/login", adminController.loadLogin);
@@ -108,7 +109,7 @@ router.get('/getSalesReport', adminAuth,statsController.getGraphData)
 
 router.get("/dashboard", adminAuth, statsController.customers);
 
-const statsController=require("../controllers/admin/statsController")
+
 const handleUndefinedRoutes = (req, res) => {
   res.status(404).render('user/page-404', { message: 'Page Not Found' });
 };
