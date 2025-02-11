@@ -164,11 +164,5 @@ router.get('/downloadInvoice/:orderId',userAuth,orderController.downloadInvoice)
 
 router.get('/contact',userAuth, contactController.getContactPage);
 
-// Route for handling form submissions
-router.post('/contact',userAuth, contactController.handleContactForm);
-// Correct export statement
-const handleUndefinedRoutes = (req, res) => {
-  res.status(404).render('user/page-404', { message: 'Page Not Found' });
-};
-router.use(handleUndefinedRoutes);
+
 module.exports = router;
