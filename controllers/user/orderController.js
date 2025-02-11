@@ -355,6 +355,7 @@ const paymentConfirm = async (req, res) => {
 };
 
 
+
       const applyCoupon = async (req, res) => {
   try {
     const userId = req.session?.user?._id;
