@@ -38,37 +38,39 @@ const generateAndSendOtp = async (req, res) => {
 // Utility: Send Verification Email
 async function sendVerificationEmail(email, otp) {
   try {
-    // Ensure environment variables are set
     if (!process.env.NODEMAILER_EMAIL || !process.env.NODEMAILER_PASSWORD) {
-      console.error("Nodemailer credentials are missing in environment variables.");
+      console.error("❌ Nodemailer credentials are missing.");
       return false;
     }
 
+    console.log(`📩 Sending OTP to: ${email}`); // Debugging line
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
-      port: 587,
-      secure: false,
-      requireTLS: true,
       auth: {
         user: process.env.NODEMAILER_EMAIL,
         pass: process.env.NODEMAILER_PASSWORD,
       },
     });
 
-    const info = await transporter.sendMail({
+    const mailOptions = {
       from: process.env.NODEMAILER_EMAIL,
       to: email,
       subject: "Verify Your Account",
       text: `Your OTP is ${otp}`,
       html: `<b>Your OTP: ${otp}</b>`,
-    });
+    };
 
-    return info.accepted.length > 0; // Return true if email sent
+    const info = await transporter.sendMail(mailOptions);
+
+    console.log(`✅ Email sent: ${info.response}`);
+    return info.accepted.length > 0;
   } catch (error) {
-    console.error("Error sending verification email:", error);
-    return false; // Return false on error
+    console.error("❌ Error sending email:", error);
+    return false;
   }
 }
+
 
 
 
@@ -238,27 +240,7 @@ const verifyOtp = async (req, res) => {
 
       await newUser.save();
 
-      if (req.session.referrer) {
-        const referrer = await User.findOne({ referralCode: req.session.referrer.referralCode });
-
-        if (referrer) {
-          referrer.wallet += 150;
-          await referrer.save();
-          await createWalletTransaction(referrer._id, 150, "Credit", "Referral Bonus");
-
-          newUser.wallet += 50;
-          await newUser.save();
-          await createWalletTransaction(newUser._id, 50, "Credit", "Referral Bonus");
-
-          referrer.redeemedUsers.push({
-            userName: newUser.name,
-            signupDate: newUser.createdOn,
-            reward: 50,
-          });
-          await referrer.save();
-        }
-      }
-
+      // ✅ Set Session Properly
       req.session.user = {
         _id: newUser._id,
         name: newUser.name,
@@ -266,6 +248,8 @@ const verifyOtp = async (req, res) => {
       };
 
       req.session.otpVerified = true;
+      req.session.userOtp = null; // Remove OTP from session
+      req.session.userData = null; // Remove temporary user data
 
       return res.json({ success: true, redirectUrl: "/" });
     } else {
