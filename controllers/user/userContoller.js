@@ -44,11 +44,8 @@ async function sendVerificationEmail(email, otp) {
       return false;
     }
 
-<<<<<<< HEAD
     console.log(`📩 Sending OTP to: ${email}`); // Debugging line
-=======
-    console.log(`📩 Sending OTP to: ${email}`); 
->>>>>>> c057489 (mess)
+
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
