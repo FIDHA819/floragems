@@ -221,7 +221,7 @@ console.log(req.query)
             bufferPages: true,
         });
 
-        const filePath = path.join(__dirname, "../../public/reports/salesReport.pdf");
+        const filePath = path.join(__dirname, "../../public/mail/salesReport.pdf");
         const stream = fs.createWriteStream(filePath);
         doc.pipe(stream);
 
