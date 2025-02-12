@@ -156,7 +156,7 @@ const getSalesReport = async (req, res) => {
       let totalDiscount = totalSales - totalFinalAmount;
       let totalCouponDiscount = orders.reduce((acc, order) => acc + (order.couponDiscount || 0), 0);
 
-      res.render("admin/salesReport", {
+      res.render("admin/salesreport", {
           orders,
           totalOrders,
           totalPages,
