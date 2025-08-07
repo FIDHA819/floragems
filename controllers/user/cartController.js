@@ -263,23 +263,32 @@ const changeQuantity = async (req, res) => {
 
 const getCartCount = async (req, res) => {
   try {
-    const userId = req.session.user._id; 
-    const cart = await Cart.findOne({ userId: userId }); 
-
-    if (!cart) {
-      return res.status(404).json({ error: 'Cart not found' });
+    // Check if user is logged in
+    if (!req.session || !req.session.user || !req.session.user._id) {
+      return res.status(200).json({ cartLength: 0 }); // Guest user
     }
 
-    // Calculate the total number of items in the cart
-    const totalProductsInCart = cart.items.reduce((total, item) => total + item.quantity, 0);
+    const userId = req.session.user._id;
+    const cart = await Cart.findOne({ userId });
 
-    
-    res.json({ cartLength: totalProductsInCart });
+    if (!cart || !cart.items || cart.items.length === 0) {
+      return res.status(200).json({ cartLength: 0 }); // No cart or empty
+    }
+
+    // Calculate total quantity of items in cart
+    const totalProductsInCart = cart.items.reduce(
+      (total, item) => total + (item.quantity || 0),
+      0
+    );
+
+    return res.status(200).json({ cartLength: totalProductsInCart });
+
   } catch (error) {
-    console.error('Error fetching cart count:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching cart count:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
+
 const clearCart = async (req, res) => {
   try {
     const userId = req.session?.user?._id;

@@ -4,7 +4,7 @@ require("dotenv").config();
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGODB_URI, {
-            family: 4,  // Keeps the IPv4 option
+            family: 4,  
         });
         console.log("✅ MongoDB Connected Successfully!");
     } catch (error) {
